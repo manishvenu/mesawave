@@ -30,6 +30,12 @@ output through CESM's data models (CDEPS). The full plan is
 - `code/`: scripts. `generate_{datm,docn,dice}_streams.py` write CPLHIST-style
   CDEPS streams files for MESACLIP, blank where unknown and checked for
   required fields. `cdeps_streams.py` is the shared writer.
+  `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) adds the MESACLIP modes to
+  a CESM checkout's CDEPS and saves the exact diff and resulting streams to
+  `cesm_edits/`. Change CESM by editing and rerunning it, not by hand.
+- `code/cdeps/`: the `mesaclip` DATM/DOCN datamodes (Fortran), copies of CDEPS's
+  CPLHIST datamodes with unit conversions marked `MESACLIP:`. Edit them here;
+  the script copies them into CESM.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
@@ -130,9 +136,6 @@ and flag any that run past ~4 minutes.
      `get_relational_constraints(cvars)`, a `{constraint: message}` dict, to
      `csp.initialize`. CrocoDash calls it from `Case.__init__` via
      `initialize_visualCaseGen(cesmroot)`.
-6. **Getting MESACLIP streams into a case.** `user_nl_datm_streams` can only
-   modify the compset's existing (JRA) streams. A new stream set needs another
-   route, not yet worked out.
 
 ## Decisions
 
@@ -140,6 +143,17 @@ and flag any that run past ~4 minutes.
   treats `Sa_u10m` as a 10 m wind, but the lowest CAM level is ~60 m (check
   `ZBOT`), so expect winds and waves biased high until rescaled to 10 m (e.g.
   to CAM's `U10` speed, if saved 6-hourly). Pass `ZBOT` as `Sa_z` for MOM6.
+- **No runs span historical and future MESACLIP** (2026-10-16). Each run
+  uses one MESACLIP scenario and member; combining them is out of scope.
+- **MESACLIP enters CESM as CDEPS modes** (2026-10-16): `DATM%MESACLIP-<scenario>`
+  and `DOCN%MESACLIP-<scenario>` with one case variable, `DATM_MESACLIP_CASE`,
+  read by `mesaclip` datamodes copied from CPLHIST, which also do the unit
+  conversions. Instantaneous `h2` where it exists. DICE is deferred. Limits are
+  in `docs/source/mesaclip_cesm_modes.md`.
+- **Stand-ins for fields MESACLIP lacks** (2026-10-16): 2 m `TREFHT`/`QREFHT` and
+  `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
+  computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;
+  topography from DATM's observed stream; WW3's 10 m winds = `UBOT`/`VBOT`.
 
 ## Working rules
 

@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8'?>
+<file id="stream" version="2.0">
+  <stream_info name="MESACLIP_HIST.SST">
+    <taxmode>cycle</taxmode>
+    <tintalgo>nearest</tintalgo>
+    <readmode>single</readmode>
+    <mapalgo>bilinear</mapalgo>
+    <dtlimit>1.e30</dtlimit>
+    <year_first>1920</year_first>
+    <year_last>2005</year_last>
+    <year_align>1920</year_align>
+    <vectors>null</vectors>
+    <meshfile>/glade/campaign/cesm/cesmdata/inputdata/share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc</meshfile>
+    <lev_dimname>null</lev_dimname>
+    <datafiles>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19200101-19300101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19300102-19400101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19400102-19500101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19500102-19600101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19600102-19700101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19700102-19800101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19800102-19900101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.19900102-20000101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.SST.20000102-20051231.nc</file>
+    </datafiles>
+    <datavars>
+      <var>SST  So_t</var>
+    </datavars>
+    <offset>-43200</offset>
+  </stream_info>
+  <stream_info name="MESACLIP_HIST.U1_1">
+    <taxmode>cycle</taxmode>
+    <tintalgo>nearest</tintalgo>
+    <readmode>single</readmode>
+    <mapalgo>bilinear</mapalgo>
+    <dtlimit>1.e30</dtlimit>
+    <year_first>1920</year_first>
+    <year_last>2005</year_last>
+    <year_align>1920</year_align>
+    <vectors>null</vectors>
+    <meshfile>/glade/campaign/cesm/cesmdata/inputdata/share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc</meshfile>
+    <lev_dimname>null</lev_dimname>
+    <datafiles>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19200101-19300101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19300102-19400101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19400102-19500101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19500102-19600101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19600102-19700101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19700102-19800101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19800102-19900101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.19900102-20000101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.U1_1.20000102-20051231.nc</file>
+    </datafiles>
+    <datavars>
+      <var>U1_1  So_u</var>
+    </datavars>
+    <offset>-43200</offset>
+  </stream_info>
+  <stream_info name="MESACLIP_HIST.V1_1">
+    <taxmode>cycle</taxmode>
+    <tintalgo>nearest</tintalgo>
+    <readmode>single</readmode>
+    <mapalgo>bilinear</mapalgo>
+    <dtlimit>1.e30</dtlimit>
+    <year_first>1920</year_first>
+    <year_last>2005</year_last>
+    <year_align>1920</year_align>
+    <vectors>null</vectors>
+    <meshfile>/glade/campaign/cesm/cesmdata/inputdata/share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc</meshfile>
+    <lev_dimname>null</lev_dimname>
+    <datafiles>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19200101-19300101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19300102-19400101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19400102-19500101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19500102-19600101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19600102-19700101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19700102-19800101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19800102-19900101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.19900102-20000101.nc</file>
+      <file>/glade/campaign/collections/gdex/data/d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/ocn/proc/tseries/day_1/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010.pop.h.nday1.V1_1.20000102-20051231.nc</file>
+    </datafiles>
+    <datavars>
+      <var>V1_1  So_v</var>
+    </datavars>
+    <offset>-43200</offset>
+  </stream_info>
+</file>

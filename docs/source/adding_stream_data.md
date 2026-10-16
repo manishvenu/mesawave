@@ -22,4 +22,6 @@
 
 ## Possible Code changes
 
-We might need a need a new datamode for mesaclip which might need to be added in CDEPS
+We might need a need a new datamode for mesaclip which might need to be added in CDEPS.
+
+It's so depressing we need to write Fortran just to do unit conversion😭

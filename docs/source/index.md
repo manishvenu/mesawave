@@ -8,6 +8,7 @@
 
 stream_data_requirements
 adding_stream_data
+mesaclip_cesm_modes
 ```
 
 ```{toctree}
