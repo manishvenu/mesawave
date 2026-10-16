@@ -27,7 +27,9 @@ output through CESM's data models (CDEPS). The full plan is
 
 ## Layout
 
-- `code/`: scripts. `generate_datm_streams.py` writes a CDEPS `datm.streams.xml`.
+- `code/`: scripts. `generate_{datm,docn,dice}_streams.py` write CPLHIST-style
+  CDEPS streams files for MESACLIP, blank where unknown and checked for
+  required fields. `cdeps_streams.py` is the shared writer.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
@@ -134,7 +136,10 @@ and flag any that run past ~4 minutes.
 
 ## Decisions
 
-(none yet)
+- **Winds: CAM bottom winds (`UBOT`/`VBOT`) for now** (2026-10-16). WW3
+  treats `Sa_u10m` as a 10 m wind, but the lowest CAM level is ~60 m (check
+  `ZBOT`), so expect winds and waves biased high until rescaled to 10 m (e.g.
+  to CAM's `U10` speed, if saved 6-hourly). Pass `ZBOT` as `Sa_z` for MOM6.
 
 ## Working rules
 

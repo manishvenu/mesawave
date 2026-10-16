@@ -1,54 +1,49 @@
-"""Generate a CESM (CDEPS) style datm.streams.xml file.
+"""Generate a CPLHIST-style datm.streams.xml for MESACLIP.
 
-Any field not given is written blank, so fill it in afterwards or pass it in.
+Streams are grouped like DATM's CPLHIST streams. Anything unknown (file
+variable names, paths, years, ...) is written blank.
 """
 
 import argparse
-import xml.etree.ElementTree as ET
 
-# Tags inside each <stream_info>, in the order CESM writes them.
-STREAM_FIELDS = [
-    "taxmode",
-    "tintalgo",
-    "readmode",
-    "mapalgo",
-    "dtlimit",
-    "year_first",
-    "year_last",
-    "year_align",
-    "vectors",
-    "meshfile",
-    "lev_dimname",
-]
+from cdeps_streams import blank_streams, write_streams
+
+# Grouped like CPLHISTForcing.* in CDEPS datm/cime_config/stream_definition_datm.xml.
+STREAMS = {
+    "MESACLIP.Solar": ["Faxa_swndr", "Faxa_swvdr", "Faxa_swndf", "Faxa_swvdf"],
+    "MESACLIP.nonSolarFlux": [
+        "Faxa_rainc",
+        "Faxa_rainl",
+        "Faxa_snowc",
+        "Faxa_snowl",
+        "Faxa_lwdn",
+    ],
+    "MESACLIP.State": [
+        "Sa_z",
+        "Sa_tbot",
+        "Sa_ptem",
+        "Sa_shum",
+        "Sa_pbot",
+        "Sa_dens",
+        "Sa_pslv",
+    ],
+    "MESACLIP.Wind": ["Sa_u", "Sa_v", "Sa_u10m", "Sa_v10m"],
+}
+
+# CPLHIST requires every field above except the 10 m winds
+# (datm_datamode_cplhist_mod.F90). WW3 needs the 10 m winds, which CPLHIST
+# doesn't export yet. Sa_topo is also required, but comes from the
+# DATM_TOPO stream that buildnml adds.
+REQUIRED = [field for fields in STREAMS.values() for field in fields]
 
 
 def write_datm_streams(streams, path):
-    """Write a list of stream dicts to a datm.streams.xml file.
-
-    Each dict can have "name", "datafiles" (list of paths), "datavars"
-    (list of (name_in_file, name_in_model) pairs), "offset", and any key in
-    STREAM_FIELDS. Anything missing is written blank.
-    """
-    root = ET.Element("file", id="stream", version="2.0")
-    for stream in streams:
-        info = ET.SubElement(root, "stream_info", name=stream.get("name", ""))
-        for field in STREAM_FIELDS:
-            ET.SubElement(info, field).text = str(stream.get(field, ""))
-        datafiles = ET.SubElement(info, "datafiles")
-        for datafile in stream.get("datafiles", []):
-            ET.SubElement(datafiles, "file").text = str(datafile)
-        datavars = ET.SubElement(info, "datavars")
-        for name_in_file, name_in_model in stream.get("datavars", []):
-            ET.SubElement(datavars, "var").text = f"{name_in_file}  {name_in_model}"
-        ET.SubElement(info, "offset").text = str(stream.get("offset", ""))
-
-    tree = ET.ElementTree(root)
-    ET.indent(tree, space="  ")
-    tree.write(path, xml_declaration=True, encoding="utf-8", short_empty_elements=False)
+    """Write datm.streams.xml, checking every required field is provided."""
+    write_streams(streams, path, required=REQUIRED)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", nargs="?", default="datm.streams.xml")
     args = parser.parse_args()
-    write_datm_streams([{}], args.output)
+    write_datm_streams(blank_streams(STREAMS), args.output)
