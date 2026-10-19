@@ -47,10 +47,11 @@ output through CESM's data models (CDEPS). The full plan is
   `sphinx-build -b html docs/source docs/build/html`.
 - `.github/workflows/docs.yml` builds on every push and PR, and deploys to
   https://manishvenu.github.io/mesawave/ from `main` only.
-- Theme: Shibuya with the `cyan` accent (`docs/source/conf.py`).
+- Theme: Shibuya with the `cyan` accent (`docs/source/conf.py`), sphinx-design
+  cards on the index, small overrides in `docs/source/_static/custom.css`.
 - `docs/build/` is git-ignored. Never commit build output.
 - Non-Markdown files (e.g. PDFs) only reach the site if a page links them with
-  `{download}`.
+  `{download}` or they are in `html_extra_path` (the proposal, at `/proposal.pdf`).
 
 ## CDEPS stream files
 

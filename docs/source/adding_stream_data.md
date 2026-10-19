@@ -3,24 +3,24 @@
 ## Required changes
 
 1. CDEPS cime_config/config_component
-    a. add %mesaclip
-    b. datm_mode add mesaclip to vald_values
-    c. add datm years st end align 
-    d. new path variabbles like cplhist
+    1. add %mesaclip
+    2. datm_mode add mesaclip to vald_values
+    3. add datm years st end align 
+    4. new path variabbles like cplhist
 
 2. CDEPS cime_config/namelist_definition_{comp}
-    a. datamode (CPLHIST for mesaclip)
-    b. streamslist 
+    1. datamode (CPLHIST for mesaclip)
+    2. streamslist 
 
 
 3. CDEPS cime_config/stream_definiton_{comp}
-    a. streamentry goes here
+    1. streamentry goes here
 
 4. ccs_config 
-    a. add mesaclip mesh 
+    1. add mesaclip mesh 
 
 
-## Possible Code changes
+## Possible code changes
 
 We might need a need a new datamode for mesaclip which might need to be added in CDEPS.
 
