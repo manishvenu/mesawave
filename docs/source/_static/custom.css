@@ -2,3 +2,8 @@
 .yue ol ol {
   list-style-type: lower-alpha;
 }
+
+/* Keep source line links like 202–203 on one line. */
+.yue a[href*=".F90#L"] {
+  white-space: nowrap;
+}

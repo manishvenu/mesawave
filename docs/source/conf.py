@@ -26,6 +26,19 @@ extensions = [
 myst_enable_extensions = ['colon_fence']
 myst_heading_anchors = 2
 
+# Short links to the coupling caps, pinned to the versions in CESM_crocodash,
+# e.g. [206](ww3:L206) in stream_data_requirements.md.
+myst_url_schemes = {
+    'http': None,
+    'https': None,
+    'mailto': None,
+    'ww3': 'https://github.com/CROCODILE-CESM/WW3/blob/4b79dba2859ce120adaac00e9ab98ffd12c8b0d5/model/src/wav_import_export.F90#{{path}}',
+    'mom6': 'https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_cap.F90#{{path}}',
+    'cice': 'https://github.com/ESCOMP/CICE/blob/cice6_6_3_20260904/cicecore/drivers/nuopc/cmeps/ice_import_export.F90#{{path}}',
+    'docn': 'https://github.com/manishvenu/CDEPS/blob/b591865280a5487912e4e739bbdb8fafa8cc7088/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
+    'dice': 'https://github.com/ESCOMP/CDEPS/blob/cdeps1.0.101/dice/dice_datamode_ssmi_mod.F90#{{path}}',
+}
+
 templates_path = ['_templates']
 exclude_patterns = []
 
