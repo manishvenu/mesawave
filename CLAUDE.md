@@ -33,6 +33,7 @@ output through CESM's data models (CDEPS). The full plan is
   `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) regenerates the MESACLIP XML
   and cap/CMake registration on the `cdeps/` submodule, starting from
   `cdeps1.0.101`; review and commit the result on its `mesaclip` branch.
+  `verify_a_case.py RUNDIR` checks the A case's coupler history against GDEX.
 - `cdeps/`: submodule, `manishvenu/CDEPS` branch `mesaclip` (draft PR
   CROCODILE-CESM/CDEPS#2). All CESM changes live here. Edit the `mesaclip`
   datamode Fortran directly on the branch; regenerate the XML with the script.
@@ -46,6 +47,7 @@ output through CESM's data models (CDEPS). The full plan is
   `sphinx-build -b html docs/source docs/build/html`.
 - `.github/workflows/docs.yml` builds on every push and PR, and deploys to
   https://manishvenu.github.io/mesawave/ from `main` only.
+- Theme: Shibuya with the `cyan` accent (`docs/source/conf.py`).
 - `docs/build/` is git-ignored. Never commit build output.
 - Non-Markdown files (e.g. PDFs) only reach the site if a page links them with
   `{download}`.
@@ -111,22 +113,36 @@ their code is in `~/documents/croc/dev/`.
 Say so before slow calls (`create_case`, `process_forcings`, `case_build`),
 and flag any that run past ~4 minutes.
 
+## Status (2026-10-19)
+
+- MESACLIP DATM/DOCN modes are done and verified. `docs/source/mesaclip_cesm_modes.md`
+  has what was added, a comparison with CPLHIST, the tests, and the compromises.
+- Draft PR CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`, one commit on
+  `cdeps1.0.101`). The org's `main` now tracks ESCOMP main, so merging needs a
+  rebase onto newer CDEPS and a retest. The user moves org refs themselves.
+- The CESM_crocodash install's `components/cdeps` holds the same edits, uncommitted,
+  on detached `cdeps1.0.101`. Switching it to the fork's `mesaclip` branch would
+  protect them from a checkout; not done yet.
+- Test cases, 10 days each on 48 tasks: `~/croc_cases/mesaclip_a_hist` (A case,
+  `ne120_t12`) and `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66
+  Bering Sea grid). Each has `replay.sh` with its setup commands; `user_nl_*`
+  edits (e.g. the A case's `histaux_*` in `user_nl_cpl`) are in the case dirs.
+- Claude runs on Casper. Build, submit and `xmlquery` need Derecho:
+  `ssh -o BatchMode=yes derecho '<command>'`. Keep jobs under 60 cores so they
+  go through the develop queue fast.
+
 ## Open questions
 
 1. **Sea ice source.** DOCN exports no ice fields. DICE exports `Si_ifrac` but
    not `Si_thick` or `Si_floediam`, and CMEPS only takes `Si_thick` from an ice
    component. Ask Alper Altuntas how the CESM3-style ice attenuation gets its inputs.
-2. **POP currents.** `UVEL`/`VVEL` are in cm/s, aligned with the grid's own
-   axes, and sit at cell corners on the 0.1° tripole grid. They likely need
-   preprocessing before DOCN can use them.
-3. **6-hourly variables on GDEX.** Which MESACLIP fields exist at 6-hourly
-   decides whether full DATM (MOM6-CICE6) is feasible.
-4. **`So_t` and `Sa_tbot`.** WW3 imports them, but they're not in proposal Fig. 2.
-   Include them in the streams or not?
-5. **Wave-only regional tests.** Plan: run regional WW3 standalone
-   (DATM + DOCN + DICE + WW3 on the custom grid). No new WW3 rule is needed:
-   DOCN satisfies the existing "WW3 needs an active or data ocean" rule.
-   `GWR_JRA` covers wave-ice-ocean tests in the meantime. What still blocks it
+   MESACLIP's ice fraction is in %. DICE is deferred until this is settled.
+2. **Rotating POP currents.** DOCN reads `U1_1`/`V1_1` and converts cm/s to m/s,
+   but they still follow the tripole grid's axes and sit on U points. Rotating
+   to east/north and moving to T points needs preprocessing or datamode code.
+3. **Wave-only regional tests through CrocoDash.** Done with plain CIME instead
+   (`mesaclip_ww3_alaska`). No new WW3 rule is needed: DOCN satisfies the
+   existing "WW3 needs an active or data ocean" rule. What still blocks CrocoDash
    (paths in CrocoDash's embedded `CrocoDash/visualCaseGen/`, which `dev_cd` uses):
    - `visualCaseGen/specs/relational_constraints.py`: "Custom grids can only be
      generated when MOM6 and/or CLM are selected" and "Custom OCN grids can
@@ -154,6 +170,13 @@ and flag any that run past ~4 minutes.
   `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
   computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;
   topography from DATM's observed stream; WW3's 10 m winds = `UBOT`/`VBOT`.
+- **6-hourly MESACLIP fields** (2026-10-16): `h2` is instantaneous (`UBOT`, `VBOT`,
+  `ZBOT`, `PSL`, `PS`, `TREFHT`, `QREFHT`); `h4` holds 6 h means stamped at the
+  window's end (`FSDS`, `FLDS`, `SOLSD`, `SOLLD`, `PRECT`, `PRECC`, `PRECSC`,
+  `PRECSL`). With the stand-ins above that is enough for full DATM. Ocean
+  fields are daily. HIST member 001 has no 6-hourly data, so it is ignored.
+- **`So_t` and `Sa_tbot` are included** (2026-10-16): `SST` and `TREFHT` are in
+  the streams.
 
 ## Working rules
 
