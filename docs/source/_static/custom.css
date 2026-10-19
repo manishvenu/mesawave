@@ -7,3 +7,10 @@
 .yue a[href*=".F90#L"] {
   white-space: nowrap;
 }
+
+/* Variable names with a hover definition (glossary.js). */
+.yue abbr.gloss {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
