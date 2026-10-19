@@ -51,6 +51,44 @@ Modeled on CPLHIST:
 
 To switch member: `./xmlchange DATM_MESACLIP_CASE=<GDEX case name>`.
 
+## Compared with CPLHIST
+
+Anything not listed is unchanged CPLHIST code: cap registration, restarts, SST °C → K (both convert
+unless `sst_constant_value` > 230), the ocean mask, and fill values for missing optional fields.
+
+**Case setup**
+
+| | CPLHIST | MESACLIP |
+|---|---|---|
+| Modes | `DATM%CPLHIST`, `DOCN%CPLHIST` | 5 per component, one per scenario (separate GDEX datasets); all run the one `mesaclip` datamode |
+| Where data is | `DATM_CPLHIST_DIR` + `DATM_CPLHIST_CASE`; DOCN has its own `DOCN_CPLHIST_DIR`/`_CASE` | GDEX path fixed in the streams; only `DATM_MESACLIP_CASE`, shared by DOCN |
+| Defaults | none: the user sets the case and directory, and DOCN's stream file is `UNSET` | case (member) and year range per scenario |
+| Years | `DATM_YR_*`, and separate `DOCN_CPLHIST_YR_*` | `DATM_YR_*` for both, `DATM_YR_ALIGN = DATM_YR_START` |
+| Topography, aerosols, N deposition, CO₂ | all `cplhist`, from the coupler history | topography `observed`; the rest follow the compset's year prefix like other DATM modes (`HIST_` gave `hist`, `hist_cmip6`, `cmip6_20tr`), so not MESACLIP's own |
+
+**Streams**
+
+| | CPLHIST | MESACLIP |
+|---|---|---|
+| Files | coupler history (`cpl.hx.atm.*`), one per day, templated with `%ymd` | CAM/POP time series on GDEX, one variable per file, every file listed |
+| Streams | DATM 4, grouped by frequency; DOCN 1 | DATM 15, DOCN 3, one per variable |
+| Variable names | coupler names (`atmImp_Sa_tbot`) | CAM/POP names (`TREFHT`, `SST`) |
+| Mesh | the case's own grid (`ATM_DOMAIN_MESH`, `OCN_DOMAIN_MESH`), so data must already be on it | MESACLIP's grids (`ne120np4`, `tx0.1v2`), regridded bilinearly to any case grid |
+| Frequency | 1 h shortwave (instantaneous) and winds (mean); 3 h other state and fluxes (mean) | 6 h state and winds (instantaneous, `h2`); 6 h radiation and precipitation (mean, `h4`); daily ocean |
+| Time interpolation | linear for state and winds, nearest for fluxes and ocean | same |
+| Offsets | −900 s shortwave, +900 s other atmosphere, 0 ocean | 0 state, −3 h radiation and precipitation, −12 h ocean |
+
+**Datamode code** (marked `MESACLIP:` in the Fortran)
+
+| | CPLHIST | MESACLIP |
+|---|---|---|
+| `Sa_ptem`, `Sa_dens` | read | computed from T, q, p |
+| Direct shortwave (`Faxa_swvdr`, `Faxa_swndr`) | read | `FSDS` minus diffuse, split 0.28 : 0.31 |
+| Rain and snow (`Faxa_rainc/l`, `Faxa_snowc/l`) | read, already kg/m²/s | split from `PRECT`, `PRECC`, `PRECSC`, `PRECSL`; m/s × 1000 |
+| `Sa_u10m`, `Sa_v10m` | not exported | exported when WW3 asks, equal to `Sa_u`, `Sa_v` |
+| `So_u`, `So_v` | copied (coupler fields are m/s, east/north) | × 0.01 (cm/s → m/s), still grid-relative |
+| `So_bldepth` | read | no stream, so DOCN's fill value (1e30) |
+
 ## Tested
 
 **A case** (`HIST_DATM%MESACLIP-HIST_SLND_SICE_DOCN%MESACLIP-HIST_SROF_SGLC_SWAV`, `ne120_t12`,
