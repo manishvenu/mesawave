@@ -1,26 +1,26 @@
-"""Add MESACLIP modes to a CESM checkout's CDEPS (DATM and DOCN).
+"""Regenerate the MESACLIP edits on the cdeps/ submodule (manishvenu/CDEPS, branch mesaclip).
 
-Adds the compset modes, the DATM_MESACLIP_CASE variable and the streams (XML in
-components/cdeps/{datm,docn}/cime_config), and the mesaclip datamodes: the Fortran
-in code/cdeps/, registered in each component's cap and CMakeLists.txt. Each file
-is reset to the checked-out CDEPS version first, so rerunning gives the same
-result. Saves the exact diff and each scenario's streams files (for its default
-case) to cesm_edits/ in this repo, and reports which members the streams fit.
+Rewrites the compset modes, the DATM_MESACLIP_CASE variable and the streams (XML in
+{datm,docn}/cime_config), and registers the mesaclip datamodes in each component's
+cap and CMakeLists.txt. Each of those files is reset to BASE first, so rerunning
+gives the same result; review and commit the diff on the mesaclip branch. The
+datamode Fortran itself ({datm,docn}/*_datamode_mesaclip_mod.F90) is edited
+directly on the branch and isn't touched here. Also reports which members the
+streams fit.
 
-    python code/add_mesaclip_to_cesm.py ~/work/installs/CESM_crocodash
+    python code/add_mesaclip_to_cesm.py [path/to/cdeps]   # default: the cdeps/ submodule
 """
 
 import argparse
 import os
-import shutil
 import subprocess
 
 import mesaclip
-from cdeps_streams import missing_fields, write_streams
+from cdeps_streams import missing_fields
 from generate_datm_streams import REQUIRED as DATM_REQUIRED
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(os.path.dirname(HERE), "cesm_edits")
+BASE = "cdeps1.0.101"  # the CDEPS tag CESM's crocodash branch uses
 TAG = "MESACLIP: added by mesawave code/add_mesaclip_to_cesm.py"
 XML, FORTRAN, CMAKE = f"<!-- {TAG} -->", f"! {TAG}", f"# {TAG}"
 FILES = [
@@ -35,7 +35,6 @@ FILES = [
     "docn/ocn_comp_nuopc.F90",
     "docn/CMakeLists.txt",
 ]
-NEW_FILES = ["datm/datm_datamode_mesaclip_mod.F90", "docn/docn_datamode_mesaclip_mod.F90"]
 SCENARIOS = list(mesaclip.SCENARIOS)
 # Fields the mesaclip datamode computes rather than reads.
 DATM_DERIVED = [
@@ -59,16 +58,10 @@ def git(cdeps, *args, check=True):
 
 
 def reset(cdeps):
-    """Restore our files to the checked-out CDEPS, unless someone else edited them."""
-    for relpath in FILES:
-        if git(cdeps, "diff", "--name-only", "--", relpath):
-            with open(os.path.join(cdeps, relpath)) as f:
-                if TAG not in f.read():
-                    raise SystemExit(f"{relpath} has edits that aren't ours; not touching it")
-            git(cdeps, "checkout", "--", relpath)
-    for relpath in NEW_FILES:
-        if os.path.exists(os.path.join(cdeps, relpath)):
-            os.remove(os.path.join(cdeps, relpath))
+    """Restore our files to BASE, refusing if any has uncommitted changes."""
+    if git(cdeps, "diff", "--name-only", "HEAD", "--", *FILES):
+        raise SystemExit("uncommitted changes in files this script writes; commit or discard them first")
+    git(cdeps, "restore", "--source", BASE, "--worktree", "--", *FILES)
 
 
 def replace(text, old, new, count=1):
@@ -385,24 +378,13 @@ def apply(cdeps):
             text = change(f.read())
         with open(path, "w") as f:
             f.write(text)
-    for relpath in NEW_FILES:
-        shutil.copy(os.path.join(HERE, "cdeps", os.path.basename(relpath)), os.path.join(cdeps, relpath))
 
 
-def save_outputs(cdeps):
-    os.makedirs(OUT, exist_ok=True)
-    patch = git(cdeps, "diff", "--", *FILES)
-    for relpath in NEW_FILES:  # untracked, so git diff alone misses them
-        patch += git(cdeps, "diff", "--no-index", "/dev/null", relpath, check=False)
-    with open(os.path.join(OUT, "cdeps_mesaclip.patch"), "w") as f:
-        f.write(patch)
-    for comp in mesaclip.FIELDS:
-        for s, (_, case, _, _) in mesaclip.SCENARIOS.items():
-            streams = [mesaclip.stream(comp, s, field, case) for field in mesaclip.FIELDS[comp]]
-            write_streams(streams, os.path.join(OUT, f"{comp}.streams.{mesaclip.mode(comp, s)}.xml"))
+def report_fields():
     provided = [{"datavars": [("", field) for field in [*mesaclip.FIELDS["datm"], *DATM_DERIVED]]}]
+    missing = missing_fields(provided, DATM_REQUIRED)
     print("DATM fields the mesaclip datamode requires that MESACLIP can't supply yet:")
-    print("  " + ", ".join(missing_fields(provided, DATM_REQUIRED)))
+    print("  " + (", ".join(missing) or "none"))
 
 
 def report_members():
@@ -414,10 +396,11 @@ def report_members():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("cesmroot")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("cdeps", nargs="?", default=os.path.join(os.path.dirname(HERE), "cdeps"))
     args = parser.parse_args()
-    cdeps = os.path.join(os.path.expanduser(args.cesmroot), "components", "cdeps")
-    apply(cdeps)
-    save_outputs(cdeps)
+    apply(os.path.expanduser(args.cdeps))
+    report_fields()
     report_members()

@@ -1,0 +1,4 @@
+[submodule "cdeps"]
+	path = cdeps
+	url = https://github.com/manishvenu/CDEPS.git
+	branch = mesaclip

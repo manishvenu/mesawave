@@ -30,12 +30,12 @@ output through CESM's data models (CDEPS). The full plan is
 - `code/`: scripts. `generate_{datm,docn,dice}_streams.py` write CPLHIST-style
   CDEPS streams files for MESACLIP, blank where unknown and checked for
   required fields. `cdeps_streams.py` is the shared writer.
-  `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) adds the MESACLIP modes to
-  a CESM checkout's CDEPS and saves the exact diff and resulting streams to
-  `cesm_edits/`. Change CESM by editing and rerunning it, not by hand.
-- `code/cdeps/`: the `mesaclip` DATM/DOCN datamodes (Fortran), copies of CDEPS's
-  CPLHIST datamodes with unit conversions marked `MESACLIP:`. Edit them here;
-  the script copies them into CESM.
+  `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) regenerates the MESACLIP XML
+  and cap/CMake registration on the `cdeps/` submodule, starting from
+  `cdeps1.0.101`; review and commit the result on its `mesaclip` branch.
+- `cdeps/`: submodule, `manishvenu/CDEPS` branch `mesaclip` (draft PR
+  CROCODILE-CESM/CDEPS#2). All CESM changes live here. Edit the `mesaclip`
+  datamode Fortran directly on the branch; regenerate the XML with the script.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
