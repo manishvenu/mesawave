@@ -54,13 +54,13 @@ Time slices are non-contiguous segments of the future scenario runs.
 | MESAWAVE experiment | MESACLIP dataset | Members | Period(s) |
 |---------------------|-----------------|---------|-----------|
 | Historical | d651007 | 005, 009, 010 | 1950–2005 |
-| RCP 2.6 | d651043 | 1 | 2006–2020, 2040–2060, 2080–2100 |
-| RCP 4.5 | d651043 | 1 | 2006–2020, 2040–2060, 2080–2100 |
+| RCP 2.6 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
+| RCP 4.5 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
 | RCP 6.0 | d651008 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
 | RCP 8.5 | d651009 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
 
-**Note:** RCP 2.6 and 4.5 have only one ensemble member in MESACLIP; the proposal's
-"3 members" for those scenarios cannot be achieved from available data.
+**Note:** RCP 2.6 and 4.5 currently have 1 member in MESACLIP (d651043); 3 members
+are planned. Check the dataset before running.
 
 ## Output streams and frequencies
 
