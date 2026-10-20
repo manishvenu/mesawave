@@ -2,4 +2,3 @@ sphinx
 myst-parser
 shibuya
 sphinx-design
-sphinxcontrib-mermaid

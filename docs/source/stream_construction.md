@@ -5,7 +5,6 @@ DOCN (ocean), and DICE (sea ice). Each reads one or more XML stream definitions
 that point at MESACLIP NetCDF files and map variables to coupler fields.
 
 For the field-by-field coupling table see [Coupling fields](stream_data_requirements.md).
-For a visual overview see [Coupling flow](coupling_flow.md).
 
 ## How MESACLIP files are organised
 
@@ -29,22 +28,35 @@ long names for a given case.
 
 ## Stream parameters
 
-Each CDEPS stream block requires several XML tags whose values depend on the
-data frequency and timestamp convention.
+`code/mesaclip.py` writes one stream per variable. The time settings depend on
+the history file the variable comes from. Tag meanings are in the
+[CDEPS streams docs](https://escomp.github.io/CDEPS/versions/master/html/streams.html).
 
 | Tag | cam.h2 | cam.h4 | pop.h.nday1 | cice.h1 |
 |-----|--------|--------|-------------|---------|
-| `taxmode` | `extend` | `limit` | `limit` | `limit` |
-| `tintalgo` | `linear` | `lower` | `lower` | `lower` |
+| `taxmode` | `limit` | `limit` | `limit` | `limit` |
+| `tintalgo` | `linear` | `nearest` | `nearest` | `nearest` |
+| `offset` (s) | `0` | `-10800` | `-43200` | `-43200` |
 | `readmode` | `single` | `single` | `single` | `single` |
-| `dtlimit` | `1.5` | `1.5` | `1.5` | `1.5` |
+| `dtlimit` | `1.e30` | `1.e30` | `1.e30` | `1.e30` |
 
-**Why `taxmode` differs:** `cam.h2` holds instantaneous snapshots; CDEPS extends
-the last known value forward in time (`extend`). `cam.h4` and the daily streams
-hold period means stamped at the *end* of the averaging window; `limit` combined
-with `tintalgo=lower` tells CDEPS to use the mean that closes at or after the
-current time — equivalent to a backward-in-time lookup, which is correct for
-end-stamped means.
+**`tintalgo` and `offset`:** `cam.h2` fields are snapshots (no `cell_methods`),
+so they are interpolated linearly. `cam.h4`, `pop.h.nday1` and `cice.h1` fields
+are means (`cell_methods = "time: mean"`) stamped at the end of their window
+(`time_bnds` upper bound equals `time`). A negative offset of half a window moves
+each stamp to the middle of its window, and `nearest` then picks the mean whose
+window contains the model time.
+
+**`taxmode`:** `limit` stops the run if the model time leaves
+`year_first`–`year_last`, instead of wrapping around (`cycle`) or holding the end
+values (`extend`). Set `year_first` to the dataset's first year, not the run's,
+so a 1950 start is inside the data. A run starting on a dataset's first day
+(e.g. RCP runs on 2006-01-01) is before the first daily record (00:00 on
+2 January) and stops; start it on 2 January or use `extend` for that run.
+
+**`dtlimit`:** `1.e30` turns off CDEPS's check for gaps in the time axis, so a
+missing file is interpolated across without an error. `add_mesaclip_to_cesm.py`
+reports missing files per member.
 
 ## Mesh files
 

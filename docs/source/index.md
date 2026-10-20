@@ -38,13 +38,6 @@ The DATM, DOCN and DICE modes added to CDEPS.
 
 What WW3, MOM6 and CICE need.
 :::
-
-:::{grid-item-card} {octicon}`workflow` Coupling flow
-:link: coupling_flow
-:link-type: doc
-
-Which MESACLIP variables connect where.
-:::
 ::::
 
 ```{toctree}
@@ -56,7 +49,6 @@ mesaclip_experiments
 stream_construction
 mesaclip_cesm_modes
 stream_data_requirements
-coupling_flow
 adding_stream_data
 ```
 

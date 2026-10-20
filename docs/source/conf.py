@@ -21,7 +21,6 @@ extensions = [
     'myst_parser',
     'sphinx.ext.napoleon',
     'sphinx_design',
-    'sphinxcontrib.mermaid',
 ]
 
 myst_enable_extensions = ['colon_fence']
