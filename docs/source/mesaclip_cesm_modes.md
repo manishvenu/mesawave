@@ -18,38 +18,22 @@ git fetch mesawave && git checkout mesaclip
 
 ## What was added
 
-Modeled on CPLHIST:
+Modeled on CPLHIST (DATM/DOCN) and SSMI (DICE):
 
 1. **Modes**: `DATM%MESACLIP-HIST`, `-RCP26`, `-RCP45`, `-RCP60`, `-RCP85` → `DATM_MODE=MESACLIP_*`,
-   and the same for DOCN (`DOCN_MODE=mesaclip_*`).
-2. **`DATM_MESACLIP_CASE`**: the GDEX case to read, which picks the ensemble member, for both DATM
-   and DOCN. Defaults to member 010, or 003 for RCP2.6/4.5 (the only member on GDEX for those).
-3. **Years**: `DATM_YR_START`/`END` (used by DOCN too) default to the usable range per scenario,
-   with `DATM_YR_ALIGN = DATM_YR_START` so model years are data years. `DATM_TOPO=observed`.
+   and the same for DOCN (`DOCN_MODE=mesaclip_*`) and DICE (`DICE_MODE=mesaclip_*`).
+2. **`DATM_MESACLIP_CASE`**: the GDEX case to read, which picks the ensemble member, for DATM,
+   DOCN, and DICE. Defaults to member 010, or 003 for RCP2.6/4.5 (the only member on GDEX for those).
+3. **Years**: `DATM_YR_START`/`END` (used by DOCN and DICE too) default to the usable range per
+   scenario, with `DATM_YR_ALIGN = DATM_YR_START` so model years are data years. `DATM_TOPO=observed`.
 4. **`mesaclip` datamodes** (`datm/datm_datamode_mesaclip_mod.F90`,
-   `docn/docn_datamode_mesaclip_mod.F90`): copies of the CPLHIST datamodes, registered in each
-   component's cap and `CMakeLists.txt`. Changes from CPLHIST are marked `MESACLIP:`.
-5. **Streams**: one per variable per scenario, read straight from GDEX, `h2` wherever it has the
-   field.
+   `docn/docn_datamode_mesaclip_mod.F90`, `dice/dice_datamode_mesaclip_mod.F90`): registered in each
+   component's cap and `CMakeLists.txt`. Changes from CPLHIST/SSMI are marked `MESACLIP:`.
+5. **Streams**: one per variable per scenario, read straight from GDEX. DICE reads daily `aice_d`
+   (%) from `cice.h1` files and exports only `Si_ifrac` (divided by 100).
 
-## Where each field comes from
-
-| Model field | Source | How |
-|---|---|---|
-| `Sa_u`, `Sa_v`, `Sa_z`, `Sa_pslv` | `UBOT`, `VBOT`, `ZBOT`, `PSL` (`h2`) | as-is |
-| `Sa_tbot`, `Sa_shum` | `TREFHT`, `QREFHT` (`h2`) | 2 m values stand in for the lowest level |
-| `Sa_pbot` | `PS` (`h2`) | surface pressure stands in for the lowest level |
-| `Sa_ptem` | computed | `T·(1e5/p)^(R/cp)` |
-| `Sa_dens` | computed | `p / (R·T·(1 + 0.608 q))`, as the JRA datamode does |
-| `Sa_u10m`, `Sa_v10m` (WW3) | `UBOT`, `VBOT` | lowest-level winds used as 10 m winds |
-| `Sa_topo` | DATM's `observed` topography stream | not MESACLIP |
-| `Faxa_lwdn`, `Faxa_swvdf`, `Faxa_swndf` | `FLDS`, `SOLSD`, `SOLLD` (`h4`) | as-is |
-| `Faxa_swvdr`, `Faxa_swndr` | `FSDS − SOLSD − SOLLD` (`h4`) | split 0.28 : 0.31 visible : near-IR (JRA's fractions) |
-| rain and snow | `PRECT`, `PRECC`, `PRECSC`, `PRECSL` (`h4`) | split into rain/snow, m/s → kg/m²/s |
-| `So_t` | `SST` (daily) | °C → K (copied CPLHIST code) |
-| `So_u`, `So_v` | `U1_1`, `V1_1` (daily) | cm/s → m/s |
-
-To switch member: `./xmlchange DATM_MESACLIP_CASE=<GDEX case name>`.
+For a field-by-field breakdown of what each model receives and how it compares to JRA and CPLHIST
+configurations, see [stream_data_requirements.md](stream_data_requirements.md).
 
 ## Compared with CPLHIST
 
@@ -61,81 +45,80 @@ unless `sst_constant_value` > 230), the ocean mask, and fill values for missing 
 | | CPLHIST | MESACLIP |
 |---|---|---|
 | Modes | `DATM%CPLHIST`, `DOCN%CPLHIST` | 5 per component, one per scenario (separate GDEX datasets); all run the one `mesaclip` datamode |
-| Where data is | `DATM_CPLHIST_DIR` + `DATM_CPLHIST_CASE`; DOCN has its own `DOCN_CPLHIST_DIR`/`_CASE` | GDEX path fixed in the streams; only `DATM_MESACLIP_CASE`, shared by DOCN |
+| Where data is | `DATM_CPLHIST_DIR` + `DATM_CPLHIST_CASE`; DOCN has its own `DOCN_CPLHIST_DIR`/`_CASE` | GDEX path fixed in the streams; only `DATM_MESACLIP_CASE`, shared by DOCN and DICE |
 | Defaults | none: the user sets the case and directory, and DOCN's stream file is `UNSET` | case (member) and year range per scenario |
-| Years | `DATM_YR_*`, and separate `DOCN_CPLHIST_YR_*` | `DATM_YR_*` for both, `DATM_YR_ALIGN = DATM_YR_START` |
-| Topography, aerosols, N deposition, CO₂ | all `cplhist`, from the coupler history | topography `observed`; the rest follow the compset's year prefix like other DATM modes (`HIST_` gave `hist`, `hist_cmip6`, `cmip6_20tr`), so not MESACLIP's own |
+| Years | `DATM_YR_*`, and separate `DOCN_CPLHIST_YR_*` | `DATM_YR_*` for all three, `DATM_YR_ALIGN = DATM_YR_START` |
+| Topography, aerosols, N deposition, CO₂ | all `cplhist`, from the coupler history | topography `observed`; the rest follow the compset's year prefix like other DATM modes |
 
 **Streams**
 
 | | CPLHIST | MESACLIP |
 |---|---|---|
-| Files | coupler history (`cpl.hx.atm.*`), one per day, templated with `%ymd` | CAM/POP time series on GDEX, one variable per file, every file listed |
-| Streams | DATM 4, grouped by frequency; DOCN 1 | DATM 15, DOCN 3, one per variable |
-| Variable names | coupler names (`atmImp_Sa_tbot`) | CAM/POP names (`TREFHT`, `SST`) |
+| Files | coupler history (`cpl.hx.atm.*`), one per day, templated with `%ymd` | CAM/POP/CICE time series on GDEX, one variable per file, every file listed |
+| Streams | DATM 4, grouped by frequency; DOCN 1 | DATM 15, DOCN 3, DICE 1 — one per variable |
+| Variable names | coupler names (`atmImp_Sa_tbot`) | CAM/POP/CICE names (`TREFHT`, `SST`, `aice_d`) |
 | Mesh | the case's own grid (`ATM_DOMAIN_MESH`, `OCN_DOMAIN_MESH`), so data must already be on it | MESACLIP's grids (`ne120np4`, `tx0.1v2`), regridded bilinearly to any case grid |
-| Frequency | 1 h shortwave (instantaneous) and winds (mean); 3 h other state and fluxes (mean) | 6 h state and winds (instantaneous, `h2`); 6 h radiation and precipitation (mean, `h4`); daily ocean |
+| Frequency | 1 h shortwave (instantaneous) and winds (mean); 3 h other state and fluxes (mean) | 6 h state and winds (instantaneous, `h2`); 6 h radiation and precipitation (mean, `h4`); daily ocean and ice |
 | Time interpolation | linear for state and winds, nearest for fluxes and ocean | same |
-| Offsets | −900 s shortwave, +900 s other atmosphere, 0 ocean | 0 state, −3 h radiation and precipitation, −12 h ocean |
+| Offsets | −900 s shortwave, +900 s other atmosphere, 0 ocean | 0 state, −3 h radiation and precipitation, −12 h ocean and ice |
 
-**Datamode code** (marked `MESACLIP:` in the Fortran)
+**Key differences in the datamode code** (marked `MESACLIP:` in the Fortran)
 
-| | CPLHIST | MESACLIP |
-|---|---|---|
-| `Sa_ptem`, `Sa_dens` | read | computed from T, q, p |
-| Direct shortwave (`Faxa_swvdr`, `Faxa_swndr`) | read | `FSDS` minus diffuse, split 0.28 : 0.31 |
-| Rain and snow (`Faxa_rainc/l`, `Faxa_snowc/l`) | read, already kg/m²/s | split from `PRECT`, `PRECC`, `PRECSC`, `PRECSL`; m/s × 1000 |
-| `Sa_u10m`, `Sa_v10m` | not exported | exported when WW3 asks, equal to `Sa_u`, `Sa_v` |
-| `So_u`, `So_v` | copied (coupler fields are m/s, east/north) | × 0.01 (cm/s → m/s), still grid-relative |
-| `So_bldepth` | read | no stream, so DOCN's fill value (1e30) |
+- `Sa_ptem`, `Sa_dens`: computed from stand-in T/q/p rather than read directly (CPLHIST reads them).
+- Direct shortwave (`Faxa_swvdr`, `Faxa_swndr`): computed as `FSDS` minus diffuse, split 0.28 : 0.31 (CPLHIST reads all 4 bands separately).
+- Rain and snow: split from total precip fields; m/s → kg/m²/s (CPLHIST reads the 4 sub-components directly in kg/m²/s).
+- `Sa_u10m`, `Sa_v10m`: exported as `Sa_u`, `Sa_v` when WW3 requests them (CPLHIST does not export these).
+- `So_u`, `So_v`: multiplied by 0.01 (cm/s → m/s); still grid-relative (CPLHIST coupler fields are already m/s and east/north).
 
 ## Tested
 
 **A case** (`HIST_DATM%MESACLIP-HIST_SLND_SICE_DOCN%MESACLIP-HIST_SROF_SGLC_SWAV`, `ne120_t12`,
-10 days from 1950-01-01, 48 tasks): runs, ~43 simulated years/day. The coupler's auxiliary
-history matches GDEX at every point checked: fields read as-is are identical, computed fields agree
-with the formulas above to ≤7e-7, SST and currents to ≤5e-8 (relative) at all ocean points. At the
-exact edge of a 6 h window, averaged fields use the window that just ended.
+10 days from 2000-01-01, 48 tasks): runs. The coupler's auxiliary history matches GDEX at every
+point checked: fields read as-is are identical, computed fields agree with the formulas above to
+≤7e-7, SST and currents to ≤5e-8 (relative) at all ocean points.
 
 **Regional WW3** (`HIST_DATM%MESACLIP-HIST_SLND_SICE_DOCN%MESACLIP-HIST_SROF_SGLC_WW3`, the
-162×66 Bering Sea grid from `big_alaska_sea_ice_waves`, DATM on `ne120np4`, 10 days from 1950-01-01,
-48 tasks): runs. Hs averages 2.0–2.4 m (max ~5 m), lower near the open boundaries, which get no
-input. Two setup steps were needed:
+162×66 Bering Sea grid, DATM on `ne120np4`, 10 days, 48 tasks): runs. Hs averages 2.0–2.4 m
+(max ~5 m). Two setup steps needed: DOCN requires a non-null `OCN_GRID`; avoid any stale
+`ww3_bounc.nml` in `WW3_GRID_INP_DIR`.
 
-- DOCN requires a non-null `OCN_GRID`, so set it to any name (`./xmlchange OCN_GRID=<name>`).
-- WW3 rebuilds `nest.ww3` from any `ww3_bounc.nml` in `WW3_GRID_INP_DIR` (and from a stale copy in
-  `RUNDIR/ww3_moddef_create`), which here held another case's 2020 spectra. Use an input folder with
-  only the grid `.inp` files.
+**A case with DICE** (`HIST_DATM%MESACLIP-HIST_SLND_DICE%MESACLIP-HIST_DOCN%MESACLIP-HIST_SROF_SGLC_SWAV`,
+`ne120_t12`, 10 days from 2000-01-01, 48 tasks): runs.
 
-Both cases (`~/croc_cases/mesaclip_a_hist`, `~/croc_cases/mesaclip_ww3_alaska`) keep their exact
-setup commands in `replay.sh`.
+**Regional WW3 with DICE** (same compset, 162×66 Bering Sea grid, 10 days): runs. Requires
+`./xmlchange ICE_GRID=<name>` after `case.setup` — DICE's buildnml checks `ICE_GRID`, unlike SICE.
+
+All four cases keep exact setup commands in `replay.sh` in their case directories
+(`~/croc_cases/mesaclip_a_hist`, `~/croc_cases/mesaclip_ww3_alaska`,
+`~/croc_cases/mesaclip_dice_a_hist`, `~/croc_cases/mesaclip_dice_ww3_alaska`).
 
 ## Not done, and compromises
 
-1. **Heights don't match.** Winds and `Sa_z` are the lowest level (~60 m), but temperature,
-   humidity and pressure are 2 m / surface values; MESACLIP doesn't save `TBOT`/`QBOT` 6-hourly.
-2. **WW3 gets lowest-level winds as 10 m winds**, so winds and waves are biased high.
-3. **Direct shortwave split** uses JRA's fixed fractions, not MESACLIP's own (`SOLS`/`SOLL` weren't
-   saved).
+1. **Heights don't match.** Winds and `Sa_z` are from the lowest model level (~60 m), but
+   temperature, humidity and pressure are 2 m / surface values — MESACLIP doesn't save `TBOT`/`QBOT`
+   6-hourly. CICE and MOM6 bulk formulae mix these inconsistently.
+2. **WW3 gets lowest-level winds as 10 m winds**, biasing waves high. JRA does the same with its
+   lowest level; CPLHIST doesn't export `Sa_u10m` at all.
+3. **Direct shortwave split** uses JRA's fixed fractions (0.28 : 0.31 vis : near-IR), not
+   MESACLIP's own (SOLS/SOLL weren't saved). CPLHIST has per-band fields and avoids this.
 4. **Topography isn't MESACLIP's.** It only matters for land/glacier downscaling.
-5. **Currents aren't rotated.** POP velocities follow the grid's axes, which differ from east/north
-   by up to 8° at 30–45°N, 28° at 45–60°N and 90° in the Arctic. They also sit on U points but are
-   read on the T-point mesh (half a cell, ~5 km, off).
-6. **No boundary-layer depth.** POP saved `HMXL`/`XBLT`, not the boundary-layer depth DOCN exports,
-   so DOCN sends WW3 its fill value (1e30) for `So_bldepth`.
-7. **No DICE.** Deferred: ice fraction is in %, and DICE can't export ice thickness. The WW3 test
-   therefore has no sea ice, though the Bering Sea has ice in January.
-8. **No wave boundary conditions.** MESACLIP has no waves, so regional WW3 runs get no swell from
+5. **Currents aren't rotated.** POP velocities follow the tripole grid's axes, which differ from
+   east/north by up to 8° at 30–45°N, 28° at 45–60°N and 90° in the Arctic. They also sit on U
+   points but are read on the T-point mesh (half a cell, ~5 km, off).
+6. **No boundary-layer depth.** `So_bldepth` gets DOCN's fill value (1e30); WW3 runs but Langmuir
+   outputs (`Sw_lamult`, `Sw_hstokes`) are fill. Langmuir (`LMPN=T`) is off by default. DOCN%SST
+   and DOCN%CPLHIST have the same limitation — only an active MOM6 provides it.
+7. **No wave boundary conditions.** MESACLIP has no waves, so regional WW3 gets no swell from
    outside the domain.
-9. **Radiation and precipitation are averages.** MESACLIP saved none instantaneous. The means are
-   stamped at the end of each window, so they're shifted back half a window and held constant over
-   it (no diurnal cycle within 6 h; ocean fields are daily).
-10. **One stream per variable.** GDEX files hold one variable each, so CPLHIST's grouped streams
+8. **Radiation and precipitation are averages.** MESACLIP saved none instantaneous. Means are
+   stamped at the end of each window, shifted back half a window (no diurnal cycle within 6 h;
+   ocean and ice fields are daily).
+9. **One stream per variable.** GDEX files hold one variable each, so CPLHIST's grouped streams
    aren't possible. `u` and `v` are interpolated as scalars, as CPLHIST does.
-11. **Every file is listed.** GDEX file names contain date ranges, which CDEPS can't template, so
+10. **Every file is listed.** GDEX file names contain date ranges which CDEPS can't template, so
     each file is listed with `$DATM_MESACLIP_CASE` in the path.
-12. **Years are trimmed** to file names every member shares: RCPs end in 2099 (the 2100 file name
+11. **Years are trimmed** to file names every member shares: RCPs end in 2099 (the 2100 file name
     varies), RCP6.0 in 2095 (so does its last ocean file). HIST data end at 2005-12-31 00Z.
-13. **Members that don't fit:** RCP8.5 005 lacks the 2096 `UBOT` file.
-14. **Time settings follow MESACLIP, not CPLHIST.** Offsets are 0 s (`h2`), −3 h (`h4`) and −12 h
-    (daily ocean) instead of CPLHIST's ±900 s.
+12. **Members that don't fit:** RCP8.5 005 lacks the 2096 `UBOT` file.
+13. **Time settings follow MESACLIP, not CPLHIST.** Offsets are 0 s (`h2`), −3 h (`h4`) and −12 h
+    (daily ocean/ice) instead of CPLHIST's ±900 s.
