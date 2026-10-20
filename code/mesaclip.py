@@ -155,7 +155,7 @@ def stream(comp, scenario, field, case=None):
         years = ("$DATM_YR_START", "$DATM_YR_END", "$DATM_YR_ALIGN")
     return {
         "name": stream_name(scenario, variable),
-        "taxmode": "cycle",
+        "taxmode": "limit",
         "tintalgo": tintalgo,
         "readmode": "single",
         "mapalgo": "bilinear",
