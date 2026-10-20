@@ -11,11 +11,25 @@ A global ensemble of ocean wave climate projections: WAVEWATCH III forced by MES
 The full plan (PDF).
 :::
 
+:::{grid-item-card} {octicon}`database` MESACLIP experiments
+:link: mesaclip_experiments
+:link-type: doc
+
+Available datasets and the MESAWAVE run matrix.
+:::
+
+:::{grid-item-card} {octicon}`tools` Stream construction
+:link: stream_construction
+:link-type: doc
+
+How to build CDEPS streams from MESACLIP data.
+:::
+
 :::{grid-item-card} {octicon}`plug` MESACLIP in CESM
 :link: mesaclip_cesm_modes
 :link-type: doc
 
-The DATM and DOCN modes.
+The DATM, DOCN and DICE modes added to CDEPS.
 :::
 
 :::{grid-item-card} {octicon}`table` Coupling fields
@@ -38,6 +52,8 @@ Which MESACLIP variables connect where.
 :caption: Notes
 :hidden:
 
+mesaclip_experiments
+stream_construction
 mesaclip_cesm_modes
 stream_data_requirements
 coupling_flow
