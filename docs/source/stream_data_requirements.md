@@ -19,25 +19,27 @@ names were checked in HIST member 010's daily files only.
 
 **EXPLANATION:** what MESACLIP variable was used, what computation was applied, and where in the Fortran source (file:line). Derived-field lines are in `datm_datamode_mesaclip_mod.F90` (DATM), `docn_datamode_mesaclip_mod.F90` (DOCN), or `dice_datamode_mesaclip_mod.F90` (DICE).
 
+**JRA / CPLHIST:** what the same field receives in a standard DATM%JRA run (`datm_datamode_jra_mod.F90`) or a DATM%CPLHIST replay (`datm_datamode_cplhist_mod.F90`). For DOCN/DICE fields the DATM mode does not matter; only the DOCN/DICE mode does.
+
 ## WW3
 
 ### Required
 
-| Import | Meaning | MESACLIP | EXPLANATION | Line |
-|---|---|---|---|---|
-| `So_bldepth` | Ocean boundary-layer depth | {bdg-danger-line}`not supplied` | DOCN sends `shr_const_spval` (fill) when no stream is present (`docn_datamode_mesaclip_mod.F90:L164`); WW3 runs but Langmuir outputs (`Sw_lamult`, `Sw_hstokes`) receive fill — these require `LMPN=T`, which is off by default and not set in the Alaska case. | [208–210](ww3:L208-L210) |
+| Import | Meaning | MESACLIP | EXPLANATION | JRA | CPLHIST | Line |
+|---|---|---|---|---|---|---|
+| `So_bldepth` | Ocean boundary-layer depth | {bdg-danger-line}`not supplied` | DOCN sends `shr_const_spval` (fill) when no stream is present (`docn_datamode_mesaclip_mod.F90:L164`); WW3 runs but Langmuir outputs (`Sw_lamult`, `Sw_hstokes`) receive fill — these require `LMPN=T`, which is off by default and not set in the Alaska case. | not supplied | not supplied | [208–210](ww3:L208-L210) |
 
 ### Optional
 
-| Import | Meaning | MESACLIP | EXPLANATION | Standard source | Line |
-|---|---|---|---|---|---|
-| `So_t` | SST | {bdg-success}`yes` `SST`, °C → K | `SST` (°C) from `pop.h.nday1`; DOCN adds `TkFrz` (273.15 K) to convert to Kelvin (`docn_datamode_mesaclip_mod.F90:L178–180`). | DOCN or MOM6 | [204](ww3:L204) |
-| `So_u`, `So_v` | Surface current | {bdg-success}`yes` `U1_1`, `V1_1` × 0.01 | `U1_1`, `V1_1` (cm/s) from `pop.h.nday1` uppermost layer; DOCN multiplies by 0.01 to convert to m/s (`docn_datamode_mesaclip_mod.F90:L148,L155`); still on POP tripole grid U-points, not rotated to geographic east/north. | DOCN or MOM6 | [202–203](ww3:L202-L203) |
-| `Sa_tbot` | Air temperature | {bdg-warning}`stand-in` `TREFHT` | `TREFHT` (2 m temperature) from `cam.h2` used as stand-in for lowest-level temperature; MESACLIP does not save 6-hourly lowest-level T (`datm_datamode_mesaclip_mod.F90:L270`). | DATM | [205](ww3:L205) |
-| `Sa_u10m`, `Sa_v10m` | 10 m wind | {bdg-warning}`stand-in` `UBOT`, `VBOT` | Bottom-level winds from `cam.h2` assigned as 10 m winds; no 6-hourly `U10` in HIST; lowest CAM level is ~60 m so winds are biased high (`datm_datamode_mesaclip_mod.F90:L283–284`). | DATM | [206–207](ww3:L206-L207) |
-| `Si_ifrac` | Ice fraction | {bdg-success}`yes` `aice_d` ÷ 100 from DICE%MESACLIP | `aice_d` (%) from `cice.h1.aice_d`; DICE divides by 100 to convert to fraction (`dice_datamode_mesaclip_mod.F90:L408`). | CICE or DICE | [200](ww3:L200) |
-| `Si_thick` | Ice thickness | {bdg-danger-line}`not supplied` could use `hi_d` ÷ (`aice_d`/100) | Not provided; DICE%SSMI also does not provide it. Candidate: derive from `hi_d` and `aice_d` in CICE history. | CICE | [201](ww3:L201) |
-| `Si_floediam` | Floe diameter | {bdg-danger-line}`not supplied` | Not provided; DICE%SSMI also does not provide it; requires CICE. | CICE | [211–213](ww3:L211-L213) |
+| Import | Meaning | MESACLIP | EXPLANATION | JRA | CPLHIST | Standard source | Line |
+|---|---|---|---|---|---|---|---|
+| `So_t` | SST | {bdg-success}`yes` `SST`, °C → K | `SST` (°C) from `pop.h.nday1`; DOCN adds `TkFrz` (273.15 K) to convert to Kelvin (`docn_datamode_mesaclip_mod.F90:L178–180`). | DOCN%SST | DOCN%CPLHIST | DOCN or MOM6 | [204](ww3:L204) |
+| `So_u`, `So_v` | Surface current | {bdg-success}`yes` `U1_1`, `V1_1` × 0.01 | `U1_1`, `V1_1` (cm/s) from `pop.h.nday1` uppermost layer; DOCN multiplies by 0.01 to convert to m/s (`docn_datamode_mesaclip_mod.F90:L148,L155`); still on POP tripole grid U-points, not rotated to geographic east/north. | DOCN%SST (currents not provided — stub zero) | DOCN%CPLHIST | DOCN or MOM6 | [202–203](ww3:L202-L203) |
+| `Sa_tbot` | Air temperature | {bdg-warning}`stand-in` `TREFHT` | `TREFHT` (2 m temperature) from `cam.h2` used as stand-in for lowest-level temperature; MESACLIP does not save 6-hourly lowest-level T (`datm_datamode_mesaclip_mod.F90:L270`). | direct lowest-level T from stream (`datm_datamode_jra_mod.F90:L276`) | direct | DATM | [205](ww3:L205) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind | {bdg-warning}`stand-in` `UBOT`, `VBOT` | Bottom-level winds from `cam.h2` assigned as 10 m winds; no 6-hourly `U10` in HIST; lowest CAM level is ~60 m so winds are biased high (`datm_datamode_mesaclip_mod.F90:L283–284`). | stand-in: `Sa_u`/`Sa_v` (lowest-level wind, `datm_datamode_jra_mod.F90:L288–289`) | not exported | DATM | [206–207](ww3:L206-L207) |
+| `Si_ifrac` | Ice fraction | {bdg-success}`yes` `aice_d` ÷ 100 from DICE%MESACLIP | `aice_d` (%) from `cice.h1.aice_d`; DICE divides by 100 to convert to fraction (`dice_datamode_mesaclip_mod.F90:L408`). | DICE%SSMI (SSM/I satellite) | DICE%CPLHIST or CICE | CICE or DICE | [200](ww3:L200) |
+| `Si_thick` | Ice thickness | {bdg-danger-line}`not supplied` could use `hi_d` ÷ (`aice_d`/100) | Not provided; DICE%SSMI also does not provide it. Candidate: derive from `hi_d` and `aice_d` in CICE history. | not supplied (DICE%SSMI also omits) | CICE only | CICE | [201](ww3:L201) |
+| `Si_floediam` | Floe diameter | {bdg-danger-line}`not supplied` | Not provided; DICE%SSMI also does not provide it; requires CICE. | not supplied | not supplied | CICE | [211–213](ww3:L211-L213) |
 
 ## MOM6
 
@@ -45,19 +47,19 @@ MOM6 guards every import; none are mandatory ([853–921](mom6:L853-L921)).
 
 ### Optional
 
-| Import | Meaning | MESACLIP | EXPLANATION | Standard source | Line |
-|---|---|---|---|---|---|
-| `Faxa_rain`, `Faxa_snow` | Rain, snow | {bdg-warning}`stand-in` `PRECT`, `PRECC`, `PRECSC`, `PRECSL` | Convective and large-scale rain/snow split in DATM from `PRECT`, `PRECC`, `PRECSC`, `PRECSL` (m/s) and converted to kg/m²/s by multiplying by `rhofw` (`datm_datamode_mesaclip_mod.F90:L289–292`). | DATM | [863–864](mom6:L863-L864) |
-| `Sa_pslv` | Sea-level pressure | {bdg-success}`yes` `PSL` | `PSL` from `cam.h2` passed directly (`datm_datamode_mesaclip_mod.F90:L273`). | DATM | [865](mom6:L865) |
-| `Si_ifrac` | Ice fraction | {bdg-success}`yes` `aice_d` ÷ 100 from DICE%MESACLIP | `aice_d` (%) from `cice.h1.aice_d`; DICE divides by 100 (`dice_datamode_mesaclip_mod.F90:L408`). | CICE or DICE | [872](mom6:L872) |
-| `Fioi_salt` | Salt flux from ice | {bdg-secondary}`other` ice | Provided by DICE (set to 0.0 — `dice_datamode_mesaclip_mod.F90:L549`), not from MESACLIP data. | CICE | [853](mom6:L853) |
-| `Foxx_rofl`, `Foxx_rofi` | Liquid, frozen runoff | {bdg-secondary}`other` DROF | Provided by DROF, not MESACLIP. | DROF | [866–867](mom6:L866-L867) |
-| `Forr_rofl_glc`, `Forr_rofi_glc` | Glacier runoff | {bdg-secondary}`other` DROF | Provided by DROF, not MESACLIP. | DROF | [868–871](mom6:L868-L871) |
-| `Fioi_meltw`, `Fioi_melth` | Meltwater, melt heat | {bdg-secondary}`other` ice | Computed by DICE from freeze/melt potential (`Fioo_q`) and ice fraction, not from MESACLIP data. | CICE | [874–875](mom6:L874-L875) |
-| `Sf_afracr`, `Foxx_swnet_afracr`, `Fioi_swpen_ifrac_n`, `Si_ifrac_n` | Per-category ice shortwave | {bdg-secondary}`other` ice | Per-thickness-category fields from CICE; DICE provides `Si_ifrac_n` only (`dice_datamode_mesaclip_mod.F90:L564`). | CICE | [888–895](mom6:L888-L895) |
-| `Faxa_ndep`, `Faxa_dstwet`, `Faxa_dstdry`, `Faxa_bcph`, `Fioi_flxdst`, `Fioi_bcphi`, `Fioi_bcpho`, `Sa_co2prog`, `Sa_co2diag` | Deposition, CO₂ | {bdg-secondary}`other` | Provided by DATM (aerosol streams) or CICE, not from MESACLIP atmospheric history. | DATM or CICE | [897–912](mom6:L897-L912) |
-| `Sw_lamult` | Langmuir factor | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP; also requires `So_bldepth` which MESACLIP does not supply. | WW3 | [914–916](mom6:L914-L916) |
-| `Sw_pstokes_x`, `Sw_pstokes_y` | Stokes drift, 3 bands | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP. | WW3 | [917–921](mom6:L917-L921) |
+| Import | Meaning | MESACLIP | EXPLANATION | JRA | CPLHIST | Standard source | Line |
+|---|---|---|---|---|---|---|---|
+| `Faxa_rain`, `Faxa_snow` | Rain, snow | {bdg-warning}`stand-in` `PRECT`, `PRECC`, `PRECSC`, `PRECSL` | Convective and large-scale rain/snow split in DATM from `PRECT`, `PRECC`, `PRECSC`, `PRECSL` (m/s) and converted to kg/m²/s by multiplying by `rhofw` (`datm_datamode_mesaclip_mod.F90:L289–292`). | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | DATM | [863–864](mom6:L863-L864) |
+| `Sa_pslv` | Sea-level pressure | {bdg-success}`yes` `PSL` | `PSL` from `cam.h2` passed directly (`datm_datamode_mesaclip_mod.F90:L273`). | direct (`datm_datamode_jra_mod.F90:L274`) | direct (`datm_datamode_cplhist_mod.F90:L260`) | DATM | [865](mom6:L865) |
+| `Si_ifrac` | Ice fraction | {bdg-success}`yes` `aice_d` ÷ 100 from DICE%MESACLIP | `aice_d` (%) from `cice.h1.aice_d`; DICE divides by 100 (`dice_datamode_mesaclip_mod.F90:L408`). | DICE%SSMI | DICE%CPLHIST or CICE | CICE or DICE | [872](mom6:L872) |
+| `Fioi_salt` | Salt flux from ice | {bdg-secondary}`other` ice | Provided by DICE (set to 0.0 — `dice_datamode_mesaclip_mod.F90:L549`), not from MESACLIP data. | DICE | DICE or CICE | CICE | [853](mom6:L853) |
+| `Foxx_rofl`, `Foxx_rofi` | Liquid, frozen runoff | {bdg-secondary}`other` DROF | Provided by DROF, not MESACLIP. | DROF | DROF | DROF | [866–867](mom6:L866-L867) |
+| `Forr_rofl_glc`, `Forr_rofi_glc` | Glacier runoff | {bdg-secondary}`other` DROF | Provided by DROF, not MESACLIP. | DROF | DROF | DROF | [868–871](mom6:L868-L871) |
+| `Fioi_meltw`, `Fioi_melth` | Meltwater, melt heat | {bdg-secondary}`other` ice | Computed by DICE from freeze/melt potential (`Fioo_q`) and ice fraction, not from MESACLIP data. | DICE | DICE or CICE | CICE | [874–875](mom6:L874-L875) |
+| `Sf_afracr`, `Foxx_swnet_afracr`, `Fioi_swpen_ifrac_n`, `Si_ifrac_n` | Per-category ice shortwave | {bdg-secondary}`other` ice | Per-thickness-category fields from CICE; DICE provides `Si_ifrac_n` only (`dice_datamode_mesaclip_mod.F90:L564`). | DICE/CICE | DICE/CICE | CICE | [888–895](mom6:L888-L895) |
+| `Faxa_ndep`, `Faxa_dstwet`, `Faxa_dstdry`, `Faxa_bcph`, `Fioi_flxdst`, `Fioi_bcphi`, `Fioi_bcpho`, `Sa_co2prog`, `Sa_co2diag` | Deposition, CO₂ | {bdg-secondary}`other` | Provided by DATM (aerosol streams) or CICE, not from MESACLIP atmospheric history. | same (DATM aerosol streams) | same (DATM aerosol streams) | DATM or CICE | [897–912](mom6:L897-L912) |
+| `Sw_lamult` | Langmuir factor | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP; also requires `So_bldepth` which MESACLIP does not supply. | WW3 | WW3 | WW3 | [914–916](mom6:L914-L916) |
+| `Sw_pstokes_x`, `Sw_pstokes_y` | Stokes drift, 3 bands | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP. | WW3 | WW3 | WW3 | [917–921](mom6:L917-L921) |
 
 ::::{dropdown} CMEPS-computed fields (derived automatically from MESACLIP inputs)
 | Import | Meaning | EXPLANATION | Line |
@@ -78,23 +80,23 @@ CICE requires `Sa_pbot` or `Sa_ptem` + `Sa_dens`; it aborts if neither is presen
 
 ### Required
 
-| Import | Meaning | MESACLIP | EXPLANATION | Line |
-|---|---|---|---|---|
-| `Sa_pbot` | Lowest-level pressure | {bdg-warning}`stand-in` `PS` | `PS` (surface pressure) from `cam.h2` used as stand-in for lowest-level pressure; MESACLIP does not save 6-hourly lowest-level pressure (`datm_datamode_mesaclip_mod.F90:L272`). | [175](cice:L175) |
-| `Sa_ptem`, `Sa_dens` | Potential temperature, density | {bdg-warning}`stand-in` computed in DATM | `Sa_ptem` = `TREFHT` × (p₀/`PS`)^(Rd/cp); `Sa_dens` = `PS` / (Rd × `TREFHT` × (1 + 0.608 × `QREFHT`)) — computed in our custom datamode from stand-in fields (`datm_datamode_mesaclip_mod.F90:L279–280`). | [183–184](cice:L183-L184) |
+| Import | Meaning | MESACLIP | EXPLANATION | JRA | CPLHIST | Line |
+|---|---|---|---|---|---|---|
+| `Sa_pbot` | Lowest-level pressure | {bdg-warning}`stand-in` `PS` | `PS` (surface pressure) from `cam.h2` used as stand-in for lowest-level pressure; MESACLIP does not save 6-hourly lowest-level pressure (`datm_datamode_mesaclip_mod.F90:L272`). | stand-in: `Sa_pslv` (sea-level pressure, `datm_datamode_jra_mod.F90:L275`) | direct (`datm_datamode_cplhist_mod.F90:L259`) | [175](cice:L175) |
+| `Sa_ptem`, `Sa_dens` | Potential temperature, density | {bdg-warning}`stand-in` computed in DATM | `Sa_ptem` = `TREFHT` × (p₀/`PS`)^(Rd/cp); `Sa_dens` = `PS` / (Rd × `TREFHT` × (1 + 0.608 × `QREFHT`)) — computed in our custom datamode from stand-in fields (`datm_datamode_mesaclip_mod.F90:L279–280`). | `Sa_ptem` stand-in: = `Sa_tbot` (no pressure correction, `datm_datamode_jra_mod.F90:L277`); `Sa_dens` computed: ideal gas law (`datm_datamode_jra_mod.F90:L292`) | direct both (`datm_datamode_cplhist_mod.F90:L256,L258`) | [183–184](cice:L183-L184) |
 
 ### Optional
 
-| Import | Meaning | MESACLIP | EXPLANATION | Standard source | Line |
-|---|---|---|---|---|---|
-| `Sa_z`, `Sa_u`, `Sa_v` | Lowest-level height, wind | {bdg-success}`yes` `ZBOT`, `UBOT`, `VBOT` | `ZBOT`, `UBOT`, `VBOT` from `cam.h2` passed directly (`datm_datamode_mesaclip_mod.F90:L268–275`). | DATM | [170–172](cice:L170-L172) |
-| `Faxa_lwdn` | Downward longwave | {bdg-success}`yes` `FLDS` | `FLDS` (6 h mean) from `cam.h4` passed directly (`datm_datamode_mesaclip_mod.F90:L293`). | DATM | [180](cice:L180) |
-| `Faxa_rain`, `Faxa_snow` | Rain, snow | {bdg-warning}`stand-in` `PRECT`, `PRECC`, `PRECSC`, `PRECSL` | Convective and large-scale rain/snow split from `PRECT`, `PRECC`, `PRECSC`, `PRECSL` and converted m/s → kg/m²/s (`datm_datamode_mesaclip_mod.F90:L289–292`). | DATM | [181–182](cice:L181-L182) |
-| `Sa_shum`, `Sa_tbot` | Humidity, air temperature | {bdg-warning}`stand-in` `QREFHT`, `TREFHT` | `QREFHT` (2 m specific humidity) and `TREFHT` (2 m temperature) from `cam.h2` used as stand-ins for lowest-level values; MESACLIP does not save 6-hourly lowest-level T and q (`datm_datamode_mesaclip_mod.F90:L270–271`). | DATM | [173–174](cice:L173-L174) |
-| `Faxa_swvdr`, `Faxa_swvdf`, `Faxa_swndr`, `Faxa_swndf` | Downward shortwave, 4 bands | {bdg-warning}`stand-in` `SOLSD`, `SOLLD`, `FSDS` | Diffuse bands (`swvdf`, `swndf`) read directly from `SOLSD`, `SOLLD` in `cam.h4`; direct bands computed as `FSDS` minus diffuse, split with JRA fixed fractions (0.475 vis, 0.525 near-IR) (`datm_datamode_mesaclip_mod.F90:L294–298`). | DATM | [176–179](cice:L176-L179) |
-| `So_t`, `So_s` | SST, SSS | `SST` {bdg-success}`yes`, `So_s` {bdg-danger-line}`not supplied` | `SST` (°C) from `pop.h.nday1` converted to K by DOCN (`docn_datamode_mesaclip_mod.F90:L178–180`); `So_s` (salinity) not in MESACLIP output — DOCN does not provide it. | DOCN or MOM6 | [163–164](cice:L163-L164) |
-| `So_u`, `So_v` | Surface current | {bdg-success}`yes` `U1_1`, `V1_1` × 0.01 | `U1_1`, `V1_1` (cm/s) from `pop.h.nday1` uppermost layer; DOCN multiplies by 0.01 (`docn_datamode_mesaclip_mod.F90:L148,L155`); not rotated to geographic east/north. | DOCN or MOM6 | [165–166](cice:L165-L166) |
-| `So_dhdx`, `So_dhdy` | Sea-surface slope | {bdg-danger-line}`not supplied` | Not in MESACLIP output; only available from an active MOM6. | MOM6 | [161–162](cice:L161-L162) |
-| `Fioo_q` | Freeze/melt potential | {bdg-danger-line}`not supplied` | Only available from an active MOM6; DOCN does not provide it. | MOM6 | [167](cice:L167) |
-| `Faxa_bcph`, `Faxa_dstwet`, `Faxa_dstdry` | Black carbon, dust | {bdg-secondary}`other` | Provided by DATM aerosol streams, not MESACLIP atmospheric history. | DATM | [189–193](cice:L189-L193) |
-| `Sw_elevation_spectrum` | Wave spectrum | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP. | WW3 | [198–201](cice:L198-L201) |
+| Import | Meaning | MESACLIP | EXPLANATION | JRA | CPLHIST | Standard source | Line |
+|---|---|---|---|---|---|---|---|
+| `Sa_z`, `Sa_u`, `Sa_v` | Lowest-level height, wind | {bdg-success}`yes` `ZBOT`, `UBOT`, `VBOT` | `ZBOT`, `UBOT`, `VBOT` from `cam.h2` passed directly (`datm_datamode_mesaclip_mod.F90:L268–275`). | `Sa_z` = constant 10.0 m (`datm_datamode_jra_mod.F90:L285`); `Sa_u`/`Sa_v` direct | all direct (`datm_datamode_cplhist_mod.F90:L254,L261–262`) | DATM | [170–172](cice:L170-L172) |
+| `Faxa_lwdn` | Downward longwave | {bdg-success}`yes` `FLDS` | `FLDS` (6 h mean) from `cam.h4` passed directly (`datm_datamode_mesaclip_mod.F90:L293`). | direct (`datm_datamode_jra_mod.F90:L283`) | direct (`datm_datamode_cplhist_mod.F90:L268`) | DATM | [180](cice:L180) |
+| `Faxa_rain`, `Faxa_snow` | Rain, snow | {bdg-warning}`stand-in` `PRECT`, `PRECC`, `PRECSC`, `PRECSL` | Convective and large-scale rain/snow split from `PRECT`, `PRECC`, `PRECSC`, `PRECSL` and converted m/s → kg/m²/s (`datm_datamode_mesaclip_mod.F90:L289–292`). | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | DATM | [181–182](cice:L181-L182) |
+| `Sa_shum`, `Sa_tbot` | Humidity, air temperature | {bdg-warning}`stand-in` `QREFHT`, `TREFHT` | `QREFHT` (2 m specific humidity) and `TREFHT` (2 m temperature) from `cam.h2` used as stand-ins for lowest-level values; MESACLIP does not save 6-hourly lowest-level T and q (`datm_datamode_mesaclip_mod.F90:L270–271`). | direct lowest-level values from stream (`datm_datamode_jra_mod.F90:L276,L281`) | direct (`datm_datamode_cplhist_mod.F90:L255,L257`) | DATM | [173–174](cice:L173-L174) |
+| `Faxa_swvdr`, `Faxa_swvdf`, `Faxa_swndr`, `Faxa_swndf` | Downward shortwave, 4 bands | {bdg-warning}`stand-in` `SOLSD`, `SOLLD`, `FSDS` | Diffuse bands (`swvdf`, `swndf`) read directly from `SOLSD`, `SOLLD` in `cam.h4`; direct bands computed as `FSDS` minus diffuse, split with JRA fixed fractions (0.475 vis, 0.525 near-IR) (`datm_datamode_mesaclip_mod.F90:L294–298`). | all 4 computed from total `Faxa_swdn` × fixed fractions (0.28/0.31/0.24/0.17, `datm_datamode_jra_mod.F90:L311–314`) | direct all 4 (`datm_datamode_cplhist_mod.F90:L269–272`) | DATM | [176–179](cice:L176-L179) |
+| `So_t`, `So_s` | SST, SSS | `SST` {bdg-success}`yes`, `So_s` {bdg-danger-line}`not supplied` | `SST` (°C) from `pop.h.nday1` converted to K by DOCN (`docn_datamode_mesaclip_mod.F90:L178–180`); `So_s` (salinity) not in MESACLIP output — DOCN does not provide it. | DOCN%SST | DOCN%CPLHIST | DOCN or MOM6 | [163–164](cice:L163-L164) |
+| `So_u`, `So_v` | Surface current | {bdg-success}`yes` `U1_1`, `V1_1` × 0.01 | `U1_1`, `V1_1` (cm/s) from `pop.h.nday1` uppermost layer; DOCN multiplies by 0.01 (`docn_datamode_mesaclip_mod.F90:L148,L155`); not rotated to geographic east/north. | DOCN%SST (no currents) | DOCN%CPLHIST | DOCN or MOM6 | [165–166](cice:L165-L166) |
+| `So_dhdx`, `So_dhdy` | Sea-surface slope | {bdg-danger-line}`not supplied` | Not in MESACLIP output; only available from an active MOM6. | not supplied | not supplied | MOM6 | [161–162](cice:L161-L162) |
+| `Fioo_q` | Freeze/melt potential | {bdg-danger-line}`not supplied` | Only available from an active MOM6; DOCN does not provide it. | not supplied | not supplied | MOM6 | [167](cice:L167) |
+| `Faxa_bcph`, `Faxa_dstwet`, `Faxa_dstdry` | Black carbon, dust | {bdg-secondary}`other` | Provided by DATM aerosol streams, not MESACLIP atmospheric history. | same (DATM aerosol streams) | same | DATM | [189–193](cice:L189-L193) |
+| `Sw_elevation_spectrum` | Wave spectrum | {bdg-secondary}`other` WW3 | Provided by WW3, not MESACLIP. | WW3 | WW3 | WW3 | [198–201](cice:L198-L201) |
