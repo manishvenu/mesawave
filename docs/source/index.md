@@ -32,7 +32,7 @@ How to build CDEPS streams from MESACLIP data.
 The PR, the five scenario modes, and the datamode code.
 :::
 
-:::{grid-item-card} {octicon}`table` Coupling fields
+:::{grid-item-card} {octicon}`table` Variables the models can request
 :link: stream_data_requirements
 :link-type: doc
 

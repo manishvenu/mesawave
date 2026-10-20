@@ -4,7 +4,8 @@ MESACLIP data reaches CESM through three CDEPS data models: DATM (atmosphere),
 DOCN (ocean), and DICE (sea ice). Each reads one or more XML stream definitions
 that point at MESACLIP NetCDF files and map variables to coupler fields.
 
-For the field-by-field coupling table see [Coupling fields](stream_data_requirements.md).
+For every field WW3, MOM6 and CICE can import, see
+[Variables the models can request](stream_data_requirements.md).
 
 ## How MESACLIP files are organised
 
