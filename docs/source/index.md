@@ -24,6 +24,13 @@ The DATM and DOCN modes.
 
 What WW3, MOM6 and CICE need.
 :::
+
+:::{grid-item-card} {octicon}`workflow` Coupling flow
+:link: coupling_flow
+:link-type: doc
+
+Which MESACLIP variables connect where.
+:::
 ::::
 
 ```{toctree}
@@ -33,6 +40,7 @@ What WW3, MOM6 and CICE need.
 
 mesaclip_cesm_modes
 stream_data_requirements
+coupling_flow
 adding_stream_data
 ```
 
