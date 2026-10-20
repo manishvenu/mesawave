@@ -1,37 +1,48 @@
 # Constructing CDEPS streams from MESACLIP
 
-MESACLIP data reaches CESM through three CDEPS data models: DATM (atmosphere),
-DOCN (ocean), and DICE (sea ice). Each reads one or more XML stream definitions
-that point at MESACLIP NetCDF files and map variables to coupler fields.
+DATM, DOCN and DICE read MESACLIP through XML stream definitions. Each stream points at the
+MESACLIP files for one variable ([MESACLIP experiments](mesaclip_experiments.md#files-and-history-streams))
+and names the field it fills
+([Variables the models can request](stream_data_requirements.md)). This page covers which
+variable fills which field, the time settings, the meshes, and where the XML comes from.
 
-For every field WW3, MOM6 and CICE can import, see
-[Variables the models can request](stream_data_requirements.md).
+## Variable mapping
 
-## How MESACLIP files are organised
+GDEX files hold one variable each, so there is one stream per variable. Each stream's `<var>` is
+`name_in_file name_in_model`. The `mesaclip` datamodes then convert or combine some fields; the
+formulas are in [Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#datamode-code).
 
-Each case produces one NetCDF file per variable per time chunk, named:
+**DATM**
 
-```
-{case}.{tag}.{VARNAME}.{YYYYMM}-{YYYYMM}.nc
-```
+| Stream field | MESACLIP variable | History file | In the datamode |
+|---|---|---|---|
+| `Sa_u`, `Sa_v` | `UBOT`, `VBOT` | `cam.h2` | as read; also sent to WW3 as `Sa_u10m`, `Sa_v10m` |
+| `Sa_z` | `ZBOT` | `cam.h2` | as read |
+| `Sa_tbot` | `TREFHT` | `cam.h2` | as read (2 m stand-in for the lowest level); `Sa_ptem` = `Sa_tbot` |
+| `Sa_shum` | `QREFHT` | `cam.h2` | as read (2 m stand-in) |
+| `Sa_pbot` | `PS` | `cam.h2` | as read (surface stand-in); used for `Sa_dens` |
+| `Sa_pslv` | `PSL` | `cam.h2` | as read |
+| `Faxa_lwdn` | `FLDS` | `cam.h4` | as read |
+| `Faxa_swvdf`, `Faxa_swndf` | `SOLSD`, `SOLLD` | `cam.h4` | as read (diffuse visible, near-IR) |
+| `Faxa_swdn` | `FSDS` | `cam.h4` | direct bands = `FSDS` − diffuse, split 0.28 : 0.31 |
+| `Faxa_prect`, `Faxa_precc`, `Faxa_precsc`, `Faxa_precsl` | `PRECT`, `PRECC`, `PRECSC`, `PRECSL` | `cam.h4` | split into rain and snow, m/s → kg/m²/s |
 
-They live under:
+**DOCN**
 
-```
-{GDEX}/{case}/
-  atm/proc/tseries/hour_6/   ← cam.h2 and cam.h4
-  ocn/proc/tseries/day_1/    ← pop.h.nday1
-  ice/proc/tseries/day_1/    ← cice.h1
-```
+| Stream field | MESACLIP variable | History file | In the datamode |
+|---|---|---|---|
+| `So_t` | `SST` | `pop.h.nday1` | °C → K |
+| `So_u`, `So_v` | `U1_1`, `V1_1` | `pop.h.nday1` | cm/s → m/s; not rotated (see [below](#meshes-and-remapping)) |
 
-Use `code/describe_mesaclip_variables.py` to list all variables with units and
-long names for a given case, or see the
-[variable glossary](mesaclip_experiments.md#variable-glossary).
+**DICE**
+
+| Stream field | MESACLIP variable | History file | In the datamode |
+|---|---|---|---|
+| `Si_ifrac` | `aice_d` | `cice.h1` | % → fraction |
 
 ## Stream parameters
 
-`code/mesaclip.py` writes one stream per variable. The time settings depend on
-the history file the variable comes from. Tag meanings are in the
+The time settings depend on the history file. Tag meanings are in the
 [CDEPS streams docs](https://escomp.github.io/CDEPS/versions/master/html/streams.html).
 
 | Tag | cam.h2 | cam.h4 | pop.h.nday1 | cice.h1 |
@@ -49,9 +60,13 @@ are means (`cell_methods = "time: mean"`) stamped at the end of their window
 each stamp to the middle of its window, and `nearest` then picks the mean whose
 window contains the model time.
 
+**Years:** `year_first` and `year_last` are `DATM_YR_START` and `DATM_YR_END`, which default to
+the scenario's whole data range, and `year_align` equals `year_first`. So model years are data
+years, and a run can start anywhere inside the range.
+
 **`taxmode`:** `limit` stops the run if the model time leaves
 `year_first`–`year_last`, instead of wrapping around (`cycle`) or holding the end
-values (`extend`). Set `year_first` to the dataset's first year, not the run's,
+values (`extend`). Keep `year_first` at the dataset's first year, not the run's,
 so a 1950 start is inside the data. A run starting on a dataset's first day
 (e.g. RCP runs on 2006-01-01) is before the first daily record (00:00 on
 2 January) and stops; start it on 2 January or use `extend` for that run.
@@ -60,113 +75,30 @@ so a 1950 start is inside the data. A run starting on a dataset's first day
 missing file is interpolated across without an error. `add_mesaclip_to_cesm.py`
 reports missing files per member.
 
-## Mesh files
+## Meshes and remapping
 
-| Data | Mesh file |
-|------|-----------|
-| `cam.h2`, `cam.h4` | ne120 atmosphere mesh (SE unstructured) |
-| `pop.h.nday1` | tx0.1v2 ocean mesh (tripole) |
-| `cice.h1` | tx0.1v2 ocean mesh (CICE uses the same grid) |
+| History files | Mesh | `mapalgo` |
+|---|---|---|
+| `cam.h2`, `cam.h4` | `share/meshes/ne120np4_ESMFmesh_cdf5_c20211018.nc` | `bilinear` |
+| `pop.h.nday1`, `cice.h1` | `share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc` | `bilinear` |
 
-The WW3 unstructured mesh is set separately in the WW3 namelist, not in the
-DATM/DOCN/DICE stream XML.
+Mesh paths are under CESM inputdata. The WW3 mesh is set in WW3, not in these streams.
 
-## Remapping algorithm (`mapalgo`)
+**Winds** need no rotation: CAM-SE's `UBOT` and `VBOT` are already east/north.
 
-| Source → Target | `mapalgo` |
-|----------------|-----------|
-| ne120 ATM → WW3/CICE/MOM6 | `bilinear` |
-| tx0.1v2 OCN → WW3/CICE/MOM6 | `bilinear` |
+**Currents** are not yet rotated. POP's `U1_1` and `V1_1` follow the tripole grid's axes, which
+match east/north south of about 29°N and turn by up to 90° in the Arctic. They also sit on U
+points but are read on the T-point mesh. The streams' `vectors` tag can't fix this: CDEPS
+assumes vector input is already east/north and rotates by longitude only
+(`dshr_strdata_mod.F90`).
 
-Bilinear is appropriate for all scalar fields. **Wind components** (`UBOT`,
-`VBOT`) and **currents** (`U1_1`, `V1_1`) are grid-relative vectors on their
-native grids and require rotation to east/north before or after remapping —
-this is not yet handled in the MESACLIP datamodes (see open questions in
-CLAUDE.md).
+## Where the stream XML comes from
 
-## Year alignment
+`code/mesaclip.py` holds the tables on this page: scenarios, history files and their time
+settings, and the field mapping. `code/add_mesaclip_to_cesm.py` writes them into CDEPS's
+`stream_definition_{datm,docn,dice}.xml`, with `$DATM_MESACLIP_CASE` in every file path and
+`$DATM_YR_START`/`END`/`ALIGN` for the years. The case's namelist build fills those in. Every
+file is listed, because GDEX file names hold date ranges that CDEPS can't template.
 
-CDEPS stream blocks require `year_first`, `year_last`, and `year_align`. For
-MESACLIP the data years equal the model years (no repeat-year forcing), so:
-
-```xml
-<year_first>1950</year_first>
-<year_last>2005</year_last>
-<year_align>1950</year_align>
-```
-
-The active scenario and member are controlled at runtime by the CESM case
-variable `DATM_MESACLIP_CASE`, which the `mesaclip` datamodes read to
-construct the file paths at model start. This means the stream XML files
-contain the path template, not a hardcoded case name.
-
-## Variable mapping
-
-Each `<var>` entry in the stream XML is:
-
-```xml
-<var>name_in_file  name_in_model</var>
-```
-
-### DATM streams
-
-**cam.h2** (6-hourly instantaneous):
-
-| `name_in_file` | `name_in_model` | Notes |
-|----------------|-----------------|-------|
-| `UBOT` | `Sa_u` | ~60 m wind; stand-in for 10 m |
-| `VBOT` | `Sa_v` | ~60 m wind; stand-in for 10 m |
-| `ZBOT` | `Sa_z` | Level height for bulk formulae |
-| `TREFHT` | `Sa_tbot` | 2 m temperature; stand-in for lowest level |
-| `QREFHT` | `Sa_shum` | 2 m specific humidity; stand-in |
-| `PS` | `Sa_pbot` | Surface pressure; stand-in for lowest-level P |
-| `PSL` | `Sa_pslv` | Sea-level pressure |
-
-**cam.h4** (6-hourly means):
-
-| `name_in_file` | `name_in_model` | Notes |
-|----------------|-----------------|-------|
-| `FLDS` | `Faxa_lwdn` | Downwelling LW — direct |
-| `FSDS` | — | Used to compute direct SW bands |
-| `SOLSD` | `Faxa_swvdf` | Diffuse visible SW — direct |
-| `SOLLD` | `Faxa_swndf` | Diffuse near-IR SW — direct |
-| `PRECT` | — | Combined with component fields for rain/snow split |
-| `PRECC` | — | Convective precipitation fraction |
-| `PRECSC` | — | Convective snow fraction |
-| `PRECSL` | — | Large-scale snow fraction |
-
-The direct SW bands (`Faxa_swvdr`, `Faxa_swndr`) and precipitation
-(`Faxa_rainc`, `Faxa_rainl`, `Faxa_snowc`, `Faxa_snowl`) are computed
-in the `mesaclip` datamode from the above inputs. Potential temperature
-(`Sa_ptem`) and air density (`Sa_dens`) are also computed from `TREFHT`,
-`PS`, and `QREFHT`.
-
-### DOCN stream (pop.h.nday1, daily)
-
-| `name_in_file` | `name_in_model` | Unit conversion |
-|----------------|-----------------|-----------------|
-| `SST` | `So_t` | °C → K (+273.15) |
-| `U1_1` | `So_u` | cm/s → m/s (×0.01) |
-| `V1_1` | `So_v` | cm/s → m/s (×0.01) |
-
-### DICE stream (cice.h1, daily)
-
-| `name_in_file` | `name_in_model` | Unit conversion |
-|----------------|-----------------|-----------------|
-| `aice_d` | `Si_ifrac` | % → fraction (÷100) |
-
-## Generating the stream XML
-
-The scripts `code/generate_datm_streams.py`, `code/generate_docn_streams.py`, and
-`code/generate_dice_streams.py` write CPLHIST-style CDEPS stream XML for a given
-MESACLIP case. They use the shared writer `code/cdeps_streams.py`.
-
-```bash
-python code/generate_datm_streams.py
-python code/generate_docn_streams.py
-python code/generate_dice_streams.py
-```
-
-Review the output XML before placing it in a case. Leave any unknown tags blank
-rather than guessing — CDEPS rejects blank `taxmode`, `mapalgo`, `tintalgo`, and
-`readmode`, so fill those before a run.
+`code/generate_{datm,docn,dice}_streams.py` write blank CPLHIST-style templates and hold the
+lists of fields each data model must supply. The MESACLIP modes don't use their output.

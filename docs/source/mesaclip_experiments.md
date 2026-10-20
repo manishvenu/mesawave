@@ -1,8 +1,8 @@
 # MESACLIP experiments
 
-MESACLIP is an NSF NCAR ensemble of CESM1.3 high-resolution runs (0.25° atmosphere,
-0.1° ocean and sea ice) produced for the CESM High-Resolution Decadal Prediction (HRDP)
-project. MESAWAVE forces WAVEWATCH III from this ensemble.
+[MESACLIP](https://project.cgd.ucar.edu/projects/MESACLIP/) is an NSF NCAR ensemble of
+high-resolution CESM1.3 runs (0.25° atmosphere, 0.1° ocean and sea ice). MESAWAVE forces
+WAVEWATCH III from it. This page covers what data exists and which parts MESAWAVE uses.
 
 ## Model grids
 
@@ -16,21 +16,38 @@ Confirmed from the NetCDF global attributes in the GDEX time-series files:
 
 ## Available datasets
 
-All datasets are on the NSF NCAR Research Data Archive (RDA). GLADE users access
-them at `/glade/campaign/collections/rda/data/d651XXX/`.
+All datasets are on GDEX. On GLADE they are at `/glade/campaign/collections/gdex/data/<ID>/`
+(the older `collections/rda` path is a link to the same place).
 
-| Scenario | RDA ID | Members | Period |
-|----------|--------|---------|--------|
+| Scenario | GDEX ID | Members | Period |
+|----------|---------|---------|--------|
 | PI control (perpetual 1850) | d651029 | 1 (500 yr) | — |
 | Historical | d651007 | 10 (001–010) | 1920–2005 |
 | RCP 6.0 | d651008 | 10 | 2006–2100 |
 | RCP 8.5 | d651009 | 10 | 2006–2100 |
 | RCP 4.5 + RCP 2.6 | d651043 | 1 each | 2006–2100 |
 
-Historical data (d651007) is also mirrored on GDEX at
-`/glade/campaign/collections/gdex/data/d651007/`.
+## MESAWAVE run matrix
 
-## Case naming convention
+Each MESAWAVE production run uses one scenario and one member. Future runs are three
+non-contiguous time slices.
+
+| MESAWAVE experiment | MESACLIP dataset | Members | Period(s) |
+|---------------------|-----------------|---------|-----------|
+| Historical | d651007 | 005, 009, 010 | 1950–2005 |
+| RCP 2.6 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
+| RCP 4.5 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
+| RCP 6.0 | d651008 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
+| RCP 8.5 | d651009 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
+
+- RCP 2.6 and 4.5 have one member (003) today; three are planned. Check the dataset before
+  running.
+- The CDEPS modes stop at 2099, and RCP 6.0 at 2095, because the last files' names differ
+  between members ([Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#five-products)). The
+  2080–2100 slice can't reach 2100 yet.
+- RCP 8.5 member 005 is missing its 2096 `UBOT` file.
+
+## Case names
 
 ```
 b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010
@@ -43,36 +60,35 @@ b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010
 fully coupled
 ```
 
-Member numbers run `001`–`010`. The model version suffix (e.g. `.44`, `.45`, `.46`)
-varies by member; use the actual directory name when constructing paths.
+The model version varies by scenario and member (`hires1.0.30`, `1.0.31`, `1.0.42`, `1.0.44`,
+`1.0.46`). RCP 2.6 and 4.5 names have no period, e.g.
+`b.e13.BRCP26C5.ne120_t12.cesm-ihesp-hires1.0.42.003`. Use the directory name on GDEX.
 
-## MESAWAVE run matrix
+## Files and history streams
 
-The table below maps each MESAWAVE production run to the MESACLIP source dataset.
-Time slices are non-contiguous segments of the future scenario runs.
+Each case has one NetCDF file per variable per time chunk:
 
-| MESAWAVE experiment | MESACLIP dataset | Members | Period(s) |
-|---------------------|-----------------|---------|-----------|
-| Historical | d651007 | 005, 009, 010 | 1950–2005 |
-| RCP 2.6 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
-| RCP 4.5 | d651043 | 3 (planned) | 2006–2020, 2040–2060, 2080–2100 |
-| RCP 6.0 | d651008 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
-| RCP 8.5 | d651009 | 005, 009, 010 | 2006–2020, 2040–2060, 2080–2100 |
+```
+{case}.{tag}.{VARNAME}.{YYYYMM}-{YYYYMM}.nc
+```
 
-**Note:** RCP 2.6 and 4.5 currently have 1 member in MESACLIP (d651043); 3 members
-are planned. Check the dataset before running.
+under
 
-## Output streams and frequencies
+```
+{GDEX}/{ID}/{case}/
+  atm/proc/tseries/hour_6/   ← cam.h2 and cam.h4
+  ocn/proc/tseries/day_1/    ← pop.h.nday1
+  ice/proc/tseries/day_1/    ← cice.h1
+```
 
-Each MESACLIP case produces four time-series streams. See
-[Variable glossary](#variable-glossary) for the full variable list.
+MESAWAVE reads four history streams:
 
-| Stream tag | Frequency | Type | Relevant CDEPS mode |
-|------------|-----------|------|---------------------|
-| `cam.h2` | 6-hourly | Instantaneous snapshot | DATM |
-| `cam.h4` | 6-hourly | Time mean (stamped at window end) | DATM |
-| `pop.h.nday1` | Daily | Time mean | DOCN |
-| `cice.h1` | Daily | Time mean | DICE |
+| Stream tag | Frequency | Type | CDEPS data model |
+|------------|-----------|------|------------------|
+| `cam.h2` | 6-hourly | Snapshot | DATM |
+| `cam.h4` | 6-hourly | Mean, stamped at the window's end | DATM |
+| `pop.h.nday1` | Daily | Mean, stamped at the window's end | DOCN |
+| `cice.h1` | Daily | Mean, stamped at the window's end | DICE |
 
 ## Variable glossary
 
