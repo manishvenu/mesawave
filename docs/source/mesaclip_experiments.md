@@ -65,7 +65,7 @@ are planned. Check the dataset before running.
 ## Output streams and frequencies
 
 Each MESACLIP case produces four time-series streams. See
-[Variable glossary](stream_construction.md#variable-glossary) for the full variable list.
+[Variable glossary](#variable-glossary) for the full variable list.
 
 | Stream tag | Frequency | Type | Relevant CDEPS mode |
 |------------|-----------|------|---------------------|
@@ -73,3 +73,89 @@ Each MESACLIP case produces four time-series streams. See
 | `cam.h4` | 6-hourly | Time mean (stamped at window end) | DATM |
 | `pop.h.nday1` | Daily | Time mean | DOCN |
 | `cice.h1` | Daily | Time mean | DICE |
+
+## Variable glossary
+
+Full variable list with units from the actual NetCDF files:
+
+```bash
+conda run -n dev_cd python -I code/describe_mesaclip_variables.py
+# or for a specific member:
+conda run -n dev_cd python -I code/describe_mesaclip_variables.py \
+    --case b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.005
+```
+
+### cam.h2 — 6-hourly instantaneous
+
+| Variable | Units | Description |
+|----------|-------|-------------|
+| `UBOT` | m/s | Lowest model level zonal wind |
+| `VBOT` | m/s | Lowest model level meridional wind |
+| `ZBOT` | m | Lowest model level height |
+| `U10` | m/s | 10 m wind speed (scalar magnitude only) |
+| `PS` | Pa | Surface pressure |
+| `PSL` | Pa | Sea level pressure |
+| `TREFHT` | K | 2 m (reference height) temperature |
+| `QREFHT` | kg/kg | 2 m specific humidity |
+| `TS` | K | Surface radiative temperature |
+| `PRECT` | m/s | Total precipitation rate |
+| `FLUT` | W/m² | Upwelling LW at top of model |
+| `IVT` | kg/m/s | Vertically integrated vapour transport |
+| `uIVT`, `vIVT` | kg/m/s | IVT components |
+| `TMQ` | kg/m² | Precipitable water |
+| `T200`, `T500` | K | Temperature at 200/500 hPa |
+| `U250`–`U925` | m/s | Zonal wind at pressure levels |
+| `V250`–`V925` | m/s | Meridional wind at pressure levels |
+| `Z250`, `Z500` | m | Geopotential height at 250/500 hPa |
+
+### cam.h4 — 6-hourly time means
+
+| Variable | Units | Description |
+|----------|-------|-------------|
+| `FLDS` | W/m² | Downwelling LW at surface |
+| `FSDS` | W/m² | Downwelling SW at surface (total) |
+| `SOLSD` | W/m² | Diffuse visible SW |
+| `SOLLD` | W/m² | Diffuse near-IR SW |
+| `FLDSC`, `FSDSC` | W/m² | Clear-sky LW/SW |
+| `FLNS`, `FSNS` | W/m² | Net LW/SW at surface |
+| `LHFLX`, `SHFLX` | W/m² | Latent/sensible heat flux |
+| `PRECT` | m/s | Total precipitation |
+| `PRECC` | m/s | Convective precipitation |
+| `PRECSC` | m/s | Convective snow rate |
+| `PRECSL` | m/s | Large-scale snow rate |
+| `QFLX` | kg/m²/s | Surface water flux |
+| `CLDTOT` | fraction | Total cloud fraction |
+| `TREFHTMN`, `TREFHTMX` | K | Min/max 2 m temperature over period |
+
+### pop.h.nday1 — daily ocean
+
+| Variable | Units | Description |
+|----------|-------|-------------|
+| `SST` | °C | Surface potential temperature |
+| `SSS` | g/kg | Surface salinity |
+| `U1_1`, `V1_1` | cm/s | Surface (level 1) velocity |
+| `U2_2`, `V2_2` | cm/s | Level 2 velocity |
+| `SSH_2` | cm | Sea surface height |
+| `HMXL`, `XMXL` | cm | Mixed-layer / max mixed-layer depth |
+| `TAUX`, `TAUY` | dyne/cm² | Wind stress (grid-relative, tripole) |
+| `SHF`, `SHF_QSW` | W/m² | Total / solar surface heat flux |
+| `EVAP_F`, `PREC_F`, `SNOW_F`, `MELT_F`, `ROFF_F` | kg/m²/s | Freshwater flux components (coupler diagnostics) |
+| `SALT_F` | kg/m²/s | Salt flux (coupler diagnostic) |
+| `LWDN_F`, `LWUP_F`, `SENH_F`, `MELTH_F` | W/m² | Heat flux components (coupler diagnostics) |
+
+**Note:** Fields ending in `_F` are fluxes that the coupler sent *to* POP in the
+original coupled run. They are coupler diagnostics, not useful as DATM/DOCN inputs.
+
+### cice.h1 — daily ice
+
+| Variable | Units | Description |
+|----------|-------|-------------|
+| `aice_d` | % | Ice concentration |
+| `hi_d` | m | Grid-cell mean ice thickness |
+| `hs_d` | m | Grid-cell mean snow thickness |
+| `Tsfc_d` | °C | Snow/ice surface temperature |
+| `uvel_d`, `vvel_d` | cm/s | Ice velocity |
+| `fswabs_d` | W/m² | Absorbed SW (ice + ocean) |
+| `fswdn_d` | W/m² | Downward SW |
+| `fswthru_d` | W/m² | SW transmitted through ice to ocean |
+| `ice_present_d` | 1 | Fraction of period any ice was present |
