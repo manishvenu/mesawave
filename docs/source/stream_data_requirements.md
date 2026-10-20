@@ -19,7 +19,7 @@ names were checked in HIST member 010's daily files only.
 
 **EXPLANATION:** what MESACLIP variable was used, what computation was applied, and where in the Fortran source (file:line). Derived-field lines are in `datm_datamode_mesaclip_mod.F90` (DATM), `docn_datamode_mesaclip_mod.F90` (DOCN), or `dice_datamode_mesaclip_mod.F90` (DICE).
 
-**JRA / CPLHIST:** what the same field receives in a standard DATM%JRA run (`datm_datamode_jra_mod.F90`) or a DATM%CPLHIST replay (`datm_datamode_cplhist_mod.F90`). For DOCN/DICE fields the DATM mode does not matter; only the DOCN/DICE mode does.
+**JRA / CPLHIST:** shorthand for the full configuration, not just the DATM mode. "JRA" = DATM%JRA (atmosphere from JRA reanalysis) + DOCN%SST (observed SST) + DICE%SSMI (SSM/I satellite ice) — three separate data products. "CPLHIST" = DATM%CPLHIST + DOCN%CPLHIST + DICE%CPLHIST, all replayed from a prior coupled run. For DATM fields, the relevant source code is `datm_datamode_jra_mod.F90` or `datm_datamode_cplhist_mod.F90`. For DOCN/DICE fields, the DATM mode is irrelevant; only the DOCN/DICE mode matters.
 
 ## WW3
 
