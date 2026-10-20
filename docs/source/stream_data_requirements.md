@@ -29,6 +29,41 @@ only.
 
 **JRA / CPLHIST:** shorthand for the full configuration, not just the DATM mode. "JRA" = DATM%JRA (atmosphere from JRA reanalysis) + DOCN%SST (observed SST) + DICE%SSMI (SSM/I satellite ice) — three separate data products. "CPLHIST" = DATM%CPLHIST + DOCN%CPLHIST + DICE%CPLHIST, all replayed from a prior coupled run. For DATM fields, the relevant source code is `datm_datamode_jra_mod.F90` or `datm_datamode_cplhist_mod.F90`. For DOCN/DICE fields, the DATM mode is irrelevant; only the DOCN/DICE mode matters.
 
+## From MESACLIP to the coupler
+
+Every field the MESACLIP datamodes send to the coupler, and how each is made from MESACLIP
+variables. Line links go to the datamode source.
+
+| Coupler field | How it's made | From MESACLIP | Line |
+|---|---|---|---|
+| `Sa_u`, `Sa_v` | direct | `UBOT`, `VBOT` | [273–274](datm:L273-L274) |
+| `Sa_z` | direct | `ZBOT` | [268](datm:L268) |
+| `Sa_tbot` | direct | `TREFHT` | [269](datm:L269) |
+| `Sa_shum` | direct | `QREFHT` | [270](datm:L270) |
+| `Sa_pbot` | direct | `PS` | [271](datm:L271) |
+| `Sa_pslv` | direct | `PSL` | [272](datm:L272) |
+| `Faxa_lwdn` | direct | `FLDS` {bdg-primary}`h4` | [293](datm:L293) |
+| `Faxa_swvdf` | direct | `SOLSD` {bdg-primary}`h4` | [295](datm:L295) |
+| `Faxa_swndf` | direct | `SOLLD` {bdg-primary}`h4` | [294](datm:L294) |
+| `Sa_ptem` | = `Sa_tbot`: CAM's formula, T × (ps/p)^κ, with p = `PS` | `TREFHT` | [279](datm:L279) |
+| `Sa_u10m`, `Sa_v10m` | copy of `Sa_u`, `Sa_v` (stand-in: ~60 m winds) | `UBOT`, `VBOT` | [283–284](datm:L283-L284) |
+| `Faxa_snowc` | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [291](datm:L291) |
+| `Faxa_snowl` | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [292](datm:L292) |
+| `So_t` | unit conversion, °C → K | `SST` | [178–180](docn:L178-L180) |
+| `So_u`, `So_v` | unit conversion, cm/s → m/s | `U1_1`, `V1_1` | [148](docn:L148), [155](docn:L155) |
+| `Si_ifrac` | unit conversion, % → fraction | `aice_d` | [408](dice:L408) |
+| `Sa_dens` | {bdg-info}`computed` | `PS` / (Rd × `TREFHT` × (1 + zvir × `QREFHT`)) | [280](datm:L280) |
+| `Faxa_rainc` | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [289](datm:L289) |
+| `Faxa_rainl` | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [290](datm:L290) |
+| `Faxa_swvdr` | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [297](datm:L297) |
+| `Faxa_swndr` | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [298](datm:L298) |
+
+**Read but not sent to the coupler:** the stream fields `Faxa_swdn` (`FSDS`), `Faxa_prect`,
+`Faxa_precc`, `Faxa_precsc` and `Faxa_precsl` are only inputs to the computed fields above.
+
+**Sent but not from MESACLIP:** `Sa_topo` (DATM's observed topography stream), `So_bldepth` (a
+fill value) and DICE's other ice fluxes, listed in the tables below.
+
 ## WW3
 
 | Import | Meaning | EXPLANATION | JRA | CPLHIST | Standard source | Line |

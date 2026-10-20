@@ -35,6 +35,9 @@ myst_url_schemes = {
     'ww3': 'https://github.com/CROCODILE-CESM/WW3/blob/4b79dba2859ce120adaac00e9ab98ffd12c8b0d5/model/src/wav_import_export.F90#{{path}}',
     'mom6': 'https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_cap.F90#{{path}}',
     'cice': 'https://github.com/ESCOMP/CICE/blob/cice6_6_3_20260904/cicecore/drivers/nuopc/cmeps/ice_import_export.F90#{{path}}',
+    'datm': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#{{path}}',
+    'docn': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
+    'dice': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90#{{path}}',
 }
 
 templates_path = ['_templates']
