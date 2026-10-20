@@ -34,6 +34,11 @@ FILES = [
     "docn/cime_config/stream_definition_docn.xml",
     "docn/ocn_comp_nuopc.F90",
     "docn/CMakeLists.txt",
+    "dice/cime_config/config_component.xml",
+    "dice/cime_config/namelist_definition_dice.xml",
+    "dice/cime_config/stream_definition_dice.xml",
+    "dice/ice_comp_nuopc.F90",
+    "dice/CMakeLists.txt",
 ]
 SCENARIOS = list(mesaclip.SCENARIOS)
 # Fields the mesaclip datamode computes rather than reads.
@@ -351,6 +356,117 @@ def docn_cap(text):
     )
 
 
+def dice_config(text):
+    text = replace(text, '[%IAF]">', f'[%IAF]{modifiers()}">')
+    text = add_after_line(text, '<desc option="IAF">', descs(), "    ")
+    text = replace(
+        text,
+        "ssmi,ssmi_iaf</valid_values>",
+        "ssmi,ssmi_iaf," + ",".join(mesaclip.mode("dice", s) for s in SCENARIOS) + "</valid_values>",
+    )
+    return add_to_values(
+        text,
+        "DICE_MODE",
+        [f'<value compset="DICE%MESACLIP-{s}">{mesaclip.mode("dice", s)}</value>' for s in SCENARIOS],
+    )
+
+
+def dice_namelist(text):
+    text = replace(text, "ssmi,ssmi_iaf</valid_values>", "ssmi,ssmi_iaf,mesaclip</valid_values>")
+    text = add_to_values(text, "datamode", ['<value dice_mode="mesaclip">mesaclip</value>'])
+    return add_to_values(text, "streamslist", streamslists("dice"))
+
+
+def dice_cap(text):
+    text = add_after_line(
+        text,
+        "use dice_datamode_cplhist_mod , only : dice_datamode_cplhist_restart_write",
+        [
+            f"use dice_datamode_mesaclip_mod , only : dice_datamode_mesaclip_{name}"
+            for name in ("advertise", "init_pointers", "advance", "restart_read", "restart_write")
+        ],
+        "  ",
+        FORTRAN,
+    )
+    text = replace(
+        text,
+        "case('ssmi','ssmi_iaf','cplhist')",
+        "case('ssmi','ssmi_iaf','cplhist','mesaclip')",
+    )
+    # advertise: flds_i2o_per_cat attribute read + multiline call
+    text = add_after_line(
+        text,
+        "call dice_datamode_cplhist_advertise(exportState, fldsexport, flds_scalar_name, rc)",
+        [
+            "case('mesaclip')",
+            "   call NUOPC_CompAttributeGet(gcomp, name='flds_i2o_per_cat', value=cvalue, rc=rc)",
+            "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
+            "   read(cvalue,*) flds_i2o_per_cat  ! module variable",
+            "   call dice_datamode_mesaclip_advertise(importState, exportState, fldsimport, fldsexport, &",
+            "        flds_scalar_name, flds_i2o_per_cat, rc)",
+            "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
+        ],
+        "    ",
+        FORTRAN,
+        skip=1,
+    )
+    # init_pointers (uses chkerr, consistent with surrounding ssmi/cplhist blocks)
+    text = add_after_line(
+        text,
+        "call dice_datamode_cplhist_init_pointers(exportState, sdat, rc)",
+        [
+            "case('mesaclip')",
+            "   call dice_datamode_mesaclip_init_pointers(importState, exportState, sdat, flds_i2o_per_cat, rc)",
+            "   if (chkerr(rc,__LINE__,u_FILE_u)) return",
+        ],
+        "       ",
+        FORTRAN,
+        skip=1,
+    )
+    # restart_read: cplhist has no ChkErr after the call, insert immediately after
+    text = add_after_line(
+        text,
+        "call dice_datamode_cplhist_restart_read(restfilm, rpfile, logunit, my_task, mpicom, sdat)",
+        [
+            "case('mesaclip')",
+            "   call dice_datamode_mesaclip_restart_read(restfilm, rpfile, logunit, my_task, mpicom, sdat, rc)",
+            "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
+        ],
+        "          ",
+        FORTRAN,
+        skip=0,
+    )
+    # advance: multiline mesaclip call
+    text = add_after_line(
+        text,
+        "call dice_datamode_cplhist_advance(sdat, rc)",
+        [
+            "case ('mesaclip')",
+            "   call dice_datamode_mesaclip_advance(exportState, importState, cosarg, flds_i2o_per_cat, &",
+            "        flux_swpf, flux_Qmin, flux_Qacc, flux_Qacc0, dt, logunit, restart_read, rc)",
+            "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
+        ],
+        "    ",
+        FORTRAN,
+        skip=1,
+    )
+    # restart_write: cplhist call spans two lines, skip past the closing paren line
+    text = add_after_line(
+        text,
+        "call dice_datamode_cplhist_restart_write(rpfile, case_name, inst_suffix, target_ymd, target_tod, &",
+        [
+            "case ('mesaclip')",
+            "   call dice_datamode_mesaclip_restart_write(rpfile, case_name, inst_suffix, target_ymd, target_tod, &",
+            "        logunit, my_task, sdat, rc)",
+            "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
+        ],
+        "       ",
+        FORTRAN,
+        skip=1,
+    )
+    return text
+
+
 EDITS = dict(
     zip(
         FILES,
@@ -365,6 +481,11 @@ EDITS = dict(
             streams_xml("docn"),
             docn_cap,
             cmake("docn"),
+            dice_config,
+            dice_namelist,
+            streams_xml("dice"),
+            dice_cap,
+            cmake("dice"),
         ],
     )
 )

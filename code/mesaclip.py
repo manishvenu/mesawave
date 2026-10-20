@@ -37,8 +37,8 @@ SCENARIOS = {
 }
 
 # History files read -> (folder in the case, file tag, mesh, time offset (s), tintalgo).
-# h2 snapshots are interpolated linearly. h4 and nday1 means are stamped at the end of
-# their window, so shift them back half a window and use the nearest one.
+# h2 snapshots are interpolated linearly. h4, nday1, and nday1_ice means are stamped at
+# the end of their window, so shift them back half a window and use the nearest one.
 SOURCES = {
     "h2": (
         "atm/proc/tseries/hour_6",
@@ -57,6 +57,13 @@ SOURCES = {
     "nday1": (
         "ocn/proc/tseries/day_1",
         "pop.h.nday1",
+        "$DIN_LOC_ROOT/share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc",
+        -43200,
+        "nearest",
+    ),
+    "nday1_ice": (
+        "ice/proc/tseries/day_1",
+        "cice.h1",
         "$DIN_LOC_ROOT/share/meshes/tx0.1v2_ESMFmesh_cd5_c20210105.nc",
         -43200,
         "nearest",
@@ -91,11 +98,14 @@ FIELDS = {
         "So_u": ("nday1", "U1_1"),
         "So_v": ("nday1", "V1_1"),
     },
+    "dice": {
+        "Si_ifrac": ("nday1_ice", "aice_d"),
+    },
 }
 
 
 def mode(comp, scenario):
-    """MESACLIP_HIST for datm, mesaclip_hist for docn (each follows its own casing)."""
+    """MESACLIP_HIST for datm, mesaclip_hist for docn/dice (each follows its own casing)."""
     return f"MESACLIP_{scenario}" if comp == "datm" else f"mesaclip_{scenario.lower()}"
 
 

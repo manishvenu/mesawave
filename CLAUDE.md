@@ -116,29 +116,26 @@ and flag any that run past ~4 minutes.
 
 ## Status (2026-10-19)
 
-- MESACLIP DATM/DOCN modes are done and verified. `docs/source/mesaclip_cesm_modes.md`
+- MESACLIP DATM/DOCN/DICE modes are done. `docs/source/mesaclip_cesm_modes.md`
   has what was added, a comparison with CPLHIST, the tests, and the compromises.
-- Draft PR CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`, one commit on
-  `cdeps1.0.101`). The org's `main` now tracks ESCOMP main, so merging needs a
-  rebase onto newer CDEPS and a retest. The user moves org refs themselves.
-- The CESM_crocodash install's `components/cdeps` holds the same edits, uncommitted,
-  on detached `cdeps1.0.101`. Switching it to the fork's `mesaclip` branch would
-  protect them from a checkout; not done yet.
-- Test cases, 10 days each on 48 tasks: `~/croc_cases/mesaclip_a_hist` (A case,
-  `ne120_t12`) and `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66
-  Bering Sea grid). Each has `replay.sh` with its setup commands; `user_nl_*`
-  edits (e.g. the A case's `histaux_*` in `user_nl_cpl`) are in the case dirs.
+- Draft PR CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`, two commits on
+  `cdeps1.0.101`: DATM+DOCN, then DICE). The org's `main` now tracks ESCOMP main,
+  so merging needs a rebase onto newer CDEPS and a retest. The user moves org refs.
+- The CESM_crocodash install's `components/cdeps` holds the same edits manually,
+  uncommitted, on detached `cdeps1.0.101`. Run `code/add_mesaclip_to_cesm.py` to
+  regenerate from the submodule if needed.
+- Verified test cases, 10 days each on 48 tasks: `~/croc_cases/mesaclip_a_hist`
+  (A case, `ne120_t12`, SICE) and `~/croc_cases/mesaclip_ww3_alaska` (regional WW3
+  on a 162×66 Bering Sea grid, SICE). Both use DATM+DOCN%MESACLIP-HIST.
+  DICE test cases (`mesaclip_dice_a_hist`, `mesaclip_dice_ww3_alaska`) pending.
+  Each has `replay.sh`; `user_nl_*` edits are in the case dirs.
 - Claude runs on Casper. Build, submit and `xmlquery` need Derecho:
   `ssh -o BatchMode=yes derecho '<command>'`. Keep jobs under 60 cores so they
   go through the develop queue fast.
 
 ## Open questions
 
-1. **Sea ice source.** DOCN exports no ice fields. DICE exports `Si_ifrac` but
-   not `Si_thick` or `Si_floediam`, and CMEPS only takes `Si_thick` from an ice
-   component. Ask Alper Altuntas how the CESM3-style ice attenuation gets its inputs.
-   MESACLIP's ice fraction is in %. DICE is deferred until this is settled.
-2. **Rotating POP currents.** DOCN reads `U1_1`/`V1_1` and converts cm/s to m/s,
+1. **Rotating POP currents.** DOCN reads `U1_1`/`V1_1` and converts cm/s to m/s,
    but they still follow the tripole grid's axes and sit on U points. Rotating
    to east/north and moving to T points needs preprocessing or datamode code.
 3. **Wave-only regional tests through CrocoDash.** Done with plain CIME instead
@@ -162,11 +159,12 @@ and flag any that run past ~4 minutes.
   to CAM's `U10` speed, if saved 6-hourly). Pass `ZBOT` as `Sa_z` for MOM6.
 - **No runs span historical and future MESACLIP** (2026-10-16). Each run
   uses one MESACLIP scenario and member; combining them is out of scope.
-- **MESACLIP enters CESM as CDEPS modes** (2026-10-16): `DATM%MESACLIP-<scenario>`
-  and `DOCN%MESACLIP-<scenario>` with one case variable, `DATM_MESACLIP_CASE`,
-  read by `mesaclip` datamodes copied from CPLHIST, which also do the unit
-  conversions. Instantaneous `h2` where it exists. DICE is deferred. Limits are
-  in `docs/source/mesaclip_cesm_modes.md`.
+- **MESACLIP enters CESM as CDEPS modes** (2026-10-16/19): `DATM%MESACLIP-<scenario>`,
+  `DOCN%MESACLIP-<scenario>`, and `DICE%MESACLIP-<scenario>` with one case variable,
+  `DATM_MESACLIP_CASE`, read by `mesaclip` datamodes copied from CPLHIST/SSMI, which
+  also do unit conversions. DICE reads daily `aice_d` (%) from CICE history and divides
+  by 100; exports only `Si_ifrac`. `Si_thick` and `Si_floediam` are not provided
+  (DICE%SSMI also doesn't provide them). Limits in `docs/source/mesaclip_cesm_modes.md`.
 - **Stand-ins for fields MESACLIP lacks** (2026-10-16): 2 m `TREFHT`/`QREFHT` and
   `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
   computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;
