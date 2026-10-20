@@ -25,11 +25,11 @@ Available datasets and the MESAWAVE run matrix.
 How to build CDEPS streams from MESACLIP data.
 :::
 
-:::{grid-item-card} {octicon}`plug` MESACLIP in CESM
-:link: mesaclip_cesm_modes
+:::{grid-item-card} {octicon}`plug` Adding MESACLIP to CDEPS
+:link: adding_mesaclip_to_cdeps
 :link-type: doc
 
-The DATM, DOCN and DICE modes added to CDEPS.
+The PR, the five scenario modes, and the datamode code.
 :::
 
 :::{grid-item-card} {octicon}`table` Coupling fields
@@ -47,9 +47,8 @@ What WW3, MOM6 and CICE need.
 
 mesaclip_experiments
 stream_construction
-mesaclip_cesm_modes
+adding_mesaclip_to_cdeps
 stream_data_requirements
-adding_stream_data
 ```
 
 ```{toctree}

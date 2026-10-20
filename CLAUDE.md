@@ -116,8 +116,8 @@ and flag any that run past ~4 minutes.
 
 ## Status (2026-10-19)
 
-- MESACLIP DATM/DOCN/DICE modes are done. `docs/source/mesaclip_cesm_modes.md`
-  has what was added, a comparison with CPLHIST, the tests, and the compromises.
+- MESACLIP DATM/DOCN/DICE modes are done. `docs/source/adding_mesaclip_to_cdeps.md`
+  has the PR, the five scenario modes, `DATM_MESACLIP_CASE` and the datamode code.
 - Draft PR CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`, two commits on
   `cdeps1.0.101`: DATM+DOCN, then DICE). The org's `main` now tracks ESCOMP main,
   so merging needs a rebase onto newer CDEPS and a retest. The user moves org refs.
@@ -164,7 +164,7 @@ and flag any that run past ~4 minutes.
   `DATM_MESACLIP_CASE`, read by `mesaclip` datamodes copied from CPLHIST/SSMI, which
   also do unit conversions. DICE reads daily `aice_d` (%) from CICE history and divides
   by 100; exports only `Si_ifrac`. `Si_thick` and `Si_floediam` are not provided
-  (DICE%SSMI also doesn't provide them). Limits in `docs/source/mesaclip_cesm_modes.md`.
+  (DICE%SSMI also doesn't provide them).
 - **Stand-ins for fields MESACLIP lacks** (2026-10-16): 2 m `TREFHT`/`QREFHT` and
   `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
   computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;

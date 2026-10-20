@@ -12,8 +12,7 @@ no waves, and with no ice component it runs ice-free ([609–614](ww3:L609-L614)
 **Prefixes:** `Sa_`, `Faxa_` atmosphere · `So_`, `Fioo_` ocean · `Si_`, `Fioi_` ice · `Sw_` wave ·
 `Foxx_`, `Sf_` merged by CMEPS.
 
-**MESACLIP:** {bdg-success}`yes` · {bdg-warning}`stand-in` (see
-[compromises](mesaclip_cesm_modes.md#not-done-and-compromises)) · {bdg-info}`computed` by CMEPS from
+**MESACLIP:** {bdg-success}`yes` · {bdg-warning}`stand-in` · {bdg-info}`computed` by CMEPS from
 MESACLIP fields · {bdg-danger-line}`not supplied` by MESACLIP today, with a candidate variable where one exists · {bdg-secondary}`other` source. The MESACLIP setup uses DATM%MESACLIP (6-hourly atmosphere), DOCN%MESACLIP (daily ocean), and DICE%MESACLIP (daily ice fraction). Ice and ocean
 names were checked in HIST member 010's daily files only.
 
