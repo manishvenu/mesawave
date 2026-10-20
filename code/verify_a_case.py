@@ -16,7 +16,8 @@ import numpy as np
 RUN = sys.argv[1]
 CASE = "b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010"
 GDEX = f"/glade/campaign/collections/gdex/data/d651007/{CASE}"
-RHOFW, RDAIR, CPDAIR = 1000.0, 287.04213, 1004.64  # shr_const values (approx; reported diffs are relative)
+RHOFW, RDAIR = 1000.0, 287.04213  # shr_const values (approx; reported diffs are relative)
+ZVIR = 28.966 / 18.016 - 1  # shr_const_zvir = MWDAIR/MWWV - 1
 VIS = 0.28 / 0.59
 
 
@@ -67,8 +68,8 @@ for k in [0, len(times) // 2]:
     for fld, var in [("Sa_u", "UBOT"), ("Sa_v", "VBOT"), ("Sa_z", "ZBOT"), ("Sa_pslv", "PSL"),
                      ("Sa_tbot", "TREFHT"), ("Sa_shum", "QREFHT"), ("Sa_pbot", "PS")]:
         report(fld, g(fld), [(f"h2 {var}", cam("h2", var, day))])
-    report("Sa_ptem", g("Sa_ptem"), [("T(1e5/p)^(R/cp)", T * (1e5 / p) ** (RDAIR / CPDAIR))])
-    report("Sa_dens", g("Sa_dens"), [("p/(R T (1+0.608q))", p / (RDAIR * T * (1 + 0.608 * q)))])
+    report("Sa_ptem", g("Sa_ptem"), [("T", T)])
+    report("Sa_dens", g("Sa_dens"), [("p/(R T (1+zvir q))", p / (RDAIR * T * (1 + ZVIR * q)))])
     # h4 means: window ending at `day` or at `day + 0.25` (nearest-rule tie at window edges)
     for fld, fn in [
         ("Faxa_lwdn", lambda w: cam("h4", "FLDS", w)),

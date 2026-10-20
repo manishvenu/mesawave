@@ -55,42 +55,45 @@ Each component gets a `mesaclip` datamode, registered in its cap and `CMakeLists
 copy of an existing datamode, and every change from the copy is marked `MESACLIP:`.
 
 **DATM**
-([`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90),
+([`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90),
 copied from CPLHIST):
 
 - **Potential temperature and density**
-  ([L279–280](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90#L279-L280)):
-  `Sa_ptem = T (p0/p)^(Rd/cp)` and `Sa_dens = p / (Rd T (1 + 0.608 q))`, from `TREFHT`, `PS` and
-  `QREFHT`. MESACLIP doesn't save them.
+  ([L279–280](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L279-L280)):
+  `Sa_ptem = T` and `Sa_dens = p / (Rd T (1 + zvir q))`, from `TREFHT`, `PS` and `QREFHT`, with
+  `Rd` and `zvir` from `shr_const_mod`. MESACLIP doesn't save them. CAM references potential
+  temperature to surface pressure, `T (ps/p)^(Rd/cp)`
+  ([`camsrfexch.F90:496`](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)),
+  which is `T` when `p` is `PS`. Density includes the moisture term, as in the JRA datamode.
 - **10 m winds for WW3**
-  ([L283–284](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90#L283-L284)):
+  ([L283–284](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L283-L284)):
   exports `Sa_u10m`, `Sa_v10m`, which CPLHIST doesn't, set to the lowest-level winds `UBOT`,
   `VBOT`.
 - **Rain and snow**
-  ([L289–292](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90#L289-L292)):
+  ([L289–292](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L289-L292)):
   from CAM's `PRECT`, `PRECC`, `PRECSC`, `PRECSL` (m/s), times fresh-water density to give kg/m²/s.
   Convective rain = `PRECC − PRECSC`, large-scale rain = `PRECT − PRECC − PRECSL`, snow =
   `PRECSC` and `PRECSL`.
 - **Direct shortwave**
-  ([L297–298](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90#L297-L298)):
+  ([L297–298](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L297-L298)):
   `FSDS − SOLSD − SOLLD`, split between visible and near-IR in the JRA datamode's 0.28 : 0.31
   ratio
-  ([L79](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/datm/datm_datamode_mesaclip_mod.F90#L79)).
+  ([L78](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L78)).
   The diffuse bands are `SOLSD` and `SOLLD` as read.
 
 **DOCN**
-([`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/docn/docn_datamode_mesaclip_mod.F90),
+([`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90),
 copied from CPLHIST):
 
 - **Currents**
-  ([L148, L155](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/docn/docn_datamode_mesaclip_mod.F90#L144-L157)):
+  ([L148, L155](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90#L144-L157)):
   `U1_1`, `V1_1` times 0.01, cm/s to m/s. They are not rotated from POP's grid axes to east/north.
   SST's °C to K conversion is CPLHIST's own.
 
 **DICE**
-([`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/dice/dice_datamode_mesaclip_mod.F90),
+([`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90),
 copied from SSMI):
 
 - **Ice fraction**
-  ([L408](https://github.com/manishvenu/CDEPS/blob/26c0f11a15d0d9aac0efbb9fbcaef2ee944fd5b6/dice/dice_datamode_mesaclip_mod.F90#L408)):
+  ([L408](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90#L408)):
   `aice_d` divided by 100, % to fraction. Only `Si_ifrac` comes from MESACLIP.
