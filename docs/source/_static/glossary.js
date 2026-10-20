@@ -179,6 +179,33 @@ const GLOSSARY = {
   'WW3_GRID_INP_DIR': 'Directory with ww3_grid.inp and its associated files',
   'RUNDIR': "The case's run directory",
   'sst_constant_value': 'DOCN namelist: globally uniform SST (K) for the sst_aquap_constant mode',
+
+  // DATM stream fields the mesaclip datamode reads but doesn't send to the coupler
+  'Faxa_swdn': 'Total downward shortwave at the surface (FSDS), W/m²; input to the direct bands',
+  'Faxa_prect': 'Total precipitation rate (PRECT), m/s; input to the rain/snow split',
+  'Faxa_precc': 'Convective precipitation rate (PRECC), m/s; input to the rain/snow split',
+  'Faxa_precsc': 'Convective snow rate, water equivalent (PRECSC), m/s',
+  'Faxa_precsl': 'Large-scale snow rate, water equivalent (PRECSL), m/s',
+
+  // DICE exports (made by DICE, not read from MESACLIP)
+  'Faii_': 'Atmosphere-ice flux, computed by the ice',
+  'Faii_swnet': 'Net shortwave absorbed by the ice, W/m²',
+  'Faii_sen': 'Sensible heat flux between atmosphere and ice, W/m²',
+  'Faii_lat': 'Latent heat flux between atmosphere and ice, W/m²',
+  'Faii_lwup': 'Upward longwave from the ice, W/m²',
+  'Faii_evap': 'Evaporation from the ice, kg/m²/s',
+  'Faii_taux': 'Zonal air-ice stress, N/m²',
+  'Faii_tauy': 'Meridional air-ice stress, N/m²',
+  'Si_t': 'Ice surface temperature, K',
+  'Si_tref': 'Reference-height (2 m) air temperature over ice, K',
+  'Si_qref': 'Reference-height (2 m) specific humidity over ice, kg/kg',
+  'Si_avsdr': 'Ice albedo, visible direct',
+  'Si_anidr': 'Ice albedo, near-infrared direct',
+  'Si_avsdf': 'Ice albedo, visible diffuse',
+  'Si_anidf': 'Ice albedo, near-infrared diffuse',
+  'Si_imask': 'Ice domain mask',
+  'flux_qacc': 'DICE namelist: accumulate the ocean freeze/melt potential to grow or melt ice (default on)',
+  'flux_swpf': 'DICE namelist: fraction of absorbed shortwave passed through the ice to the ocean (default 0)',
 };
 
 document.addEventListener('DOMContentLoaded', () => {
