@@ -16,18 +16,44 @@ out. Hover over any variable name for its full name and units. CMEPS
 
 ## WW3
 
+**Sources.** The table comes from the cap. Published sources that agree:
+- [WW3 v5.16 manual](https://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf): §2.6 lists the forcing fields as current, wind, air-sea temperature difference, ice
+  concentration, ice thickness and floe diameter. §2.4 says wave-ice terms need "at least the ice
+  concentration …, mean ice thickness, and maximum floe diameter". §2.3.8 says the stability
+  correction, which uses air and sea temperature, "was derived for winds at 10 m height". This is
+  standalone WW3's forcing, not the CESM cap.
+- [Roach et al. 2019](https://doi.org/10.1029/2019MS001836), JAMES, §2.1 (p. 4169): CICE passes WW3 "sea ice concentration, sea ice thickness, and
+  mean floe size", and WW3 passes CICE the wave spectrum (CICE5 + WW3 v5.16, outside CESM).
+- [Bailey & Holland 2024](https://www.cesm.ucar.edu/sites/default/files/2024-02/2024-OMWG-D-Bailey.pptx.pdf), "Coupling requirements for CICE6-MOM6-WW3" (CESM OMWG slides): from CICE, "sea ice
+  thickness, maximum floe diameter, sea ice concentration".
+- No source found for `So_bldepth` going to WW3; only the cap.
+
+
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
 | `Sa_u10m`, `Sa_v10m` | 10 m wind | stand-in: `Sa_u`/`Sa_v` (lowest-level wind, `datm_datamode_jra_mod.F90:L288–289`) | not exported | [206–207](ww3:L206-L207) |
 | `Sa_tbot` | Air temperature | direct lowest-level T from stream (`datm_datamode_jra_mod.F90:L276`) | direct | [205](ww3:L205) |
 | `So_t` | SST | DOCN%SST | DOCN%CPLHIST | [204](ww3:L204) |
 | `So_u`, `So_v` | Surface current | DOCN%SST (currents not provided — stub zero) | DOCN%CPLHIST | [202–203](ww3:L202-L203) |
-| `So_bldepth` | Ocean boundary-layer depth — **not supplied**: DOCN sends a fill value, so WW3's Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only with `LMPN=T`) are fill | not supplied | not supplied | [208–210](ww3:L208-L210) |
+| `So_bldepth` | Ocean boundary-layer depth (CMEPS's `fd_cesm.yaml` aliases it `mixed_layer_depth`; MOM6 sends its [mixed-layer depth](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_ocean_model_nuopc.F90#L999)) — **not supplied**: DOCN sends a fill value, so WW3's Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only with `LMPN=T`) are fill | not supplied | not supplied | [208–210](ww3:L208-L210) |
 | `Si_ifrac` | Ice fraction | DICE%SSMI (SSM/I satellite) | DICE%CPLHIST or CICE | [200](ww3:L200) |
 | `Si_thick` | Ice thickness — **not supplied** (candidate: `hi_d` ÷ (`aice_d`/100) from CICE history) | not supplied (DICE%SSMI also omits) | CICE only | [201](ww3:L201) |
 | `Si_floediam` | Floe diameter — **not supplied**; needs CICE | not supplied | not supplied | [211–213](ww3:L211-L213) |
 
 ## MOM6
+
+**Sources.** The table comes from the cap; published coverage is thin. There is no paper on MOM6 in
+CESM yet.
+- [ESMF MOM NUOPC cap docs](https://earthsystemmodeling.org/docs/nightly/develop/mom/), an older
+  cap "tested with MOM5 and MOM6", not CESM's: imports wind stress, sensible heat, evaporation, net
+  longwave, the four net shortwave bands, rain, snow, liquid and frozen runoff with their heat, and
+  salt flux.
+- [Bailey & Holland 2024](https://www.cesm.ucar.edu/sites/default/files/2024-02/2024-OMWG-D-Bailey.pptx.pdf): CICE sends "ice-ocean stresses, shortwave, heat, salt, freshwater".
+- No source found for ice fraction, separate melt heat and meltwater, glacier runoff, deposition and
+  CO₂, or WW3's Langmuir factor and Stokes drift reaching MOM6. For waves in CESM's ocean see
+  [Li et al. 2016](https://doi.org/10.1016/j.ocemod.2015.07.020) (WW3 with POP in CESM1.2; not
+  checked here).
+
 
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
@@ -57,6 +83,16 @@ out. Hover over any variable name for its full name and units. CMEPS
 
 ## CICE
 
+**Sources.** The [Icepack science guide §2.1](https://cice-consortium-icepack.readthedocs.io/en/main/science_guide/sg_boundary_forcing.html) table "External forcing data that are relevant to Icepack" lists every
+field below except `Sa_pbot` and the aerosols, plus two optional fields the CESM cap doesn't import
+(a separate height for scalars, first ocean level thickness). The
+[CICE6 coupling section](https://cice-consortium-cice.readthedocs.io/en/main/science_guide/sg_coupling.html)
+defers to it. Aerosol deposition (`faero_atm`, black carbon and dust classes) is in
+[Icepack §2.9.1](https://cice-consortium-icepack.readthedocs.io/en/main/science_guide/sg_bgc.html).
+[Bailey & Holland 2024](https://www.cesm.ucar.edu/sites/default/files/2024-02/2024-OMWG-D-Bailey.pptx.pdf) list "To CICE: wave spectrum (25 bands), ocean velocities, sea surface tilt terms,
+scalars: temperature, salinity, frzmlt", and [Roach et al. 2019](https://doi.org/10.1029/2019MS001836) the wave spectrum from WW3.
+
+
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
 | `Sa_z`, `Sa_u`, `Sa_v` | Lowest-level height, wind | `Sa_z` = constant 10.0 m (`datm_datamode_jra_mod.F90:L285`); `Sa_u`/`Sa_v` direct | all direct (`datm_datamode_cplhist_mod.F90:L254,L261–262`) | [170–172](cice:L170-L172) |
@@ -69,7 +105,7 @@ out. Hover over any variable name for its full name and units. CMEPS
 | `Faxa_swvdr`, `Faxa_swndr` | Direct shortwave, visible and near-IR | computed from total `Faxa_swdn` × fixed fractions (0.28/0.31, `datm_datamode_jra_mod.F90:L311–312`) | direct (`datm_datamode_cplhist_mod.F90:L269,L271`) | [176](cice:L176), [178](cice:L178) |
 | `Faxa_rain`, `Faxa_snow` | Rain, snow | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | [181–182](cice:L181-L182) |
 | `So_t` | SST | DOCN%SST | DOCN%CPLHIST | [163](cice:L163) |
-| `So_s` | Sea-surface salinity | constant 34.7 psu (DOCN%SST, `docn_datamode_sstdata_mod.F90:L109`) | not supplied | [164](cice:L164) |
+| `So_s` | Sea-surface salinity; CICE clips negative values to 0 ([810](cice:L810)) | constant 34.7 psu (DOCN%SST, `docn_datamode_sstdata_mod.F90:L109`) | not supplied | [164](cice:L164) |
 | `So_u`, `So_v` | Surface current | DOCN%SST (no currents) | DOCN%CPLHIST | [165–166](cice:L165-L166) |
 | `So_dhdx`, `So_dhdy` | Sea-surface slope — **not supplied**; only from an active MOM6 | not supplied | not supplied | [161–162](cice:L161-L162) |
 | `Fioo_q` | Freeze/melt potential — **not supplied**; only from an active MOM6 | not supplied | not supplied | [167](cice:L167) |
