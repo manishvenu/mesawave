@@ -16,7 +16,7 @@ git fetch mesawave && git checkout mesaclip
 ```
 
 Most of the PR is standard data-model entry: compset modes, namelist values and stream
-definitions (one stream per variable, see [stream construction](stream_construction.md)). This page
+definitions (one stream per variable, see [Supply: MESACLIP to the coupler](stream_construction.md)). This page
 covers what goes beyond that.
 
 ## Five products
@@ -52,53 +52,12 @@ switches all three components. Defaults are the members in the table above. To u
 ## Datamode code
 
 Each component gets a `mesaclip` datamode, registered in its cap and `CMakeLists.txt`. Each is a
-copy of an existing datamode, and every change from the copy is marked `MESACLIP:`.
+copy of an existing datamode, and every change from the copy is marked `MESACLIP:`. What each
+field ends up as, with formulas and line links, is in the
+[supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
 
-**DATM**
-([`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90),
-copied from CPLHIST):
-
-- **Potential temperature and density**
-  ([L279–280](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L279-L280)):
-  `Sa_ptem = T` and `Sa_dens = p / (Rd T (1 + zvir q))`, from `TREFHT`, `PS` and `QREFHT`, with
-  `Rd` and `zvir` from `shr_const_mod`. MESACLIP doesn't save them. CAM references potential
-  temperature to surface pressure, `T (ps/p)^(Rd/cp)`
-  ([`camsrfexch.F90:496`](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)),
-  which is `T` when `p` is `PS`. Density includes the moisture term, as in the JRA datamode.
-- **10 m winds for WW3**
-  ([L283–284](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L283-L284)):
-  exports `Sa_u10m`, `Sa_v10m`, which CPLHIST doesn't, set to the lowest-level winds `UBOT`,
-  `VBOT`.
-- **Rain and snow**
-  ([L289–292](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L289-L292)):
-  from CAM's `PRECT`, `PRECC`, `PRECSC`, `PRECSL` (m/s), times fresh-water density to give kg/m²/s.
-  Convective rain = `PRECC − PRECSC`, large-scale rain = `PRECT − PRECC − PRECSL`, snow =
-  `PRECSC` and `PRECSL`.
-- **Direct shortwave**
-  ([L297–298](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L297-L298)):
-  `FSDS − SOLSD − SOLLD`, split between visible and near-IR in the JRA datamode's 0.28 : 0.31
-  ratio
-  ([L78](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#L78)).
-  The diffuse bands are `SOLSD` and `SOLLD` as read.
-
-**DOCN**
-([`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90),
-copied from CPLHIST):
-
-- **Currents**
-  ([L156, L163](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#L152-L167)):
-  `U1_1`, `V1_1` times 0.01, cm/s to m/s. They are not rotated from POP's grid axes to east/north.
-  SST's °C to K conversion is CPLHIST's own.
-- **Salinity**
-  ([L180](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#L175-L184)):
-  added; CPLHIST doesn't send `So_s`. `SSS` times 1000: the files hold kg/kg although their units
-  attribute says g/kg, and g/kg is the same number as psu. Without
-  the stream it falls back to the constant 34.7 psu that DOCN%SST sends.
-
-**DICE**
-([`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90),
-copied from SSMI):
-
-- **Ice fraction**
-  ([L408](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90#L408)):
-  `aice_d` divided by 100, % to fraction. Only `Si_ifrac` comes from MESACLIP.
+| Datamode | Copied from | Changes from the copy |
+|---|---|---|
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow and direct shortwave from MESACLIP variables; adds `Sa_u10m`, `Sa_v10m` for WW3 |
+| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s); adds `So_s` |
+| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction) |

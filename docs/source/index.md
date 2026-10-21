@@ -18,18 +18,18 @@ The full plan (PDF).
 Available datasets and the MESAWAVE run matrix.
 :::
 
-:::{grid-item-card} {octicon}`table` Variables the models can request
+:::{grid-item-card} {octicon}`table` Demand: what the models import
 :link: stream_data_requirements
 :link-type: doc
 
-What WW3, MOM6 and CICE need.
+What WW3, MOM6 and CICE ask for, and what nobody supplies.
 :::
 
-:::{grid-item-card} {octicon}`tools` Stream construction
+:::{grid-item-card} {octicon}`tools` Supply: MESACLIP to the coupler
 :link: stream_construction
 :link-type: doc
 
-How to build CDEPS streams from MESACLIP data.
+What the data models send, how each field is made, and the stream settings.
 :::
 
 :::{grid-item-card} {octicon}`plug` Adding MESACLIP to CDEPS
@@ -48,14 +48,13 @@ Read the pages in this order:
    WW3 mesh, and which runs, members and time slices are planned.
 2. **[MESACLIP experiments](mesaclip_experiments.md)**: what data exists. Grids, GDEX datasets,
    case names, the MESAWAVE run matrix, and every variable MESACLIP saved.
-3. **[Variables the models can request](stream_data_requirements.md)**: what WW3, MOM6 and CICE
-   import, and whether MESACLIP supplies each field directly, as a stand-in, computed, or not at
-   all. The best single page for the science compromises.
-4. **[Stream construction](stream_construction.md)**: how MESACLIP files become CDEPS streams. Time
-   settings, meshes, variable mapping and the generator scripts. For changing or debugging the
-   forcing.
+3. **[Demand: what the models import](stream_data_requirements.md)**: every field WW3, MOM6 and
+   CICE can import, which ones nobody supplies, and how JRA and CPLHIST compare.
+4. **[Supply: MESACLIP to the coupler](stream_construction.md)**: every field the data models
+   send and how each is made from MESACLIP (the science compromises), the MESACLIP variables not
+   used yet, then the stream time settings and meshes.
 5. **[Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md)**: the PR, the five scenario modes,
-   `DATM_MESACLIP_CASE`, and the custom datamode code. For work on the CESM side.
+   `DATM_MESACLIP_CASE`, and what each datamode changes. For work on the CESM side.
 6. **Discussions** (in the sidebar): dated planning notes, for how decisions were reached.
 
 ```{toctree}
