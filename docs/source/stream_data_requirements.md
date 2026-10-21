@@ -33,74 +33,74 @@ datamode source.
 
 ### DATM
 
-| Coupler field | How it's made | From MESACLIP | Line |
-|---|---|---|---|
-| `Sa_u`, `Sa_v` | direct | `UBOT`, `VBOT` | [273–274](datm:L273-L274) |
-| `Sa_z` | direct | `ZBOT` | [268](datm:L268) |
-| `Sa_tbot` | direct | `TREFHT` | [269](datm:L269) |
-| `Sa_shum` | direct | `QREFHT` | [270](datm:L270) |
-| `Sa_pbot` | direct | `PS` | [271](datm:L271) |
-| `Sa_pslv` | direct | `PSL` | [272](datm:L272) |
-| `Faxa_lwdn` | direct | `FLDS` {bdg-primary}`h4` | [293](datm:L293) |
-| `Faxa_swvdf` | direct | `SOLSD` {bdg-primary}`h4` | [295](datm:L295) |
-| `Faxa_swndf` | direct | `SOLLD` {bdg-primary}`h4` | [294](datm:L294) |
-| `Sa_ptem` | = `Sa_tbot`: CAM's formula, T × (ps/p)^κ, with p = `PS` | `TREFHT` | [279](datm:L279) |
-| `Sa_u10m`, `Sa_v10m` | copy of `Sa_u`, `Sa_v` (stand-in: ~60 m winds) | `UBOT`, `VBOT` | [283–284](datm:L283-L284) |
-| `Faxa_snowc` | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [291](datm:L291) |
-| `Faxa_snowl` | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [292](datm:L292) |
-| `Sa_dens` | {bdg-info}`computed` | `PS` / (Rd × `TREFHT` × (1 + zvir × `QREFHT`)) | [280](datm:L280) |
-| `Faxa_rainc` | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [289](datm:L289) |
-| `Faxa_rainl` | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [290](datm:L290) |
-| `Faxa_swvdr` | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [297](datm:L297) |
-| `Faxa_swndr` | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [298](datm:L298) |
-| `Sa_topo` | DATM's observed topography stream | — | [267](datm:L267) |
+| Coupler field | Meaning | How it's made | From MESACLIP | Line |
+|---|---|---|---|---|
+| `Sa_u`, `Sa_v` | Lowest-level wind, zonal and meridional | direct | `UBOT`, `VBOT` | [273–274](datm:L273-L274) |
+| `Sa_z` | Height of the lowest atmosphere level | direct | `ZBOT` | [268](datm:L268) |
+| `Sa_tbot` | Lowest-level air temperature | direct | `TREFHT` | [269](datm:L269) |
+| `Sa_shum` | Lowest-level specific humidity | direct | `QREFHT` | [270](datm:L270) |
+| `Sa_pbot` | Lowest-level pressure | direct | `PS` | [271](datm:L271) |
+| `Sa_pslv` | Sea-level pressure | direct | `PSL` | [272](datm:L272) |
+| `Faxa_lwdn` | Downward longwave | direct | `FLDS` {bdg-primary}`h4` | [293](datm:L293) |
+| `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [295](datm:L295) |
+| `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [294](datm:L294) |
+| `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's formula, T × (ps/p)^κ, with p = `PS` | `TREFHT` | [279](datm:L279) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | copy of `Sa_u`, `Sa_v` (stand-in: ~60 m winds) | `UBOT`, `VBOT` | [283–284](datm:L283-L284) |
+| `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [291](datm:L291) |
+| `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [292](datm:L292) |
+| `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd × `TREFHT` × (1 + zvir × `QREFHT`)) | [280](datm:L280) |
+| `Faxa_rainc` | Convective rain | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [289](datm:L289) |
+| `Faxa_rainl` | Large-scale rain | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [290](datm:L290) |
+| `Faxa_swvdr` | Downward shortwave, visible direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [297](datm:L297) |
+| `Faxa_swndr` | Downward shortwave, near-IR direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [298](datm:L298) |
+| `Sa_topo` | Surface height (topography) | DATM's observed topography stream | — | [267](datm:L267) |
 
 **Read but not sent to the coupler:** the stream fields `Faxa_swdn` (`FSDS`), `Faxa_prect`,
 `Faxa_precc`, `Faxa_precsc` and `Faxa_precsl` are only inputs to the computed fields above.
 
 ### DOCN
 
-| Coupler field | How it's made | From MESACLIP | Line |
-|---|---|---|---|
-| `So_t` | unit conversion, °C → K | `SST` | [178–180](docn:L178-L180) |
-| `So_u`, `So_v` | unit conversion, cm/s → m/s; not rotated to east/north | `U1_1`, `V1_1` | [148](docn:L148), [155](docn:L155) |
-| `So_omask` | ocean fraction of the model mesh | — | [126](docn:L126) |
-| `So_bldepth` | fill value, no stream | — | [164](docn:L164) |
+| Coupler field | Meaning | How it's made | From MESACLIP | Line |
+|---|---|---|---|---|
+| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [178–180](docn:L178-L180) |
+| `So_u`, `So_v` | Surface current, zonal and meridional | unit conversion, cm/s → m/s; not rotated to east/north | `U1_1`, `V1_1` | [148](docn:L148), [155](docn:L155) |
+| `So_omask` | Ocean mask (fraction of each cell that is ocean) | ocean fraction of the model mesh | — | [126](docn:L126) |
+| `So_bldepth` | Ocean boundary-layer depth | fill value, no stream | — | [164](docn:L164) |
 
 ### DICE
 
 Only `Si_ifrac` comes from MESACLIP. DICE makes everything else itself, from the ice fraction and
 the fields it imports from DATM and the ocean, as DICE%SSMI does.
 
-| Coupler field | How it's made | From MESACLIP | Line |
-|---|---|---|---|
-| `Si_ifrac` | unit conversion, % → fraction, clipped to 0–1. With `flux_qacc` (on by default), at least 0.01 where there is ice, and new ice can form where the ocean's freeze potential `Fioo_q` builds up. | `aice_d` | [408](dice:L408), [438](dice:L438), [501–509](dice:L501-L509) |
-| `Si_imask` | ice mask of the model mesh | — | [245](dice:L245) |
-| `Si_t` | made up: 260 K ± 10 K on a seasonal cycle, pulled toward the freezing point by the ice fraction | — | [441–445](dice:L441-L445), [519](dice:L519) |
-| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | fixed albedos | — | [448–451](dice:L448-L451) |
-| `Faii_swnet` | DATM's four shortwave bands × (1 − albedo) | via DATM | [456–459](dice:L456-L459) |
-| `Faii_sen`, `Faii_lat`, `Faii_lwup`, `Faii_evap`, `Faii_taux`, `Faii_tauy`, `Si_tref`, `Si_qref` | DICE's bulk formula, from DATM's state fields and `Si_t` | via DATM | [523–528](dice:L523-L528) |
-| `Fioi_melth`, `Fioi_meltw` | from the ocean's freeze/melt potential `Fioo_q` and the ice fraction | — | [462–515](dice:L462-L515) |
-| `Fioi_swpen` | `flux_swpf` × `Faii_swnet` (`flux_swpf` defaults to 0) | — | [542](dice:L542) |
-| `Fioi_taux`, `Fioi_tauy` | = `Faii_taux`, `Faii_tauy` | — | [545–546](dice:L545-L546) |
-| `Fioi_salt` | 0 | — | [549](dice:L549) |
-| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | DATM's aerosol deposition | — | [555–558](dice:L555-L558) |
-| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | one category: `Si_ifrac`, `Fioi_swpen` × `Si_ifrac` (only with per-category coupling) | — | [564–565](dice:L564-L565) |
+| Coupler field | Meaning | How it's made | From MESACLIP | Line |
+|---|---|---|---|---|
+| `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1. With `flux_qacc` (on by default), at least 0.01 where there is ice, and new ice can form where the ocean's freeze potential `Fioo_q` builds up. | `aice_d` | [408](dice:L408), [438](dice:L438), [501–509](dice:L501-L509) |
+| `Si_imask` | Ice mask | ice mask of the model mesh | — | [245](dice:L245) |
+| `Si_t` | Ice surface temperature | made up: 260 K ± 10 K on a seasonal cycle, pulled toward the freezing point by the ice fraction | — | [441–445](dice:L441-L445), [519](dice:L519) |
+| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo: visible and near-IR, direct and diffuse | fixed albedos | — | [448–451](dice:L448-L451) |
+| `Faii_swnet` | Net shortwave absorbed by the ice | DATM's four shortwave bands × (1 − albedo) | via DATM | [456–459](dice:L456-L459) |
+| `Faii_sen`, `Faii_lat`, `Faii_lwup`, `Faii_evap`, `Faii_taux`, `Faii_tauy`, `Si_tref`, `Si_qref` | Ice-atmosphere sensible and latent heat, upward longwave, evaporation and stress; 2 m temperature and humidity over ice | DICE's bulk formula, from DATM's state fields and `Si_t` | via DATM | [523–528](dice:L523-L528) |
+| `Fioi_melth`, `Fioi_meltw` | Melt heat and meltwater, ice to ocean | from the ocean's freeze/melt potential `Fioo_q` and the ice fraction | — | [462–515](dice:L462-L515) |
+| `Fioi_swpen` | Shortwave through the ice to the ocean | `flux_swpf` × `Faii_swnet` (`flux_swpf` defaults to 0) | — | [542](dice:L542) |
+| `Fioi_taux`, `Fioi_tauy` | Ice-ocean stress, zonal and meridional | = `Faii_taux`, `Faii_tauy` | — | [545–546](dice:L545-L546) |
+| `Fioi_salt` | Salt flux, ice to ocean | 0 | — | [549](dice:L549) |
+| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | Black carbon (hydrophobic, hydrophilic) and dust, ice to ocean | DATM's aerosol deposition | — | [555–558](dice:L555-L558) |
+| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Ice fraction and through-ice shortwave per thickness category | one category: `Si_ifrac`, `Fioi_swpen` × `Si_ifrac` (only with per-category coupling) | — | [564–565](dice:L564-L565) |
 
 ### MESACLIP variables not used yet
 
 These are in the MESACLIP files ([variable glossary](mesaclip_experiments.md#variable-glossary)) but
 not in any stream, and could replace a stand-in, a made-up value or a missing field:
 
-| MESACLIP variable | File | Could provide | Instead of |
-|---|---|---|---|
-| `U10` | `cam.h2` | 10 m wind speed, to rescale `UBOT`/`VBOT` for `Sa_u10m`, `Sa_v10m` | ~60 m winds |
-| `hi_d` | `cice.h1` | `Si_thick` = `hi_d` ÷ (`aice_d`/100) | not supplied |
-| `SSS` | `pop.h.nday1` | `So_s` | not supplied |
-| `HMXL` | `pop.h.nday1` | mixed-layer depth, a possible stand-in for `So_bldepth` | fill value |
-| `SSH_2` | `pop.h.nday1` | `So_dhdx`, `So_dhdy` from its gradient (needs preprocessing on the tripole grid) | not supplied |
-| `Tsfc_d` | `cice.h1` | `Si_t` | DICE's made-up seasonal value |
-| `fswthru_d` | `cice.h1` | `Fioi_swpen` | 0 |
+| MESACLIP variable | Meaning | File | Could provide | Instead of |
+|---|---|---|---|---|
+| `U10` | 10 m wind speed | `cam.h2` | 10 m wind speed, to rescale `UBOT`/`VBOT` for `Sa_u10m`, `Sa_v10m` | ~60 m winds |
+| `hi_d` | Grid-cell mean ice thickness | `cice.h1` | `Si_thick` = `hi_d` ÷ (`aice_d`/100) | not supplied |
+| `SSS` | Sea-surface salinity | `pop.h.nday1` | `So_s` | not supplied |
+| `HMXL` | Mixed-layer depth | `pop.h.nday1` | mixed-layer depth, a possible stand-in for `So_bldepth` | fill value |
+| `SSH_2` | Sea-surface height | `pop.h.nday1` | `So_dhdx`, `So_dhdy` from its gradient (needs preprocessing on the tripole grid) | not supplied |
+| `Tsfc_d` | Snow/ice surface temperature | `cice.h1` | `Si_t` | DICE's made-up seasonal value |
+| `fswthru_d` | Shortwave through the ice to the ocean | `cice.h1` | `Fioi_swpen` | 0 |
 
 The rest are diagnostics no model imports: upper-air fields (`T200`, `U250`, `Z500`, …), clear-sky
 and net radiation, turbulent fluxes CMEPS computes itself (`LHFLX`, `SHFLX`, `TAUX`, …), and the
