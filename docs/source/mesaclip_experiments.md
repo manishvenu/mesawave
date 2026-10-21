@@ -16,16 +16,16 @@ Confirmed from the NetCDF global attributes in the GDEX time-series files:
 
 ## Available datasets
 
-All datasets are on GDEX. On GLADE they are at `/glade/campaign/collections/gdex/data/<ID>/`
+All datasets are on GDEX. On GLADE each is a directory with one subdirectory per member (case)
 (the older `collections/rda` path is a link to the same place).
 
-| Scenario | GDEX ID | Members | Period |
-|----------|---------|---------|--------|
-| PI control (perpetual 1850) | d651029 | 1 (500 yr) | — |
-| Historical | d651007 | 10 (001–010) | 1920–2005 |
-| RCP 6.0 | d651008 | 10 | 2006–2100 |
-| RCP 8.5 | d651009 | 10 | 2006–2100 |
-| RCP 4.5 + RCP 2.6 | d651043 | 1 each | 2006–2100 |
+| Scenario | GDEX ID | Members | Period | GLADE path |
+|----------|---------|---------|--------|------------|
+| PI control (perpetual 1850) | d651029 | 1 (500 yr) | — | `/glade/campaign/collections/gdex/data/d651029/` |
+| Historical | d651007 | 10 (001–010) | 1920–2005 | `/glade/campaign/collections/gdex/data/d651007/` |
+| RCP 6.0 | d651008 | 10 | 2006–2100 | `/glade/campaign/collections/gdex/data/d651008/` |
+| RCP 8.5 | d651009 | 10 | 2006–2100 | `/glade/campaign/collections/gdex/data/d651009/` |
+| RCP 4.5 + RCP 2.6 | d651043 | 1 each | 2006–2100 | `/glade/campaign/collections/gdex/data/d651043/` |
 
 ## MESAWAVE run matrix
 
@@ -46,6 +46,23 @@ non-contiguous time slices.
   between members ([Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#five-products)). The
   2080–2100 slice can't reach 2100 yet.
 - RCP 8.5 member 005 is missing its 2096 `UBOT` file.
+
+### Member directories used by MESAWAVE
+
+```
+/glade/campaign/collections/gdex/data/
+  d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.44-1920-2005.005/
+  d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.009/
+  d651007/b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.010/
+  d651043/b.e13.BRCP26C5.ne120_t12.cesm-ihesp-hires1.0.42.003/
+  d651043/b.e13.BRCP45C5.ne120_t12.cesm-ihesp-hires1.0.42.003/
+  d651008/b.e13.BRCP60C5.ne120_t12.cesm-ihesp-hires1.0.44-2006-2100.005/
+  d651008/b.e13.BRCP60C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.009/
+  d651008/b.e13.BRCP60C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.010/
+  d651009/b.e13.BRCP85C5.ne120_t12.cesm-ihesp-hires1.0.44-2006-2100.005/
+  d651009/b.e13.BRCP85C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.009/
+  d651009/b.e13.BRCP85C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.010/
+```
 
 ## Case names
 
@@ -148,7 +165,7 @@ conda run -n dev_cd python -I code/describe_mesaclip_variables.py \
 | Variable | Units | Description |
 |----------|-------|-------------|
 | `SST` | °C | Surface potential temperature |
-| `SSS` | g/kg | Surface salinity |
+| `SSS` | kg/kg (labelled g/kg) | Surface salinity |
 | `U1_1`, `V1_1` | cm/s | Surface (level 1) velocity |
 | `U2_2`, `V2_2` | cm/s | Level 2 velocity |
 | `SSH_2` | cm | Sea surface height |

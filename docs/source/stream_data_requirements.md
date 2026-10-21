@@ -62,10 +62,11 @@ datamode source.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [178–180](docn:L178-L180) |
-| `So_u`, `So_v` | Surface current, zonal and meridional | unit conversion, cm/s → m/s; not rotated to east/north | `U1_1`, `V1_1` | [148](docn:L148), [155](docn:L155) |
-| `So_omask` | Ocean mask (fraction of each cell that is ocean) | ocean fraction of the model mesh | — | [126](docn:L126) |
-| `So_bldepth` | Ocean boundary-layer depth | fill value, no stream | — | [164](docn:L164) |
+| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [196–198](docn:L196-L198) |
+| `So_s` | Sea-surface salinity | unit conversion, kg/kg → g/kg (the same number as psu); used by CICE, and by DICE for the freezing point | `SSS` | [180](docn:L180) |
+| `So_u`, `So_v` | Surface current, zonal and meridional | unit conversion, cm/s → m/s; not rotated to east/north | `U1_1`, `V1_1` | [156](docn:L156), [163](docn:L163) |
+| `So_omask` | Ocean mask (fraction of each cell that is ocean) | ocean fraction of the model mesh | — | [134](docn:L134) |
+| `So_bldepth` | Ocean boundary-layer depth | fill value, no stream | — | [172](docn:L172) |
 
 ### DICE
 
@@ -96,7 +97,6 @@ not in any stream, and could replace a stand-in, a made-up value or a missing fi
 |---|---|---|---|---|
 | `U10` | 10 m wind speed | `cam.h2` | 10 m wind speed, to rescale `UBOT`/`VBOT` for `Sa_u10m`, `Sa_v10m` | ~60 m winds |
 | `hi_d` | Grid-cell mean ice thickness | `cice.h1` | `Si_thick` = `hi_d` ÷ (`aice_d`/100) | not supplied |
-| `SSS` | Sea-surface salinity | `pop.h.nday1` | `So_s` | not supplied |
 | `HMXL` | Mixed-layer depth | `pop.h.nday1` | mixed-layer depth, a possible stand-in for `So_bldepth` | fill value |
 | `SSH_2` | Sea-surface height | `pop.h.nday1` | `So_dhdx`, `So_dhdy` from its gradient (needs preprocessing on the tripole grid) | not supplied |
 | `Tsfc_d` | Snow/ice surface temperature | `cice.h1` | `Si_t` | DICE's made-up seasonal value |
@@ -161,7 +161,7 @@ coupler flux diagnostics in `pop.h.nday1` (`*_F`).
 | `Faxa_swvdr`, `Faxa_swndr` {bdg-info}`computed` {bdg-primary}`h4` | Direct shortwave, visible and near-IR | computed from total `Faxa_swdn` × fixed fractions (0.28/0.31, `datm_datamode_jra_mod.F90:L311–312`) | direct (`datm_datamode_cplhist_mod.F90:L269,L271`) | [176](cice:L176), [178](cice:L178) |
 | `Faxa_rain`, `Faxa_snow` {bdg-info}`computed` {bdg-primary}`h4` | Rain, snow | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | [181–182](cice:L181-L182) |
 | `So_t` | SST | DOCN%SST | DOCN%CPLHIST | [163](cice:L163) |
-| `So_s` | SSS — **not supplied** (candidate: `SSS` in `pop.h.nday1`) | not supplied | not supplied | [164](cice:L164) |
+| `So_s` | Sea-surface salinity | constant 34.7 psu (DOCN%SST, `docn_datamode_sstdata_mod.F90:L109`) | not supplied | [164](cice:L164) |
 | `So_u`, `So_v` | Surface current | DOCN%SST (no currents) | DOCN%CPLHIST | [165–166](cice:L165-L166) |
 | `So_dhdx`, `So_dhdy` | Sea-surface slope — **not supplied**; only from an active MOM6 | not supplied | not supplied | [161–162](cice:L161-L162) |
 | `Fioo_q` | Freeze/melt potential — **not supplied**; only from an active MOM6 | not supplied | not supplied | [167](cice:L167) |

@@ -27,7 +27,9 @@ output through CESM's data models (CDEPS). The full plan is
 
 ## Layout
 
-- `code/`: scripts. `generate_{datm,docn,dice}_streams.py` write CPLHIST-style
+- `code/`: scripts for the user: `describe_mesaclip_variables.py` and
+  `list_mesaclip_variables.py` print what MESACLIP has on GDEX. Keep these simple.
+- `code/claude/`: tooling Claude runs. `generate_{datm,docn,dice}_streams.py` write CPLHIST-style
   CDEPS streams files for MESACLIP, blank where unknown and checked for
   required fields. `cdeps_streams.py` is the shared writer.
   `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) regenerates the MESACLIP XML
@@ -122,7 +124,7 @@ and flag any that run past ~4 minutes.
   `cdeps1.0.101`: DATM+DOCN, then DICE). The org's `main` now tracks ESCOMP main,
   so merging needs a rebase onto newer CDEPS and a retest. The user moves org refs.
 - The CESM_crocodash install's `components/cdeps` holds the same edits manually,
-  uncommitted, on detached `cdeps1.0.101`. Run `code/add_mesaclip_to_cesm.py` to
+  uncommitted, on detached `cdeps1.0.101`. Run `code/claude/add_mesaclip_to_cesm.py` to
   regenerate from the submodule if needed.
 - Verified test cases, 10 days each on 48 tasks: `~/croc_cases/mesaclip_a_hist`
   (A case, `ne120_t12`, SICE) and `~/croc_cases/mesaclip_ww3_alaska` (regional WW3
@@ -176,6 +178,9 @@ and flag any that run past ~4 minutes.
   fields are daily. HIST member 001 has no 6-hourly data, so it is ignored.
 - **`So_t` and `Sa_tbot` are included** (2026-10-16): `SST` and `TREFHT` are in
   the streams.
+- **`So_s` from MESACLIP `SSS`** (2026-10-21): daily POP `SSS`, × 1000 because the files hold kg/kg despite a g/kg label,
+  in the DOCN streams; CICE and DICE (freezing point, `tfreeze_option = mushy`) import
+  it. Without the stream, DOCN falls back to 34.7 psu as DOCN%SST does.
 
 ## Working rules
 

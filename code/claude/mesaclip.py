@@ -97,6 +97,7 @@ FIELDS = {
         "So_t": ("nday1", "SST"),
         "So_u": ("nday1", "U1_1"),
         "So_v": ("nday1", "V1_1"),
+        "So_s": ("nday1", "SSS"),
     },
     "dice": {
         "Si_ifrac": ("nday1_ice", "aice_d"),

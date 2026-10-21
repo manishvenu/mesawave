@@ -36,7 +36,7 @@ myst_url_schemes = {
     'mom6': 'https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_cap.F90#{{path}}',
     'cice': 'https://github.com/ESCOMP/CICE/blob/cice6_6_3_20260904/cicecore/drivers/nuopc/cmeps/ice_import_export.F90#{{path}}',
     'datm': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#{{path}}',
-    'docn': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
+    'docn': 'https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
     'dice': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90#{{path}}',
 }
 

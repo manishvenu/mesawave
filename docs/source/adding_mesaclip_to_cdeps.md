@@ -6,7 +6,7 @@ All changes are in draft PR
 [CROCODILE-CESM/CDEPS#2](https://github.com/CROCODILE-CESM/CDEPS/pull/2), from the `mesaclip`
 branch of [manishvenu/CDEPS](https://github.com/manishvenu/CDEPS/tree/mesaclip) on top of
 `cdeps1.0.101` (the CDEPS tag CESM's `crocodash` branch uses). This repo carries the branch as the
-`cdeps/` submodule. `code/add_mesaclip_to_cesm.py` regenerates the XML and registration edits; the
+`cdeps/` submodule. `code/claude/add_mesaclip_to_cesm.py` regenerates the XML and registration edits; the
 datamode Fortran is edited on the branch.
 
 ```bash
@@ -47,7 +47,7 @@ switches all three components. Defaults are the members in the table above. To u
 ./xmlchange DATM_MESACLIP_CASE=b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.005
 ```
 
-`code/add_mesaclip_to_cesm.py` reports which members have every file the streams list.
+`code/claude/add_mesaclip_to_cesm.py` reports which members have every file the streams list.
 
 ## Datamode code
 
@@ -82,13 +82,18 @@ copied from CPLHIST):
   The diffuse bands are `SOLSD` and `SOLLD` as read.
 
 **DOCN**
-([`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90),
+([`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90),
 copied from CPLHIST):
 
 - **Currents**
-  ([L148, L155](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_mesaclip_mod.F90#L144-L157)):
+  ([L156, L163](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#L152-L167)):
   `U1_1`, `V1_1` times 0.01, cm/s to m/s. They are not rotated from POP's grid axes to east/north.
   SST's °C to K conversion is CPLHIST's own.
+- **Salinity**
+  ([L180](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#L175-L184)):
+  added; CPLHIST doesn't send `So_s`. `SSS` times 1000: the files hold kg/kg although their units
+  attribute says g/kg, and g/kg is the same number as psu. Without
+  the stream it falls back to the constant 34.7 psu that DOCN%SST sends.
 
 **DICE**
 ([`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90),

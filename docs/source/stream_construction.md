@@ -32,6 +32,7 @@ formulas are in [Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#datamode-
 | Stream field | MESACLIP variable | History file | In the datamode |
 |---|---|---|---|
 | `So_t` | `SST` | `pop.h.nday1` | °C → K |
+| `So_s` | `SSS` | `pop.h.nday1` | kg/kg → g/kg (= psu) |
 | `So_u`, `So_v` | `U1_1`, `V1_1` | `pop.h.nday1` | cm/s → m/s; not rotated (see [below](#meshes-and-remapping)) |
 
 **DICE**
@@ -94,11 +95,11 @@ assumes vector input is already east/north and rotates by longitude only
 
 ## Where the stream XML comes from
 
-`code/mesaclip.py` holds the tables on this page: scenarios, history files and their time
-settings, and the field mapping. `code/add_mesaclip_to_cesm.py` writes them into CDEPS's
+`code/claude/mesaclip.py` holds the tables on this page: scenarios, history files and their time
+settings, and the field mapping. `code/claude/add_mesaclip_to_cesm.py` writes them into CDEPS's
 `stream_definition_{datm,docn,dice}.xml`, with `$DATM_MESACLIP_CASE` in every file path and
 `$DATM_YR_START`/`END`/`ALIGN` for the years. The case's namelist build fills those in. Every
 file is listed, because GDEX file names hold date ranges that CDEPS can't template.
 
-`code/generate_{datm,docn,dice}_streams.py` write blank CPLHIST-style templates and hold the
+`code/claude/generate_{datm,docn,dice}_streams.py` write blank CPLHIST-style templates and hold the
 lists of fields each data model must supply. The MESACLIP modes don't use their output.

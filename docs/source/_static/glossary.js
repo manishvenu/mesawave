@@ -133,7 +133,7 @@ const GLOSSARY = {
 
   // MESACLIP POP (daily)
   'SST': 'Surface potential temperature, °C (POP daily)',
-  'SSS': 'Surface salinity, g/kg (POP daily)',
+  'SSS': 'Surface salinity, kg/kg despite its g/kg units label (POP daily)',
   'U1_1': 'Zonal velocity, top level, cm/s, along POP grid axes (POP daily)',
   'V1_1': 'Meridional velocity, top level, cm/s, along POP grid axes (POP daily)',
   'SSH_2': 'Sea surface height, cm (POP daily)',

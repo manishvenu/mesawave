@@ -8,7 +8,7 @@ datamode Fortran itself ({datm,docn}/*_datamode_mesaclip_mod.F90) is edited
 directly on the branch and isn't touched here. Also reports which members the
 streams fit.
 
-    python code/add_mesaclip_to_cesm.py [path/to/cdeps]   # default: the cdeps/ submodule
+    python code/claude/add_mesaclip_to_cesm.py [path/to/cdeps]   # default: the cdeps/ submodule
 """
 
 import argparse
@@ -21,7 +21,7 @@ from generate_datm_streams import REQUIRED as DATM_REQUIRED
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "cdeps1.0.101"  # the CDEPS tag CESM's crocodash branch uses
-TAG = "MESACLIP: added by mesawave code/add_mesaclip_to_cesm.py"
+TAG = "MESACLIP: added by mesawave add_mesaclip_to_cesm.py"
 XML, FORTRAN, CMAKE = f"<!-- {TAG} -->", f"! {TAG}", f"# {TAG}"
 FILES = [
     "datm/cime_config/config_component.xml",
@@ -520,7 +520,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("cdeps", nargs="?", default=os.path.join(os.path.dirname(HERE), "cdeps"))
+    parser.add_argument("cdeps", nargs="?", default=os.path.join(HERE, "..", "..", "cdeps"))
     args = parser.parse_args()
     apply(os.path.expanduser(args.cdeps))
     report_fields()
