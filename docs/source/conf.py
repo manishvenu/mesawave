@@ -38,6 +38,10 @@ myst_url_schemes = {
     'datm': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90#{{path}}',
     'docn': 'https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
     'dice': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90#{{path}}',
+    # Standard CDEPS datamodes compared against on the demand page (unchanged from cdeps1.0.101).
+    'jra': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_jra_mod.F90#{{path}}',
+    'cplhist': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_cplhist_mod.F90#{{path}}',
+    'sstdata': 'https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/docn/docn_datamode_sstdata_mod.F90#{{path}}',
 }
 
 templates_path = ['_templates']

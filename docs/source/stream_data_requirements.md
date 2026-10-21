@@ -12,7 +12,10 @@ out. Hover over any variable name for its full name and units. CMEPS
 **Prefixes:** `Sa_`, `Faxa_` atmosphere · `So_`, `Fioo_` ocean · `Si_`, `Fioi_` ice · `Sw_` wave ·
 `Foxx_`, `Sf_` merged by CMEPS.
 
-**JRA / CPLHIST:** shorthand for the full configuration, not just the DATM mode. "JRA" = DATM%JRA (atmosphere from JRA reanalysis) + DOCN%SST (observed SST) + DICE%SSMI (SSM/I satellite ice) — three separate data products. "CPLHIST" = DATM%CPLHIST + DOCN%CPLHIST + DICE%CPLHIST, all replayed from a prior coupled run. For DATM fields, the relevant source code is `datm_datamode_jra_mod.F90` or `datm_datamode_cplhist_mod.F90`. For DOCN/DICE fields, the DATM mode is irrelevant; only the DOCN/DICE mode matters.
+**JRA / CPLHIST:** the full configurations. "JRA" is DATM%JRA (JRA reanalysis) + DOCN%SST
+(observed SST) + DICE%SSMI (satellite ice). "CPLHIST" is DATM%CPLHIST + DOCN%CPLHIST +
+DICE%CPLHIST, replayed from a prior coupled run. Links in these columns go to
+`datm_datamode_jra_mod.F90`, `datm_datamode_cplhist_mod.F90` and `docn_datamode_sstdata_mod.F90`.
 
 ## WW3
 
@@ -28,17 +31,20 @@ out. Hover over any variable name for its full name and units. CMEPS
   thickness, maximum floe diameter, sea ice concentration".
 - No source found for `So_bldepth` going to WW3; only the cap.
 
-
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
-| `Sa_u10m`, `Sa_v10m` | 10 m wind | stand-in: `Sa_u`/`Sa_v` (lowest-level wind, `datm_datamode_jra_mod.F90:L288–289`) | not exported | [206–207](ww3:L206-L207) |
-| `Sa_tbot` | Air temperature | direct lowest-level T from stream (`datm_datamode_jra_mod.F90:L276`) | direct | [205](ww3:L205) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind | = `Sa_u`, `Sa_v` ([288–289](jra:L288-L289)) | not sent | [206–207](ww3:L206-L207) |
+| `Sa_tbot` | Air temperature | direct ([276](jra:L276)) | direct ([255](cplhist:L255)) | [205](ww3:L205) |
 | `So_t` | SST | DOCN%SST | DOCN%CPLHIST | [204](ww3:L204) |
-| `So_u`, `So_v` | Surface current | DOCN%SST (currents not provided — stub zero) | DOCN%CPLHIST | [202–203](ww3:L202-L203) |
-| `So_bldepth` | Ocean boundary-layer depth (CMEPS's `fd_cesm.yaml` aliases it `mixed_layer_depth`; MOM6 sends its [mixed-layer depth](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_ocean_model_nuopc.F90#L999)) — **not supplied**: DOCN sends a fill value, so WW3's Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only with `LMPN=T`) are fill | not supplied | not supplied | [208–210](ww3:L208-L210) |
-| `Si_ifrac` | Ice fraction | DICE%SSMI (SSM/I satellite) | DICE%CPLHIST or CICE | [200](ww3:L200) |
-| `Si_thick` | Ice thickness — **not supplied** (candidate: `hi_d` ÷ (`aice_d`/100) from CICE history) | not supplied (DICE%SSMI also omits) | CICE only | [201](ww3:L201) |
-| `Si_floediam` | Floe diameter — **not supplied**; needs CICE | not supplied | not supplied | [211–213](ww3:L211-L213) |
+| `So_u`, `So_v` | Surface current | 0 ([107–108](sstdata:L107-L108)) | DOCN%CPLHIST | [202–203](ww3:L202-L203) |
+| `So_bldepth` | Boundary-layer depth: **not supplied** | not supplied | not supplied | [208–210](ww3:L208-L210) |
+| `Si_ifrac` | Ice fraction | DICE%SSMI | DICE%CPLHIST or CICE | [200](ww3:L200) |
+| `Si_thick` | Ice thickness: **not supplied** | not supplied | CICE only | [201](ww3:L201) |
+| `Si_floediam` | Floe diameter: **not supplied** | not supplied | not supplied | [211–213](ww3:L211-L213) |
+
+`So_bldepth`: DOCN sends a fill value, so WW3's Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only
+with `LMPN=T`) are fill. CMEPS's `fd_cesm.yaml` aliases it `mixed_layer_depth`, and MOM6 sends its
+[mixed-layer depth](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_ocean_model_nuopc.F90#L999).
 
 ## MOM6
 
@@ -54,31 +60,30 @@ CESM yet.
   [Li et al. 2016](https://doi.org/10.1016/j.ocemod.2015.07.020) (WW3 with POP in CESM1.2; not
   checked here).
 
-
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
-| `Faxa_rain`, `Faxa_snow` | Rain, snow | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | [863–864](mom6:L863-L864) |
-| `Sa_pslv` | Sea-level pressure | direct (`datm_datamode_jra_mod.F90:L274`) | direct (`datm_datamode_cplhist_mod.F90:L260`) | [865](mom6:L865) |
+| `Faxa_rain`, `Faxa_snow` | Rain, snow | JRA55-do direct; JRA55 split by T ([294–307](jra:L294-L307)) | direct ([264–267](cplhist:L264-L267)) | [863–864](mom6:L863-L864) |
+| `Sa_pslv` | Sea-level pressure | direct ([274](jra:L274)) | direct ([260](cplhist:L260)) | [865](mom6:L865) |
 | `Si_ifrac` | Ice fraction | DICE%SSMI | DICE%CPLHIST or CICE | [872](mom6:L872) |
-| `Fioi_salt` | Salt flux from ice (0 from DICE) | DICE | DICE or CICE | [853](mom6:L853) |
-| `Fioi_meltw`, `Fioi_melth` | Meltwater, melt heat (made by DICE) | DICE | DICE or CICE | [874–875](mom6:L874-L875) |
-| `Sf_afracr`, `Foxx_swnet_afracr`, `Fioi_swpen_ifrac_n`, `Si_ifrac_n` | Per-category ice shortwave | DICE/CICE | DICE/CICE | [888–895](mom6:L888-L895) |
-| `Foxx_rofl`, `Foxx_rofi` | Liquid, frozen runoff (DROF) | DROF | DROF | [866–867](mom6:L866-L867) |
-| `Forr_rofl_glc`, `Forr_rofi_glc` | Glacier runoff (DROF) | DROF | DROF | [868–871](mom6:L868-L871) |
-| `Faxa_ndep`, `Faxa_dstwet`, `Faxa_dstdry`, `Faxa_bcph`, `Fioi_flxdst`, `Fioi_bcphi`, `Fioi_bcpho`, `Sa_co2prog`, `Sa_co2diag` | Deposition, CO₂ (DATM aerosol streams or ice) | same (DATM aerosol streams) | same (DATM aerosol streams) | [897–912](mom6:L897-L912) |
-| `Sw_lamult` | Langmuir factor (WW3; needs `So_bldepth`, which isn't supplied) | WW3 | WW3 | [914–916](mom6:L914-L916) |
-| `Sw_pstokes_x`, `Sw_pstokes_y` | Stokes drift, 3 bands (WW3) | WW3 | WW3 | [917–921](mom6:L917-L921) |
+| `Fioi_salt` | Salt flux from ice | 0 (DICE) | 0 (DICE) or CICE | [853](mom6:L853) |
+| `Fioi_meltw`, `Fioi_melth` | Meltwater, melt heat | DICE | DICE or CICE | [874–875](mom6:L874-L875) |
+| `Si_ifrac_n`, `Fioi_swpen_ifrac_n`, `Sf_afracr`, `Foxx_swnet_afracr` | Per-category ice shortwave | DICE | DICE or CICE | [888–895](mom6:L888-L895) |
+| `Foxx_rofl`, `Foxx_rofi` | Liquid, frozen runoff | DROF | DROF | [866–867](mom6:L866-L867) |
+| `Forr_rofl_glc`, `Forr_rofi_glc` | Glacier runoff | DROF | DROF | [868–871](mom6:L868-L871) |
+| `Faxa_ndep`, `Faxa_bcph`, `Faxa_dst*`, `Fioi_bcph*`, `Fioi_flxdst`, `Sa_co2*` | Deposition, CO₂ | DATM aerosol streams | same | [897–912](mom6:L897-L912) |
+| `Sw_lamult` | Langmuir factor | WW3 | WW3 | [914–916](mom6:L914-L916) |
+| `Sw_pstokes_x`, `Sw_pstokes_y` | Stokes drift, 3 bands | WW3 | WW3 | [917–921](mom6:L917-L921) |
 
-::::{dropdown} CMEPS-computed fields (derived automatically from MESACLIP inputs)
-| Import | Meaning | EXPLANATION | Line |
+::::{dropdown} CMEPS-computed fields
+| Import | Meaning | How CMEPS makes it | Line |
 |---|---|---|---|
-| `Foxx_taux`, `Foxx_tauy` | Surface stress | Computed by CMEPS bulk formula from DATM winds (`Sa_u`, `Sa_v`, `Sa_z`, `Sa_dens`) and SST. | [854–855](mom6:L854-L855) |
-| `Foxx_sen`, `Foxx_evap` | Sensible heat, evaporation | Computed by CMEPS bulk formula from DATM temperature, humidity and wind fields. | [856–857](mom6:L856-L857) |
-| `Foxx_lwnet` | Net longwave | CMEPS combines DATM's `FLDS` (`Faxa_lwdn`) with upward LW from SST. | [858](mom6:L858) |
-| `Foxx_swnet_vdr`, `Foxx_swnet_vdf`, `Foxx_swnet_idr`, `Foxx_swnet_idf` | Net shortwave, 4 bands | CMEPS computes net SW per band from DATM's 4-band downward SW and surface albedo. | [859–862](mom6:L859-L862) |
-| `So_duu10n` | 10 m neutral wind squared | Computed by CMEPS from `Sa_u10m`, `Sa_v10m`. | [873](mom6:L873) |
-| `Foxx_hrain`, `Foxx_hsnow`, `Foxx_hevap`, `Foxx_hcond`, `Foxx_hrofl`, `Foxx_hrofi` | Heat content of water fluxes | Computed by CMEPS from the corresponding mass fluxes and temperatures. | [877–882](mom6:L877-L882) |
-| `Foxx_hrofl_glc`, `Foxx_hrofi_glc` | Heat content of glacier runoff | Computed by CMEPS from DROF glacier runoff. | [883–886](mom6:L883-L886) |
+| `Foxx_taux`, `Foxx_tauy` | Surface stress | bulk formula: wind, height, density, SST | [854–855](mom6:L854-L855) |
+| `Foxx_sen`, `Foxx_evap` | Sensible heat, evaporation | bulk formula: T, q, wind, SST | [856–857](mom6:L856-L857) |
+| `Foxx_lwnet` | Net longwave | `Faxa_lwdn` and upward longwave from SST | [858](mom6:L858) |
+| `Foxx_swnet_*` (4 bands) | Net shortwave | each band × (1 − albedo) | [859–862](mom6:L859-L862) |
+| `So_duu10n` | 10 m neutral wind squared | bulk formula | [873](mom6:L873) |
+| `Foxx_h*` (6 fields) | Heat content of water fluxes | mass flux × temperature | [877–882](mom6:L877-L882) |
+| `Foxx_hrofl_glc`, `Foxx_hrofi_glc` | Heat content of glacier runoff | from DROF glacier runoff | [883–886](mom6:L883-L886) |
 ::::
 
 ## CICE
@@ -92,22 +97,24 @@ defers to it. Aerosol deposition (`faero_atm`, black carbon and dust classes) is
 [Bailey & Holland 2024](https://www.cesm.ucar.edu/sites/default/files/2024-02/2024-OMWG-D-Bailey.pptx.pdf) list "To CICE: wave spectrum (25 bands), ocean velocities, sea surface tilt terms,
 scalars: temperature, salinity, frzmlt", and [Roach et al. 2019](https://doi.org/10.1029/2019MS001836) the wave spectrum from WW3.
 
-
 | Import | Meaning | JRA | CPLHIST | Line |
 |---|---|---|---|---|
-| `Sa_z`, `Sa_u`, `Sa_v` | Lowest-level height, wind | `Sa_z` = constant 10.0 m (`datm_datamode_jra_mod.F90:L285`); `Sa_u`/`Sa_v` direct | all direct (`datm_datamode_cplhist_mod.F90:L254,L261–262`) | [170–172](cice:L170-L172) |
-| `Sa_tbot`, `Sa_shum` | Air temperature, humidity | direct lowest-level values from stream (`datm_datamode_jra_mod.F90:L276,L281`) | direct (`datm_datamode_cplhist_mod.F90:L255,L257`) | [173–174](cice:L173-L174) |
-| `Sa_pbot` | Lowest-level pressure | stand-in: `Sa_pslv` (sea-level pressure, `datm_datamode_jra_mod.F90:L275`) | direct (`datm_datamode_cplhist_mod.F90:L259`) | [175](cice:L175) |
-| `Sa_ptem` | Potential temperature | stand-in: = `Sa_tbot` (`datm_datamode_jra_mod.F90:L277`) | direct (`datm_datamode_cplhist_mod.F90:L256`) | [183](cice:L183) |
-| `Sa_dens` | Air density | computed: ideal gas law (`datm_datamode_jra_mod.F90:L292`) | direct (`datm_datamode_cplhist_mod.F90:L258`) | [184](cice:L184) |
-| `Faxa_lwdn` | Downward longwave | direct (`datm_datamode_jra_mod.F90:L283`) | direct (`datm_datamode_cplhist_mod.F90:L268`) | [180](cice:L180) |
-| `Faxa_swvdf`, `Faxa_swndf` | Diffuse shortwave, visible and near-IR | computed from total `Faxa_swdn` × fixed fractions (0.24/0.17, `datm_datamode_jra_mod.F90:L313–314`) | direct (`datm_datamode_cplhist_mod.F90:L270,L272`) | [177](cice:L177), [179](cice:L179) |
-| `Faxa_swvdr`, `Faxa_swndr` | Direct shortwave, visible and near-IR | computed from total `Faxa_swdn` × fixed fractions (0.28/0.31, `datm_datamode_jra_mod.F90:L311–312`) | direct (`datm_datamode_cplhist_mod.F90:L269,L271`) | [176](cice:L176), [178](cice:L178) |
-| `Faxa_rain`, `Faxa_snow` | Rain, snow | JRA55do: direct `prrn`/`prsn`; JRA55: T-threshold split of total precip (`datm_datamode_jra_mod.F90:L295–308`) | direct 4 components (`datm_datamode_cplhist_mod.F90:L264–267`) | [181–182](cice:L181-L182) |
+| `Sa_z` | Lowest-level height | 10 m ([285](jra:L285)) | direct ([254](cplhist:L254)) | [170](cice:L170) |
+| `Sa_u`, `Sa_v` | Lowest-level wind | direct ([278–279](jra:L278-L279)) | direct ([261–262](cplhist:L261-L262)) | [171–172](cice:L171-L172) |
+| `Sa_tbot`, `Sa_shum` | Air temperature, humidity | direct ([276](jra:L276), [280](jra:L280)) | direct ([255](cplhist:L255), [257](cplhist:L257)) | [173–174](cice:L173-L174) |
+| `Sa_pbot` | Lowest-level pressure | = `Sa_pslv` ([275](jra:L275)) | direct ([259](cplhist:L259)) | [175](cice:L175) |
+| `Sa_ptem` | Potential temperature | = `Sa_tbot` ([277](jra:L277)) | direct ([256](cplhist:L256)) | [183](cice:L183) |
+| `Sa_dens` | Air density | ideal gas law ([292](jra:L292)) | direct ([258](cplhist:L258)) | [184](cice:L184) |
+| `Faxa_lwdn` | Downward longwave | direct ([282](jra:L282)) | direct ([268](cplhist:L268)) | [180](cice:L180) |
+| `Faxa_swvdf`, `Faxa_swndf` | Diffuse shortwave, visible, near-IR | 0.24, 0.17 × total ([313–314](jra:L313-L314)) | direct ([270](cplhist:L270), [272](cplhist:L272)) | [177](cice:L177), [179](cice:L179) |
+| `Faxa_swvdr`, `Faxa_swndr` | Direct shortwave, visible, near-IR | 0.28, 0.31 × total ([311–312](jra:L311-L312)) | direct ([269](cplhist:L269), [271](cplhist:L271)) | [176](cice:L176), [178](cice:L178) |
+| `Faxa_rain`, `Faxa_snow` | Rain, snow | JRA55-do direct; JRA55 split by T ([294–307](jra:L294-L307)) | direct ([264–267](cplhist:L264-L267)) | [181–182](cice:L181-L182) |
 | `So_t` | SST | DOCN%SST | DOCN%CPLHIST | [163](cice:L163) |
-| `So_s` | Sea-surface salinity; CICE clips negative values to 0 ([810](cice:L810)) | constant 34.7 psu (DOCN%SST, `docn_datamode_sstdata_mod.F90:L109`) | not supplied | [164](cice:L164) |
-| `So_u`, `So_v` | Surface current | DOCN%SST (no currents) | DOCN%CPLHIST | [165–166](cice:L165-L166) |
-| `So_dhdx`, `So_dhdy` | Sea-surface slope — **not supplied**; only from an active MOM6 | not supplied | not supplied | [161–162](cice:L161-L162) |
-| `Fioo_q` | Freeze/melt potential — **not supplied**; only from an active MOM6 | not supplied | not supplied | [167](cice:L167) |
-| `Faxa_bcph`, `Faxa_dstwet`, `Faxa_dstdry` | Black carbon, dust (DATM aerosol streams) | same (DATM aerosol streams) | same | [189–193](cice:L189-L193) |
-| `Sw_elevation_spectrum` | Wave spectrum (WW3) | WW3 | WW3 | [198–201](cice:L198-L201) |
+| `So_s` | Salinity; CICE clips < 0 to 0 ([810](cice:L810)) | 34.7 psu ([109](sstdata:L109)) | not supplied | [164](cice:L164) |
+| `So_u`, `So_v` | Surface current | 0 ([107–108](sstdata:L107-L108)) | DOCN%CPLHIST | [165–166](cice:L165-L166) |
+| `So_dhdx`, `So_dhdy` | Sea-surface slope: **not supplied** | not supplied | not supplied | [161–162](cice:L161-L162) |
+| `Fioo_q` | Freeze/melt potential: **not supplied** | not supplied | not supplied | [167](cice:L167) |
+| `Faxa_bcph`, `Faxa_dstwet`, `Faxa_dstdry` | Black carbon, dust | DATM aerosol streams | same | [189–193](cice:L189-L193) |
+| `Sw_elevation_spectrum` | Wave spectrum | WW3 | WW3 | [198–201](cice:L198-L201) |
+
+Slope and freeze/melt potential come only from an active ocean model such as MOM6.

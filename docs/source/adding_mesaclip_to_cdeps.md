@@ -58,6 +58,6 @@ field ends up as, with formulas and line links, is in the
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|
-| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow and direct shortwave from MESACLIP variables; adds `Sa_u10m`, `Sa_v10m` for WW3 |
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
 | [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/35ed48d01acee8c83ff6ad9b87d80cce5a9f33fc/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s); adds `So_s` |
 | [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f6e5d4354e1ac8a0df6cd9ea2a1a07c8971b1121/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction) |

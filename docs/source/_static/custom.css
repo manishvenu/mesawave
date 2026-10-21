@@ -14,3 +14,17 @@
   text-underline-offset: 2px;
   cursor: help;
 }
+
+/* Compact tables: smaller text, tight cells. */
+.yue table {
+  font-size: 0.85em;
+}
+.yue table th,
+.yue table td {
+  padding: 0.2em 0.5em;
+  line-height: 1.35;
+  vertical-align: top;
+}
+.yue table code {
+  padding: 0 0.15em;
+}
