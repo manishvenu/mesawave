@@ -33,25 +33,25 @@ Ice and ocean names were checked in HIST member 010's daily files only.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `Sa_u`, `Sa_v` | Lowest-level wind, zonal and meridional | direct | `UBOT`, `VBOT` | [273–274](datm:L273-L274) |
-| `Sa_z` | Height of the lowest atmosphere level | direct | `ZBOT` | [268](datm:L268) |
-| `Sa_tbot` | Lowest-level air temperature | direct | `TREFHT` | [269](datm:L269) |
-| `Sa_shum` | Lowest-level specific humidity | direct | `QREFHT` | [270](datm:L270) |
-| `Sa_pbot` | Lowest-level pressure | direct | `PS` | [271](datm:L271) |
-| `Sa_pslv` | Sea-level pressure | direct | `PSL` | [272](datm:L272) |
-| `Faxa_lwdn` | Downward longwave | direct | `FLDS` {bdg-primary}`h4` | [293](datm:L293) |
-| `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [295](datm:L295) |
-| `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [294](datm:L294) |
-| `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's T (ps/p)^κ ([CAM](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)) with p = `PS` | `TREFHT` | [279](datm:L279) |
-| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | copy of `Sa_u`, `Sa_v` (~60 m winds) | `UBOT`, `VBOT` | [283–284](datm:L283-L284) |
-| `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [291](datm:L291) |
-| `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [292](datm:L292) |
-| `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd `TREFHT` (1 + zvir `QREFHT`)) | [280](datm:L280) |
-| `Faxa_rainc` | Convective rain | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [289](datm:L289) |
-| `Faxa_rainl` | Large-scale rain | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [290](datm:L290) |
-| `Faxa_swvdr` | Downward shortwave, visible direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [297](datm:L297) |
-| `Faxa_swndr` | Downward shortwave, near-IR direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [298](datm:L298) |
-| `Sa_topo` | Surface height (topography) | DATM's observed topography stream | — | [267](datm:L267) |
+| `Sa_u`, `Sa_v` | Lowest-level wind, zonal and meridional | direct | `UBOT`, `VBOT` | [269–270](datm:L269-L270) |
+| `Sa_z` | Height of the lowest atmosphere level | direct | `ZBOT` | [264](datm:L264) |
+| `Sa_tbot` | Lowest-level air temperature | direct | `TREFHT` | [265](datm:L265) |
+| `Sa_shum` | Lowest-level specific humidity | direct | `QREFHT` | [266](datm:L266) |
+| `Sa_pbot` | Lowest-level pressure | direct | `PS` | [267](datm:L267) |
+| `Sa_pslv` | Sea-level pressure | direct | `PSL` | [268](datm:L268) |
+| `Faxa_lwdn` | Downward longwave | direct | `FLDS` {bdg-primary}`h4` | [289](datm:L289) |
+| `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [291](datm:L291) |
+| `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [290](datm:L290) |
+| `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's T (ps/p)^κ ([CAM](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)) with p = `PS` | `TREFHT` | [275](datm:L275) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | copy of `Sa_u`, `Sa_v` (~60 m winds) | `UBOT`, `VBOT` | [279–280](datm:L279-L280) |
+| `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [287](datm:L287) |
+| `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [288](datm:L288) |
+| `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd `TREFHT` (1 + zvir `QREFHT`)) | [276](datm:L276) |
+| `Faxa_rainc` | Convective rain | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [285](datm:L285) |
+| `Faxa_rainl` | Large-scale rain | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [286](datm:L286) |
+| `Faxa_swvdr` | Downward shortwave, visible direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [293](datm:L293) |
+| `Faxa_swndr` | Downward shortwave, near-IR direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [294](datm:L294) |
+| `Sa_topo` | Surface height (topography) | DATM's observed topography stream | — | [263](datm:L263) |
 
 Direct shortwave is split between visible and near-IR in JRA's 0.28 : 0.31 ratio.
 
@@ -79,19 +79,19 @@ the fields it imports from DATM and the ocean, as DICE%SSMI does.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1¹ | `aice_d` | [418](dice:L418), [458](dice:L458), [521–529](dice:L521-L529) |
-| `Si_thick` | Ice thickness (for WW3) | `hi_d` ÷ ice fraction where there is ice, else 0, as CICE does | `hi_d`, `aice_d` | [423–428](dice:L423-L428) |
+| `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1¹ | `aice_d` | [418](dice:L418), [448](dice:L448), [511–519](dice:L511-L519) |
+| `Si_thick` | Ice thickness (for WW3) | `hi_d` ÷ final ice fraction where there is ice, else 0, as CICE does | `hi_d`, `aice_d` | [567–574](dice:L567-L574) |
 | `Si_imask` | Ice mask | ice mask of the model mesh | — | [251](dice:L251) |
-| `Si_t` | Ice surface temperature | made up: 260 ± 10 K seasonal cycle, pulled toward freezing | — | [461–465](dice:L461-L465), [539](dice:L539) |
-| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo, 4 bands | fixed albedos | — | [468–471](dice:L468-L471) |
-| `Faii_swnet` | Net shortwave into the ice | DATM's 4 bands × (1 − albedo) | via DATM | [476–479](dice:L476-L479) |
-| `Faii_*` (6 fields), `Si_tref`, `Si_qref` | Ice-atmosphere fluxes and stress; 2 m T, q | bulk formula from DATM and `Si_t` | via DATM | [543–548](dice:L543-L548) |
-| `Fioi_melth`, `Fioi_meltw` | Melt heat, meltwater | from the ocean's `Fioo_q` and ice fraction | — | [482–535](dice:L482-L535) |
-| `Fioi_swpen` | Shortwave through the ice | `flux_swpf` (default 0) × `Faii_swnet` | — | [562](dice:L562) |
-| `Fioi_taux`, `Fioi_tauy` | Ice-ocean stress | = `Faii_taux`, `Faii_tauy` | — | [565–566](dice:L565-L566) |
-| `Fioi_salt` | Salt flux, ice to ocean | 0 | — | [569](dice:L569) |
-| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | Black carbon, dust to ocean | DATM's aerosol deposition | — | [575–578](dice:L575-L578) |
-| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Per-category ice fraction, shortwave | one category (per-category coupling only) | — | [584–585](dice:L584-L585) |
+| `Si_t` | Ice surface temperature | made up: 260 ± 10 K seasonal cycle, pulled toward freezing | — | [451–455](dice:L451-L455), [529](dice:L529) |
+| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo, 4 bands | fixed albedos | — | [458–461](dice:L458-L461) |
+| `Faii_swnet` | Net shortwave into the ice | DATM's 4 bands × (1 − albedo) | via DATM | [466–469](dice:L466-L469) |
+| `Faii_*` (6 fields), `Si_tref`, `Si_qref` | Ice-atmosphere fluxes and stress; 2 m T, q | bulk formula from DATM and `Si_t` | via DATM | [533–538](dice:L533-L538) |
+| `Fioi_melth`, `Fioi_meltw` | Melt heat, meltwater | from the ocean's `Fioo_q` and ice fraction | — | [472–525](dice:L472-L525) |
+| `Fioi_swpen` | Shortwave through the ice | `flux_swpf` (default 0) × `Faii_swnet` | — | [552](dice:L552) |
+| `Fioi_taux`, `Fioi_tauy` | Ice-ocean stress | = `Faii_taux`, `Faii_tauy` | — | [555–556](dice:L555-L556) |
+| `Fioi_salt` | Salt flux, ice to ocean | 0 | — | [559](dice:L559) |
+| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | Black carbon, dust to ocean | DATM's aerosol deposition | — | [576–579](dice:L576-L579) |
+| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Per-category ice fraction, shortwave | one category (per-category coupling only) | — | [585–586](dice:L585-L586) |
 
 ¹ With `flux_qacc` (on by default), `Si_ifrac` is at least 0.01 where there is ice, and new ice can
 form where the ocean's freeze potential `Fioo_q` builds up.
@@ -122,9 +122,9 @@ The time settings depend on the history file. Tag meanings are in the
 
 | Tag | cam.h2 | cam.h4 | pop.h.nday1 | cice.h1 |
 |-----|--------|--------|-------------|---------|
-| `taxmode` | `limit` | `limit` | `limit` | `limit` |
-| `tintalgo` | `linear` | `nearest` | `nearest` | `nearest` |
-| `offset` (s) | `0` | `-10800` | `-43200` | `-43200` |
+| `taxmode` | `extend` | `extend` | `extend` | `extend` |
+| `tintalgo` | `linear` | `nearest`; `coszen` for shortwave | `nearest` | `nearest` |
+| `offset` (s) | `0` | `-10800`; `-21600` for shortwave | `-43200` | `-43200` |
 | `readmode` | `single` | `single` | `single` | `single` |
 | `dtlimit` | `1.e30` | `1.e30` | `1.e30` | `1.e30` |
 
@@ -133,22 +133,27 @@ so they are interpolated linearly. `cam.h4`, `pop.h.nday1` and `cice.h1` fields
 are means (`cell_methods = "time: mean"`) stamped at the end of their window
 (`time_bnds` upper bound equals `time`). A negative offset of half a window moves
 each stamp to the middle of its window, and `nearest` then picks the mean whose
-window contains the model time.
+window contains the model time. The shortwave means (`FSDS`, `SOLSD`, `SOLLD`) use `coszen`
+instead, which spreads each mean over its window with the sun's angle; it takes the record's time
+as the window's start, so their offset is a whole window (CDEPS's JRA streams do the same).
 
 **Years:** `year_first` and `year_last` are `DATM_YR_START` and `DATM_YR_END`, which default to
 the scenario's whole data range, and `year_align` equals `year_first`. So model years are data
 years, and a run can start anywhere inside the range.
 
-**`taxmode`:** `limit` stops the run if the model time leaves
-`year_first`–`year_last`, instead of wrapping around (`cycle`) or holding the end
-values (`extend`). Keep `year_first` at the dataset's first year, not the run's,
-so a 1950 start is inside the data. A run starting on a dataset's first day
-(e.g. RCP runs on 2006-01-01) is before the first daily record (00:00 on
-2 January) and stops; start it on 2 January or use `extend` for that run.
+**`taxmode`:** `extend` holds the first or last record when the model time is outside the
+records. CDEPS only uses records from Jan 1 of `year_first` to before Jan 1 of `year_last + 1`, and
+after the offsets the averaged fields' first and last records sit up to 12 hours inside that (daily
+fields: Jan 1 12:00 to Dec 31 12:00), so a run starting on Jan 1 of `year_first` or ending on Dec 31
+of `year_last` needs them held for a few hours. `limit` would stop the run there, and at a
+scenario's first or last day (2006-01-01, 2005-12-31, 2100-12-31) there is no file beyond to pad
+with. The cost: a run past `year_last` also holds the last record, with no error, so keep the run
+inside the stream years.
 
 **`dtlimit`:** `1.e30` turns off CDEPS's check for gaps in the time axis, so a
-missing file is interpolated across without an error. `add_mesaclip_to_cesm.py`
-reports missing files per member.
+missing file would be interpolated across without an error; `%daterange` stops the case setup
+on a missing year or a gap between files instead. `add_mesaclip_to_cesm.py` reports missing years
+per member.
 
 ## Meshes and remapping
 
@@ -166,9 +171,14 @@ axes, which match east/north south of about 29°N and turn by up to 90° in the 
 `vectors` tag can't fix this: CDEPS assumes vector input is already east/north and rotates by
 longitude only (`dshr_strdata_mod.F90`). Instead, at init the datamode reads POP's U-grid `ANGLE`
 from the first current file, regrids its cosine and sine to the model mesh with the current
-stream's own weights and renormalizes them ([236–340](docn:L236-L340)); each step it rotates as
-POP's coupler does, u cos − v sin and u sin + v cos ([189–197](docn:L189-L197)). The currents still
-sit on U points but are read on the T-point mesh.
+stream's own weights and renormalizes them ([236–349](docn:L236-L349)); each step it rotates as
+POP's coupler does, u cos − v sin and u sin + v cos ([189–197](docn:L189-L197)). Where the
+regridded cos/sin is shorter than 0.5, the stencil straddles POP's grid fold in the Arctic, where
+`ANGLE` jumps by π and the regridded grid-relative currents are themselves unreliable; the current
+there is set to 0 ([335–341](docn:L335-L341)). Rotating before regridding would avoid this but needs
+a change to CDEPS's stream reader. On tx0.1 itself (the A case) the regridding is an identity, and
+the rotated currents match `ANGLE`-rotated GDEX currents to 5e-8. The currents still sit on U points
+but are read on the T-point mesh.
 
 ## Where the stream XML comes from
 

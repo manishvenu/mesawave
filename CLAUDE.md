@@ -72,9 +72,9 @@ output through CESM's data models (CDEPS). The full plan is
   invalid `taxmode`, `mapalgo`, `tintalgo`, `readmode`, so fill these before a run.
 - CDEPS does not convert units or rotate grid-relative vectors.
 - `%daterange` (stack PR #5) in a `<file>` stands for the `<start>-<end>` of CESM
-  time-series names; buildnml expands it to the files covering the stream years
-  and checks gaps and overlaps, and the model checks each file's times against
-  its name.
+  time-series names; buildnml expands it to the files covering the stream years,
+  checks gaps and overlaps, and marks the stream `check_dates`, so the model checks
+  each file's times against its name (only for those streams).
 
 ## Reference CESM source (GLADE)
 
@@ -138,11 +138,12 @@ and flag any that run past ~4 minutes.
 - The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (remote
   `mesawave`); the earlier manual copies are in its `stash@{0}`.
 - The A case needs ~136 GB, more than Derecho's develop queue gives (~1.8 GB per
-  core, 63 cores max): run it on Casper or a full `main` node. Pending runs of
-  `%daterange` + current rotation: `mesaclip_dice_a_hist` (Casper) and
-  `mesaclip_dice_a_hist_derecho` (main, 128 tasks), years 1999–2000, 2 days;
-  check currents with the scratch `check_currents.py` approach (coupler
-  `So_u/So_v` vs 0.01 × `ANGLE`-rotated `U1_1/V1_1`).
+  core, 63 cores max): run it on Casper or a full `main` node.
+  `~/croc_cases/mesaclip_dice_a_hist_derecho` (main, 128 tasks, 2 days, stream
+  years 2000–2000, ocean history `So_t:So_s:So_u:So_v`) verified the stack: run
+  starts on Jan 1 of the stream year (`extend`), currents match `ANGLE`-rotated
+  GDEX to 5e-8 (compare coupler `So_u/So_v` with 0.01 × rotated `U1_1/V1_1`).
+  The Casper `mesaclip_dice_a_hist` is left at STOP_N=2, stream years 1999–2000.
 - Verified test cases: `~/croc_cases/mesaclip_a_hist` (A case, `ne120_t12`, SICE),
   `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66 Bering Sea grid,
   SICE), `mesaclip_dice_a_hist` and `mesaclip_dice_ww3_alaska` (16 tasks; WW3 gets
@@ -214,7 +215,17 @@ and flag any that run past ~4 minutes.
   not wanted.
 - **Currents rotated in the DOCN datamode, no preprocessing** (2026-10-22): `ANGLE`
   read from the current files at init, cos/sin regridded with the current
-  stream's weights and renormalized, rotated as POP's coupler does.
+  stream's weights and renormalized, rotated as POP's coupler does. Verified on
+  tx0.1 to 5e-8. Where the regridded cos/sin is shorter than 0.5 (stencil across
+  POP's Arctic fold) the current is set to 0.
+- **`taxmode = extend` for all MESACLIP streams** (2026-10-22, from review):
+  averaged fields' edge records sit up to 12 h inside the year and scenario edges
+  have no file beyond, so `limit` stopped runs on Jan 1 / Dec 31. Cost: a run past
+  `DATM_YR_END` silently holds the last record.
+- **Shortwave `coszen`** (2026-10-22): `FSDS`, `SOLSD`, `SOLLD` use `coszen` with
+  offset −21600 (window start), like JRA; other h4 means stay `nearest`/−10800.
+- **`Si_thick` from the final ice fraction** (2026-10-22): computed after DICE's
+  SSMI code adjusts the fraction.
 
 ## Working rules
 

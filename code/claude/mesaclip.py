@@ -67,6 +67,11 @@ SOURCES = {
     ),
 }
 
+# Shortwave 6 h means use coszen, which spreads each mean over the window with the
+# sun's angle; it takes the record's time as the window's start, so shift the h4
+# end-of-window stamp back a whole window (CDEPS's JRA streams do the same).
+COSZEN = {"FSDS", "SOLSD", "SOLLD"}
+
 # Stream field -> (history file, MESACLIP variable). h2 (instantaneous) wherever it
 # has the field; radiation and precipitation are only saved time-averaged, in h4.
 # TREFHT/QREFHT/PS are 2 m / surface stand-ins for the lowest-level values, which
@@ -143,6 +148,8 @@ def stream(comp, scenario, field, case=None):
     """
     history, variable = FIELDS[comp][field]
     _, _, mesh, offset, tintalgo = SOURCES[history]
+    if variable in COSZEN:
+        offset, tintalgo = -21600, "coszen"
     _, _, first, last = SCENARIOS[scenario]
     if case:
         files = case_files(scenario, case, history, variable)
@@ -153,7 +160,10 @@ def stream(comp, scenario, field, case=None):
         years = ("$DATM_YR_START", "$DATM_YR_END", "$DATM_YR_ALIGN")
     return {
         "name": stream_name(scenario, variable),
-        "taxmode": "limit",
+        # extend, not limit: averaged fields' first and last records sit up to 12 h
+        # inside the year, and at a scenario's first or last day there is no file
+        # beyond to bracket them. extend holds the edge record there.
+        "taxmode": "extend",
         "tintalgo": tintalgo,
         "readmode": "single",
         "mapalgo": "bilinear",

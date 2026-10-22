@@ -60,12 +60,14 @@ time order. It stops if two files overlap or a year has no file (RCP 8.5 member 
 `UBOT`). Set the years to the run's years to list, and read time axes from, only those files:
 
 ```bash
-./xmlchange DATM_YR_START=2079,DATM_YR_END=2100   # a run starting 2080-01-01
+./xmlchange DATM_YR_START=2080,DATM_YR_END=2100   # a run from 2080-01-01 to 2100-12-31
 ```
 
-Start a year early: with `taxmode = limit`, a run can't start before the first record, and daily
-means are stamped at noon after the stream offset. When the model opens a file whose name ends in
-`.<start>-<end>.nc`, it also checks the file's first and last times are within a day of those dates.
+The streams use `taxmode = extend`, so a run can start on Jan 1 of `DATM_YR_START` and end on
+Dec 31 of `DATM_YR_END`, including at a scenario's first and last day; keep it inside those years,
+since past them it would hold the last record without an error
+([stream parameters](stream_construction.md#stream-parameters)). When the model opens one of these
+files, it also checks the file's first and last times are within a day of the dates in its name.
 
 ## XML variable: `DATM_MESACLIP_CASE`
 
@@ -88,6 +90,6 @@ field ends up as, with formulas and line links, is in the
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|
-| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/f0a0cb137edb107d4b2c4c3a4ec7c6419c042d35/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
-| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/4b2e82c39966a0ae8551b609eac6f0dbc154ade3/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
-| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/75767f640c4732d65398143f390fff511c429468/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/706a639e4081cfee05950593b73d4233dda6db34/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
+| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/bc1f4517d2084c89bf147d1b7dd055fffaa20907/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
+| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/538a864da572eba05abe208b7e552eae433b1a6e/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
