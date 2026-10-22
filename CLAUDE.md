@@ -205,8 +205,13 @@ and flag any that run past ~4 minutes.
   (`vice/aice` where aice > puny, else 0). Before, WW3 got 0 everywhere.
 - **`So_bldepth` = 0** (2026-10-21): WW3 wants a boundary-layer depth, not POP's
   mixed-layer depth `HMXL`; MESACLIP only has the daily maximum (`XBLT`). DOCN
-  sends 0 (was 1e30) and WW3 floors it at 5 m. It only affects WW3's Langmuir and
-  Stokes diagnostics.
+  sends 0 (was 1e30). WW3 reads it into `HSL` but uses it only with `&LMPN`
+  `LMPENABLED` and `HSLMODE = 1`, both off by default, so it changes nothing.
+- **What standalone WW3 uses** (2026-10-22, from the CESM WW3 source; proof links on
+  the demand page): only winds, currents and ice fraction change the waves. `Sa_tbot −
+  So_t` feeds only `STAB3` (build has `STAB0`); the cap turns `Si_thick`/`Si_floediam`
+  off without CICE, which also turns off ice-concentration scaling, so `IC4` method 1
+  (no `&SIC4`) damps at 0.5 m⁻¹ wherever ice > 0. `So_h` isn't advertised.
 - **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
   per variable, expanded at buildnml to the member's files for the stream years
   (all RCPs to 2100), with gap/overlap checks and a file-time-vs-name check in

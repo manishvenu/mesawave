@@ -13,9 +13,7 @@ branch uses):
 | [#2](https://github.com/manishvenu/CDEPS/pull/2) | `mesaclip-docn` | `mesaclip-datm` | DOCN mode, with current rotation |
 | [#3](https://github.com/manishvenu/CDEPS/pull/3) | `mesaclip-dice` | `mesaclip-docn` | DICE mode |
 
-DOCN and DICE need #1 for `DATM_MESACLIP_CASE`. `mesaclip-dice` holds all four, and this repo
-carries it as the `cdeps/` submodule. `code/claude/add_mesaclip_to_cesm.py` regenerates the XML and
-registration edits; the datamode Fortran is edited on the branches.
+`mesaclip-dice` holds all four; this repo carries it as the `cdeps/` submodule.
 
 ```bash
 cd <cesm>/components/cdeps
@@ -23,14 +21,9 @@ git remote add mesawave https://github.com/manishvenu/CDEPS.git
 git fetch mesawave && git checkout mesaclip-dice
 ```
 
-Most of the PR is standard data-model entry: compset modes, namelist values and stream
-definitions (one stream per variable, see [Supply: MESACLIP to the coupler](stream_construction.md)). This page
-covers what goes beyond that.
-
 ## Five products
 
-Each MESACLIP scenario is its own mode in DATM, DOCN and DICE, so a compset picks one scenario,
-e.g. `DATM%MESACLIP-RCP85`, `DOCN%MESACLIP-RCP85`, `DICE%MESACLIP-RCP85`.
+Each scenario is its own mode, e.g. `DATM%MESACLIP-RCP85`, `DOCN%MESACLIP-RCP85`, `DICE%MESACLIP-RCP85`.
 
 | Compset option | `DATM_MODE` | `DOCN_MODE`, `DICE_MODE` | GDEX dataset | Default member | Years |
 |---|---|---|---|---|---|
@@ -40,40 +33,31 @@ e.g. `DATM%MESACLIP-RCP85`, `DOCN%MESACLIP-RCP85`, `DICE%MESACLIP-RCP85`.
 | `MESACLIP-RCP60` | `MESACLIP_RCP60` | `mesaclip_rcp60` | d651008 | 010 | 2006–2100 |
 | `MESACLIP-RCP85` | `MESACLIP_RCP85` | `mesaclip_rcp85` | d651009 | 010 | 2006–2100 |
 
-The years are the defaults for `DATM_YR_START` and `DATM_YR_END`, which DOCN and DICE also use,
-with `DATM_YR_ALIGN = $DATM_YR_START` so model years are data years. `DATM_TOPO` is `observed`.
+Years are the `DATM_YR_START`/`END` defaults (DOCN and DICE use them too); `DATM_YR_ALIGN = $DATM_YR_START`.
 
 ## Finding the files
 
-MESACLIP on GDEX, like other CESM post-processed time series (LENS, CESM2-LE), holds one variable
-per file, named by the dates it spans: `UBOT.2000010100-2001010100.nc`, ten-year ocean and ice
-chunks such as `SST.20860102-20960101.nc`, and a last file whose name depends on when the member's
-run ended. CDEPS's `%y` templates can't build those names, so #5 adds `%daterange`. Each MESACLIP
-stream is one entry like
+GDEX files hold one variable each, named by the dates they span (`UBOT.2000010100-2001010100.nc`,
+`SST.20860102-20960101.nc`), which `%y` templates can't build, so #5 adds `%daterange`:
 
 ```
 .../hour_6/$DATM_MESACLIP_CASE.cam.h2.UBOT.%daterange.nc
 ```
 
-which the namelist build expands to the member's files that cover `DATM_YR_START`–`DATM_YR_END`, in
-time order. It stops if two files overlap or a year has no file (RCP 8.5 member 005 lacks 2096
-`UBOT`). Set the years to the run's years to list, and read time axes from, only those files:
+The namelist build expands it to the member's files for `DATM_YR_START`–`DATM_YR_END` and stops on
+an overlap or a year with no file. When the model opens a file it checks its first and last times
+are within a day of its name. Set the years to the run's years:
 
 ```bash
 ./xmlchange DATM_YR_START=2080,DATM_YR_END=2100   # a run from 2080-01-01 to 2100-12-31
 ```
 
-The streams use `taxmode = extend`, so a run can start on Jan 1 of `DATM_YR_START` and end on
-Dec 31 of `DATM_YR_END`, including at a scenario's first and last day; keep it inside those years,
-since past them it would hold the last record without an error
-([stream parameters](stream_construction.md#stream-parameters)). When the model opens one of these
-files, it also checks the file's first and last times are within a day of the dates in its name.
+Keep runs inside those years: past them `extend` holds the last record without an error
+([stream parameters](stream_construction.md#stream-parameters)).
 
 ## XML variable: `DATM_MESACLIP_CASE`
 
-The GDEX case name to read, which picks the ensemble member. It is in `env_run.xml`, and every
-DATM, DOCN and DICE MESACLIP stream file path contains `$DATM_MESACLIP_CASE`, so one setting
-switches all three components. Defaults are the members in the table above. To use another member:
+The GDEX case name, which picks the member for DATM, DOCN and DICE at once (`env_run.xml`):
 
 ```bash
 ./xmlchange DATM_MESACLIP_CASE=b.e13.BHISTC5.ne120_t12.cesm-ihesp-hires1.0.46-1920-2005.005
@@ -83,10 +67,8 @@ switches all three components. Defaults are the members in the table above. To u
 
 ## Datamode code
 
-Each component gets a `mesaclip` datamode, registered in its cap and `CMakeLists.txt`. Each is a
-copy of an existing datamode, and every change from the copy is marked `MESACLIP:`. What each
-field ends up as, with formulas and line links, is in the
-[supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
+Changes from the copied datamode are marked `MESACLIP:`. Per-field formulas and line links are in
+the [supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|

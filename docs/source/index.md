@@ -22,7 +22,7 @@ Available datasets and the MESAWAVE run matrix.
 :link: stream_data_requirements
 :link-type: doc
 
-What WW3, MOM6 and CICE ask for, and what nobody supplies.
+What WW3, MOM6 and CICE import, proven from their caps.
 :::
 
 :::{grid-item-card} {octicon}`tools` Supply: MESACLIP to the coupler
@@ -49,7 +49,7 @@ Read the pages in this order:
 2. **[MESACLIP experiments](mesaclip_experiments.md)**: what data exists. Grids, GDEX datasets,
    case names, the MESAWAVE run matrix, and every variable MESACLIP saved.
 3. **[Demand: what the models import](stream_data_requirements.md)**: every field WW3, MOM6 and
-   CICE can import, which ones nobody supplies, and how JRA and CPLHIST compare.
+   CICE imports, with cap line links, and which WW3 imports change the waves.
 4. **[Supply: MESACLIP to the coupler](stream_construction.md)**: every field the data models
    send and how each is made from MESACLIP (the science compromises), the MESACLIP variables not
    used yet, then the stream time settings and meshes.
