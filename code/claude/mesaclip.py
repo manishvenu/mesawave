@@ -10,10 +10,6 @@ DIN_LOC_ROOT = "/glade/campaign/cesm/cesmdata/inputdata"  # Derecho/Casper
 CASE_VAR = "$DATM_MESACLIP_CASE"
 
 # Scenario -> (GDEX dataset, default case, first year, last year).
-# The years are the ones every usable member stores under the same file names:
-# RCP runs end in different years, so the 2100 file name varies by member, and for
-# RCP6.0 so does the 2096-2100 ocean file, hence 2095. Runs to 2100 list their
-# member's own files in the case (mesaclip_case_streams.py).
 SCENARIOS = {
     "HIST": (
         "d651007",
@@ -21,19 +17,19 @@ SCENARIOS = {
         1920,
         2005,
     ),
-    "RCP26": ("d651043", "b.e13.BRCP26C5.ne120_t12.cesm-ihesp-hires1.0.42.003", 2006, 2099),
-    "RCP45": ("d651043", "b.e13.BRCP45C5.ne120_t12.cesm-ihesp-hires1.0.42.003", 2006, 2099),
+    "RCP26": ("d651043", "b.e13.BRCP26C5.ne120_t12.cesm-ihesp-hires1.0.42.003", 2006, 2100),
+    "RCP45": ("d651043", "b.e13.BRCP45C5.ne120_t12.cesm-ihesp-hires1.0.42.003", 2006, 2100),
     "RCP60": (
         "d651008",
         "b.e13.BRCP60C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.010",
         2006,
-        2095,
+        2100,
     ),
     "RCP85": (
         "d651009",
         "b.e13.BRCP85C5.ne120_t12.cesm-ihesp-hires1.0.46-2006-2100.010",
         2006,
-        2099,
+        2100,
     ),
 }
 
@@ -116,11 +112,9 @@ def stream_name(scenario, variable):
     return f"MESACLIP_{scenario}.{variable}"
 
 
-def case_files(scenario, case, history, variable, last=None):
-    """GDEX files for one variable of one case that overlap the scenario's years
-    (to `last`, if given)."""
-    dataset, _, first, shared_last = SCENARIOS[scenario]
-    last = last or shared_last
+def case_files(scenario, case, history, variable):
+    """GDEX files for one variable of one case that overlap the scenario's years."""
+    dataset, _, first, last = SCENARIOS[scenario]
     folder = f"{GDEX}/{dataset}/{case}/{SOURCES[history][0]}"
     prefix = f"{case}.{SOURCES[history][1]}.{variable}."
     files = []
@@ -133,12 +127,11 @@ def case_files(scenario, case, history, variable, last=None):
 
 
 def stream_files(scenario, history, variable):
-    """The default case's files, with its name replaced by $DATM_MESACLIP_CASE."""
-    case = SCENARIOS[scenario][1]
-    return [
-        path.replace(case, CASE_VAR)
-        for path in case_files(scenario, case, history, variable)
-    ]
+    """One %daterange entry, which buildnml (stream_cdeps.py) expands to the case's
+    files for the run's years."""
+    dataset = SCENARIOS[scenario][0]
+    folder, tag = SOURCES[history][:2]
+    return [f"{GDEX}/{dataset}/{CASE_VAR}/{folder}/{CASE_VAR}.{tag}.{variable}.%daterange.nc"]
 
 
 def stream(comp, scenario, field, case=None):
@@ -177,31 +170,19 @@ def stream(comp, scenario, field, case=None):
     }
 
 
-def missing_files(scenario, case):
-    """File names the DATM and DOCN streams list that this case doesn't have."""
-    dataset = SCENARIOS[scenario][0]
-    missing = []
-    for comp in FIELDS:
-        for history, variable in FIELDS[comp].values():
-            folder = f"{GDEX}/{dataset}/{case}/{SOURCES[history][0]}"
-            have = set(os.listdir(folder)) if os.path.isdir(folder) else set()
-            for path in stream_files(scenario, history, variable):
-                name = os.path.basename(path).replace(CASE_VAR, case)
-                if name not in have:
-                    missing.append(name)
-    return missing
-
-
-def missing_years(scenario, case, last=None):
-    """{variable: [years]} for years in the scenario (to `last`, if given) that none
-    of the case's files cover, judged from the date ranges in their names."""
-    first = SCENARIOS[scenario][2]
-    last = last or SCENARIOS[scenario][3]
+def missing_years(scenario, case):
+    """{variable: [years]} for years in the scenario that none of the case's files
+    cover, judged from the date ranges in their names (as %daterange does)."""
+    _, _, first, last = SCENARIOS[scenario]
     missing = {}
     for comp in FIELDS:
         for history, variable in FIELDS[comp].values():
+            folder = f"{GDEX}/{SCENARIOS[scenario][0]}/{case}/{SOURCES[history][0]}"
+            if not os.path.isdir(folder):
+                missing[variable] = list(range(first, last + 1))
+                continue
             covered = set()
-            for path in case_files(scenario, case, history, variable, last):
+            for path in case_files(scenario, case, history, variable):
                 start, end = os.path.basename(path).split(".")[-2].split("-")
                 # A file ending on Jan 1 (e.g. 2095010100-2096010100) stops at that year's start.
                 end_year = int(end[:4]) - (end[4:8] == "0101")

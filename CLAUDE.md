@@ -34,17 +34,17 @@ output through CESM's data models (CDEPS). The full plan is
   required fields. `cdeps_streams.py` is the shared writer.
   `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) regenerates the MESACLIP XML
   and cap/CMake registration on the `cdeps/` submodule, starting from
-  `cdeps1.0.101`; review and commit the result on the stack branches.
+  `stream-daterange`; review and commit the result on the stack branches.
   `verify_a_case.py RUNDIR` checks the A case's coupler history against GDEX.
   `coupler_fields.py CPL_HI [CPL_HI_TEST]` lists what the mediator sends each model
-  (and what a test case lacks against a reference). `mesaclip_case_streams.py`
-  writes one member's full file lists into a case's `user_nl_*_streams`.
+  (and what a test case lacks against a reference).
 - `cdeps/`: submodule on `manishvenu/CDEPS` `mesaclip-dice`, the top of a GitHub
-  stack (#4) of PRs in the fork: #1 `mesaclip-datm` → `main`, #2 `mesaclip-docn`
-  → `mesaclip-datm`, #3 `mesaclip-dice` → `mesaclip-docn`, each one commit on
-  `cdeps1.0.101`. All CESM changes live here. Change a component's datamode on
-  its branch, then restack the branches above it. Don't run `gh stack sync`: it
-  rebases onto the fork's `main`, 133 commits past `cdeps1.0.101`.
+  stack of PRs in the fork, on `cdeps1.0.101`: #5 `stream-daterange` → `main`
+  (`%daterange`), #1 `mesaclip-datm` → `stream-daterange`, #2 `mesaclip-docn` →
+  `mesaclip-datm`, #3 `mesaclip-dice` → `mesaclip-docn`. All CESM changes live
+  here. Change a component on its branch, then restack the branches above it
+  (force-pushes need the user's OK). Don't run `gh stack sync`: it rebases onto
+  the fork's `main`, 133 commits past `cdeps1.0.101`.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
@@ -71,6 +71,10 @@ output through CESM's data models (CDEPS). The full plan is
 - Leave anything unknown blank rather than guessing. CDEPS rejects blank or
   invalid `taxmode`, `mapalgo`, `tintalgo`, `readmode`, so fill these before a run.
 - CDEPS does not convert units or rotate grid-relative vectors.
+- `%daterange` (stack PR #5) in a `<file>` stands for the `<start>-<end>` of CESM
+  time-series names; buildnml expands it to the files covering the stream years
+  and checks gaps and overlaps, and the model checks each file's times against
+  its name.
 
 ## Reference CESM source (GLADE)
 
@@ -125,14 +129,20 @@ and flag any that run past ~4 minutes.
 ## Status (2026-10-22)
 
 - MESACLIP DATM/DOCN/DICE modes are done. `docs/source/adding_mesaclip_to_cdeps.md`
-  has the PRs, the five scenario modes, `DATM_MESACLIP_CASE`, runs to 2100 and the
+  has the PRs, the five scenario modes, `%daterange`, `DATM_MESACLIP_CASE` and the
   datamode code.
-- PRs: the stack manishvenu/CDEPS#1–#3 (stack #4). The older combined draft
+- PRs: the stack manishvenu/CDEPS#5, #1, #2, #3. The older combined draft
   CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`) is untouched; the org's `main`
   now tracks ESCOMP main, so merging there needs a rebase and a retest. The user
   moves org refs.
 - The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (remote
   `mesawave`); the earlier manual copies are in its `stash@{0}`.
+- The A case needs ~136 GB, more than Derecho's develop queue gives (~1.8 GB per
+  core, 63 cores max): run it on Casper or a full `main` node. Pending runs of
+  `%daterange` + current rotation: `mesaclip_dice_a_hist` (Casper) and
+  `mesaclip_dice_a_hist_derecho` (main, 128 tasks), years 1999–2000, 2 days;
+  check currents with the scratch `check_currents.py` approach (coupler
+  `So_u/So_v` vs 0.01 × `ANGLE`-rotated `U1_1/V1_1`).
 - Verified test cases: `~/croc_cases/mesaclip_a_hist` (A case, `ne120_t12`, SICE),
   `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66 Bering Sea grid,
   SICE), `mesaclip_dice_a_hist` and `mesaclip_dice_ww3_alaska` (16 tasks; WW3 gets
@@ -147,9 +157,8 @@ and flag any that run past ~4 minutes.
 
 ## Open questions
 
-1. **Rotating POP currents.** DOCN reads `U1_1`/`V1_1` and converts cm/s to m/s,
-   but they still follow the tripole grid's axes and sit on U points. Rotating
-   to east/north and moving to T points needs preprocessing or datamode code.
+1. **POP currents on U points.** The datamode rotates them to east/north, but
+   they are read on the T-point mesh (about half a cell off).
 3. **Wave-only regional tests through CrocoDash.** Done with plain CIME instead
    (`mesaclip_ww3_alaska`). No new WW3 rule is needed: DOCN satisfies the
    existing "WW3 needs an active or data ocean" rule. What still blocks CrocoDash
@@ -197,10 +206,15 @@ and flag any that run past ~4 minutes.
   mixed-layer depth `HMXL`; MESACLIP only has the daily maximum (`XBLT`). DOCN
   sends 0 (was 1e30) and WW3 floors it at 5 m. It only affects WW3's Langmuir and
   Stokes diagnostics.
-- **Years to 2100 without changing CDEPS code** (2026-10-21): CDEPS's `%y`
-  templates can't name MESACLIP's date-range files, and members' last files differ,
-  so the stream XML lists files explicitly up to the shared years (RCP 6.0 to
-  2095, other RCPs to 2099). Runs past that use `mesaclip_case_streams.py`.
+- **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
+  per variable, expanded at buildnml to the member's files for the stream years
+  (all RCPs to 2100), with gap/overlap checks and a file-time-vs-name check in
+  `dshr_stream_mod.F90`. Replaces explicit file lists and the per-case script.
+  Mesh/weight sharing across streams and multi-file streams were considered and
+  not wanted.
+- **Currents rotated in the DOCN datamode, no preprocessing** (2026-10-22): `ANGLE`
+  read from the current files at init, cos/sin regridded with the current
+  stream's weights and renormalized, rotated as POP's coupler does.
 
 ## Working rules
 

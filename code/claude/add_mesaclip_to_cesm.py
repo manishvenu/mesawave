@@ -20,7 +20,7 @@ from cdeps_streams import missing_fields
 from generate_datm_streams import REQUIRED as DATM_REQUIRED
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BASE = "cdeps1.0.101"  # the CDEPS tag CESM's crocodash branch uses
+BASE = "stream-daterange"  # %daterange support, on cdeps1.0.101 (the tag CESM's crocodash branch uses)
 TAG = "MESACLIP: added by mesawave add_mesaclip_to_cesm.py"
 CMAKE = f"# {TAG}"
 FILES = [
@@ -504,8 +504,9 @@ def report_members():
     for s in SCENARIOS:
         print(f"{s}:")
         for case in mesaclip.members(s):
-            missing = mesaclip.missing_files(s, case)
-            print(f"  {'ok' if not missing else f'missing {len(missing)} files'}  {case}")
+            missing = mesaclip.missing_years(s, case)
+            gaps = "; ".join(f"{v} {y[0]}-{y[-1]}" if len(y) > 1 else f"{v} {y[0]}" for v, y in missing.items())
+            print(f"  {'ok' if not missing else 'no files for ' + gaps}  {case}")
 
 
 if __name__ == "__main__":

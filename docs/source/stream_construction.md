@@ -62,15 +62,15 @@ Direct shortwave is split between visible and near-IR in JRA's 0.28 : 0.31 ratio
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [198–200](docn:L198-L200) |
-| `So_s` | Sea-surface salinity | unit conversion, kg/kg → g/kg (= psu) | `SSS` | [182](docn:L182) |
-| `So_u`, `So_v` | Surface current, zonal and meridional | unit conversion, cm/s → m/s; not rotated | `U1_1`, `V1_1` | [156](docn:L156), [163](docn:L163) |
-| `So_omask` | Ocean fraction of each cell | ocean fraction of the model mesh | — | [134](docn:L134) |
-| `So_bldepth` | Ocean boundary-layer depth | 0, no stream: MESACLIP has no daily mean (WW3 floors it at 5 m) | — | [174](docn:L174) |
+| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [228–230](docn:L228-L230) |
+| `So_s` | Sea-surface salinity | unit conversion, kg/kg → g/kg (= psu) | `SSS` | [212](docn:L212) |
+| `So_u`, `So_v` | Surface current, east and north | cm/s → m/s, rotated from POP's grid axes with `ANGLE` | `U1_1`, `V1_1`, `ANGLE` | [177](docn:L177), [184](docn:L184), [189–197](docn:L189-L197) |
+| `So_omask` | Ocean fraction of each cell | ocean fraction of the model mesh | — | [153](docn:L153) |
+| `So_bldepth` | Ocean boundary-layer depth | 0, no stream: MESACLIP has no daily mean (WW3 floors it at 5 m) | — | [204](docn:L204) |
 
 `SSS` files hold kg/kg although their units attribute says g/kg. Without the stream, `So_s` is
-34.7 psu, as DOCN%SST sends. CICE uses it, and DICE uses it for the freezing point. Currents stay
-on POP's grid axes ([meshes and remapping](#meshes-and-remapping)).
+34.7 psu, as DOCN%SST sends. CICE uses it, and DICE uses it for the freezing point. Currents are
+rotated to east/north ([meshes and remapping](#meshes-and-remapping)).
 
 ### DICE
 
@@ -161,19 +161,23 @@ Mesh paths are under CESM inputdata. The WW3 mesh is set in WW3, not in these st
 
 **Winds** need no rotation: CAM-SE's `UBOT` and `VBOT` are already east/north.
 
-**Currents** are not yet rotated. POP's `U1_1` and `V1_1` follow the tripole grid's axes, which
-match east/north south of about 29°N and turn by up to 90° in the Arctic. They also sit on U
-points but are read on the T-point mesh. The streams' `vectors` tag can't fix this: CDEPS
-assumes vector input is already east/north and rotates by longitude only
-(`dshr_strdata_mod.F90`).
+**Currents** are rotated in the DOCN datamode. POP's `U1_1` and `V1_1` follow the tripole grid's
+axes, which match east/north south of about 29°N and turn by up to 90° in the Arctic. The streams'
+`vectors` tag can't fix this: CDEPS assumes vector input is already east/north and rotates by
+longitude only (`dshr_strdata_mod.F90`). Instead, at init the datamode reads POP's U-grid `ANGLE`
+from the first current file, regrids its cosine and sine to the model mesh with the current
+stream's own weights and renormalizes them ([236–340](docn:L236-L340)); each step it rotates as
+POP's coupler does, u cos − v sin and u sin + v cos ([189–197](docn:L189-L197)). The currents still
+sit on U points but are read on the T-point mesh.
 
 ## Where the stream XML comes from
 
 `code/claude/mesaclip.py` holds the tables on this page: scenarios, history files and their time
 settings, and the field mapping. `code/claude/add_mesaclip_to_cesm.py` writes them into CDEPS's
 `stream_definition_{datm,docn,dice}.xml`, with `$DATM_MESACLIP_CASE` in every file path and
-`$DATM_YR_START`/`END`/`ALIGN` for the years. The case's namelist build fills those in. Every
-file is listed, because GDEX file names hold date ranges that CDEPS can't template.
+`$DATM_YR_START`/`END`/`ALIGN` for the years. The case's namelist build fills those in. Each
+stream is one `%daterange` entry, which the namelist build expands to the case's files for those
+years ([Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#finding-the-files)).
 
 `code/claude/generate_{datm,docn,dice}_streams.py` write blank CPLHIST-style templates and hold the
 lists of fields each data model must supply. The MESACLIP modes don't use their output.
