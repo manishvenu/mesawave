@@ -43,8 +43,8 @@ non-contiguous time slices.
 - RCP 2.6 and 4.5 have one member (003) today; three are planned. Check the dataset before
   running.
 - The CDEPS modes stop at 2099, and RCP 6.0 at 2095, because the last files' names differ
-  between members ([Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#five-products)). The
-  2080–2100 slice can't reach 2100 yet.
+  between members. Runs to 2100 list their member's own files in the case
+  ([Adding MESACLIP to CDEPS](adding_mesaclip_to_cdeps.md#runs-to-2100)).
 - RCP 8.5 member 005 is missing its 2096 `UBOT` file.
 
 ### Member directories used by MESAWAVE

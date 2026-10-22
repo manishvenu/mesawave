@@ -12,7 +12,8 @@ CASE_VAR = "$DATM_MESACLIP_CASE"
 # Scenario -> (GDEX dataset, default case, first year, last year).
 # The years are the ones every usable member stores under the same file names:
 # RCP runs end in different years, so the 2100 file name varies by member, and for
-# RCP6.0 so does the 2096-2100 ocean file, hence 2095.
+# RCP6.0 so does the 2096-2100 ocean file, hence 2095. Runs to 2100 list their
+# member's own files in the case (mesaclip_case_streams.py).
 SCENARIOS = {
     "HIST": (
         "d651007",
@@ -101,6 +102,7 @@ FIELDS = {
     },
     "dice": {
         "Si_ifrac": ("nday1_ice", "aice_d"),
+        "Si_vice": ("nday1_ice", "hi_d"),
     },
 }
 
@@ -114,9 +116,11 @@ def stream_name(scenario, variable):
     return f"MESACLIP_{scenario}.{variable}"
 
 
-def case_files(scenario, case, history, variable):
-    """GDEX files for one variable of one case that overlap the scenario's years."""
-    dataset, _, first, last = SCENARIOS[scenario]
+def case_files(scenario, case, history, variable, last=None):
+    """GDEX files for one variable of one case that overlap the scenario's years
+    (to `last`, if given)."""
+    dataset, _, first, shared_last = SCENARIOS[scenario]
+    last = last or shared_last
     folder = f"{GDEX}/{dataset}/{case}/{SOURCES[history][0]}"
     prefix = f"{case}.{SOURCES[history][1]}.{variable}."
     files = []
@@ -185,6 +189,26 @@ def missing_files(scenario, case):
                 name = os.path.basename(path).replace(CASE_VAR, case)
                 if name not in have:
                     missing.append(name)
+    return missing
+
+
+def missing_years(scenario, case, last=None):
+    """{variable: [years]} for years in the scenario (to `last`, if given) that none
+    of the case's files cover, judged from the date ranges in their names."""
+    first = SCENARIOS[scenario][2]
+    last = last or SCENARIOS[scenario][3]
+    missing = {}
+    for comp in FIELDS:
+        for history, variable in FIELDS[comp].values():
+            covered = set()
+            for path in case_files(scenario, case, history, variable, last):
+                start, end = os.path.basename(path).split(".")[-2].split("-")
+                # A file ending on Jan 1 (e.g. 2095010100-2096010100) stops at that year's start.
+                end_year = int(end[:4]) - (end[4:8] == "0101")
+                covered.update(range(int(start[:4]), end_year + 1))
+            years = [y for y in range(first, last + 1) if y not in covered]
+            if years:
+                missing[variable] = years
     return missing
 
 

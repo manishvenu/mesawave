@@ -22,7 +22,7 @@ from generate_datm_streams import REQUIRED as DATM_REQUIRED
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "cdeps1.0.101"  # the CDEPS tag CESM's crocodash branch uses
 TAG = "MESACLIP: added by mesawave add_mesaclip_to_cesm.py"
-XML, FORTRAN, CMAKE = f"<!-- {TAG} -->", f"! {TAG}", f"# {TAG}"
+CMAKE = f"# {TAG}"
 FILES = [
     "datm/cime_config/config_component.xml",
     "datm/cime_config/namelist_definition_datm.xml",
@@ -76,10 +76,10 @@ def replace(text, old, new, count=1):
 
 
 def block(lines, indent, mark):
-    return "".join(f"\n{indent}{line}" for line in [mark, *lines])
+    return "".join(f"\n{indent}{line}" for line in ([mark] if mark else []) + lines)
 
 
-def add_after_line(text, needle, lines, indent, mark=XML, skip=0):
+def add_after_line(text, needle, lines, indent, mark=None, skip=0):
     """Add lines after the line containing needle (which must appear once), or
     after the line `skip` lines below it."""
     replace(text, needle, needle)  # checks it appears once
@@ -96,20 +96,20 @@ def add_to_values(text, entry_id, lines, indent="      "):
     if end > text.index("</entry>", start):
         raise ValueError(f"{entry_id} has no <values> block")
     end = text.rindex("\n", 0, end)
-    return text[:end] + block(lines, indent, XML) + text[end:]
+    return text[:end] + block(lines, indent, None) + text[end:]
 
 
 def add_after_entry(text, entry_id, lines, indent="  "):
     start = text.index(f'<entry id="{entry_id}">')
     end = text.index("</entry>", start) + len("</entry>")
-    return text[:end] + "\n" + block(lines, indent, XML) + text[end:]
+    return text[:end] + "\n" + block(lines, indent, None) + text[end:]
 
 
 def add_case(text, call, case, new_call, case_indent):
     """Add a `case` block for the mesaclip datamode after an existing call and its
     ChkErr line."""
     lines = [case, f"   {new_call}", "   if (ChkErr(rc,__LINE__,u_FILE_u)) return"]
-    return add_after_line(text, call, lines, case_indent, FORTRAN, skip=1)
+    return add_after_line(text, call, lines, case_indent, skip=1)
 
 
 def stream_entry(stream):
@@ -156,7 +156,7 @@ def streams_xml(comp):
             for s in SCENARIOS
             for field in mesaclip.FIELDS[comp]
         )
-        return replace(text, "\n</stream_data>", f"\n  {XML}\n{entries}\n</stream_data>")
+        return replace(text, "\n</stream_data>", f"\n{entries}\n</stream_data>")
 
     return change
 
@@ -243,7 +243,6 @@ def datm_cap(text):
             for name in ("advertise", "init_pointers", "advance")
         ],
         "  ",
-        FORTRAN,
     )
     text = replace(
         text, "'CLMNCEP','CPLHIST','GEFS','ERA5','SIMPLE')", "'CLMNCEP','CPLHIST','GEFS','ERA5','SIMPLE','MESACLIP')"
@@ -320,7 +319,6 @@ def docn_cap(text):
             for name in ("advertise", "init_pointers", "advance")
         ],
         "  ",
-        FORTRAN,
     )
     text = replace(
         text,
@@ -386,7 +384,6 @@ def dice_cap(text):
             for name in ("advertise", "init_pointers", "advance", "restart_read", "restart_write")
         ],
         "  ",
-        FORTRAN,
     )
     text = replace(
         text,
@@ -407,7 +404,6 @@ def dice_cap(text):
             "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
         ],
         "    ",
-        FORTRAN,
         skip=1,
     )
     # init_pointers (uses chkerr, consistent with surrounding ssmi/cplhist blocks)
@@ -420,7 +416,6 @@ def dice_cap(text):
             "   if (chkerr(rc,__LINE__,u_FILE_u)) return",
         ],
         "       ",
-        FORTRAN,
         skip=1,
     )
     # restart_read: cplhist has no ChkErr after the call, insert immediately after
@@ -433,7 +428,6 @@ def dice_cap(text):
             "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
         ],
         "          ",
-        FORTRAN,
         skip=0,
     )
     # advance: multiline mesaclip call
@@ -447,7 +441,6 @@ def dice_cap(text):
             "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
         ],
         "    ",
-        FORTRAN,
         skip=1,
     )
     # restart_write: cplhist call spans two lines, skip past the closing paren line
@@ -461,7 +454,6 @@ def dice_cap(text):
             "   if (ChkErr(rc,__LINE__,u_FILE_u)) return",
         ],
         "       ",
-        FORTRAN,
         skip=1,
     )
     return text

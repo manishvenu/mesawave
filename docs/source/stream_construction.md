@@ -62,11 +62,11 @@ Direct shortwave is split between visible and near-IR in JRA's 0.28 : 0.31 ratio
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [196–198](docn:L196-L198) |
-| `So_s` | Sea-surface salinity | unit conversion, kg/kg → g/kg (= psu) | `SSS` | [180](docn:L180) |
+| `So_t` | Sea-surface temperature | unit conversion, °C → K | `SST` | [198–200](docn:L198-L200) |
+| `So_s` | Sea-surface salinity | unit conversion, kg/kg → g/kg (= psu) | `SSS` | [182](docn:L182) |
 | `So_u`, `So_v` | Surface current, zonal and meridional | unit conversion, cm/s → m/s; not rotated | `U1_1`, `V1_1` | [156](docn:L156), [163](docn:L163) |
 | `So_omask` | Ocean fraction of each cell | ocean fraction of the model mesh | — | [134](docn:L134) |
-| `So_bldepth` | Ocean boundary-layer depth | fill value, no stream | — | [172](docn:L172) |
+| `So_bldepth` | Ocean boundary-layer depth | 0, no stream: MESACLIP has no daily mean (WW3 floors it at 5 m) | — | [174](docn:L174) |
 
 `SSS` files hold kg/kg although their units attribute says g/kg. Without the stream, `So_s` is
 34.7 psu, as DOCN%SST sends. CICE uses it, and DICE uses it for the freezing point. Currents stay
@@ -74,23 +74,24 @@ on POP's grid axes ([meshes and remapping](#meshes-and-remapping)).
 
 ### DICE
 
-Only `Si_ifrac` comes from MESACLIP. DICE makes everything else itself, from the ice fraction and
+Only `Si_ifrac` and `Si_thick` come from MESACLIP. DICE makes everything else itself, from the ice fraction and
 the fields it imports from DATM and the ocean, as DICE%SSMI does.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1¹ | `aice_d` | [408](dice:L408), [438](dice:L438), [501–509](dice:L501-L509) |
-| `Si_imask` | Ice mask | ice mask of the model mesh | — | [245](dice:L245) |
-| `Si_t` | Ice surface temperature | made up: 260 ± 10 K seasonal cycle, pulled toward freezing | — | [441–445](dice:L441-L445), [519](dice:L519) |
-| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo, 4 bands | fixed albedos | — | [448–451](dice:L448-L451) |
-| `Faii_swnet` | Net shortwave into the ice | DATM's 4 bands × (1 − albedo) | via DATM | [456–459](dice:L456-L459) |
-| `Faii_*` (6 fields), `Si_tref`, `Si_qref` | Ice-atmosphere fluxes and stress; 2 m T, q | bulk formula from DATM and `Si_t` | via DATM | [523–528](dice:L523-L528) |
-| `Fioi_melth`, `Fioi_meltw` | Melt heat, meltwater | from the ocean's `Fioo_q` and ice fraction | — | [462–515](dice:L462-L515) |
-| `Fioi_swpen` | Shortwave through the ice | `flux_swpf` (default 0) × `Faii_swnet` | — | [542](dice:L542) |
-| `Fioi_taux`, `Fioi_tauy` | Ice-ocean stress | = `Faii_taux`, `Faii_tauy` | — | [545–546](dice:L545-L546) |
-| `Fioi_salt` | Salt flux, ice to ocean | 0 | — | [549](dice:L549) |
-| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | Black carbon, dust to ocean | DATM's aerosol deposition | — | [555–558](dice:L555-L558) |
-| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Per-category ice fraction, shortwave | one category (per-category coupling only) | — | [564–565](dice:L564-L565) |
+| `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1¹ | `aice_d` | [418](dice:L418), [458](dice:L458), [521–529](dice:L521-L529) |
+| `Si_thick` | Ice thickness (for WW3) | `hi_d` ÷ ice fraction where there is ice, else 0, as CICE does | `hi_d`, `aice_d` | [423–428](dice:L423-L428) |
+| `Si_imask` | Ice mask | ice mask of the model mesh | — | [251](dice:L251) |
+| `Si_t` | Ice surface temperature | made up: 260 ± 10 K seasonal cycle, pulled toward freezing | — | [461–465](dice:L461-L465), [539](dice:L539) |
+| `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo, 4 bands | fixed albedos | — | [468–471](dice:L468-L471) |
+| `Faii_swnet` | Net shortwave into the ice | DATM's 4 bands × (1 − albedo) | via DATM | [476–479](dice:L476-L479) |
+| `Faii_*` (6 fields), `Si_tref`, `Si_qref` | Ice-atmosphere fluxes and stress; 2 m T, q | bulk formula from DATM and `Si_t` | via DATM | [543–548](dice:L543-L548) |
+| `Fioi_melth`, `Fioi_meltw` | Melt heat, meltwater | from the ocean's `Fioo_q` and ice fraction | — | [482–535](dice:L482-L535) |
+| `Fioi_swpen` | Shortwave through the ice | `flux_swpf` (default 0) × `Faii_swnet` | — | [562](dice:L562) |
+| `Fioi_taux`, `Fioi_tauy` | Ice-ocean stress | = `Faii_taux`, `Faii_tauy` | — | [565–566](dice:L565-L566) |
+| `Fioi_salt` | Salt flux, ice to ocean | 0 | — | [569](dice:L569) |
+| `Fioi_bcpho`, `Fioi_bcphi`, `Fioi_flxdst` | Black carbon, dust to ocean | DATM's aerosol deposition | — | [575–578](dice:L575-L578) |
+| `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Per-category ice fraction, shortwave | one category (per-category coupling only) | — | [584–585](dice:L584-L585) |
 
 ¹ With `flux_qacc` (on by default), `Si_ifrac` is at least 0.01 where there is ice, and new ice can
 form where the ocean's freeze potential `Fioo_q` builds up.
@@ -103,8 +104,7 @@ not in any stream, and could replace a stand-in, a made-up value or a missing fi
 | MESACLIP variable | Meaning | File | Could provide | Instead of |
 |---|---|---|---|---|
 | `U10` | 10 m wind speed | `cam.h2` | rescaled `Sa_u10m`, `Sa_v10m` | ~60 m winds |
-| `hi_d` | Grid-cell mean ice thickness | `cice.h1` | `Si_thick` = `hi_d` ÷ (`aice_d`/100) | not supplied |
-| `HMXL` | Mixed-layer depth | `pop.h.nday1` | `So_bldepth` (stand-in) | fill value |
+| `XBLT` | Daily maximum boundary-layer depth | `pop.h.nday1` | `So_bldepth` (biased deep) | 0 |
 | `SSH_2` | Sea-surface height | `pop.h.nday1` | `So_dhdx`, `So_dhdy` from its gradient² | not supplied |
 | `Tsfc_d` | Snow/ice surface temperature | `cice.h1` | `Si_t` | DICE's made-up seasonal value |
 | `fswthru_d` | Shortwave through the ice to the ocean | `cice.h1` | `Fioi_swpen` | 0 |

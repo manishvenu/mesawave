@@ -34,11 +34,17 @@ output through CESM's data models (CDEPS). The full plan is
   required fields. `cdeps_streams.py` is the shared writer.
   `add_mesaclip_to_cesm.py` (data in `mesaclip.py`) regenerates the MESACLIP XML
   and cap/CMake registration on the `cdeps/` submodule, starting from
-  `cdeps1.0.101`; review and commit the result on its `mesaclip` branch.
+  `cdeps1.0.101`; review and commit the result on the stack branches.
   `verify_a_case.py RUNDIR` checks the A case's coupler history against GDEX.
-- `cdeps/`: submodule, `manishvenu/CDEPS` branch `mesaclip` (draft PR
-  CROCODILE-CESM/CDEPS#2). All CESM changes live here. Edit the `mesaclip`
-  datamode Fortran directly on the branch; regenerate the XML with the script.
+  `coupler_fields.py CPL_HI [CPL_HI_TEST]` lists what the mediator sends each model
+  (and what a test case lacks against a reference). `mesaclip_case_streams.py`
+  writes one member's full file lists into a case's `user_nl_*_streams`.
+- `cdeps/`: submodule on `manishvenu/CDEPS` `mesaclip-dice`, the top of a GitHub
+  stack (#4) of PRs in the fork: #1 `mesaclip-datm` → `main`, #2 `mesaclip-docn`
+  → `mesaclip-datm`, #3 `mesaclip-dice` → `mesaclip-docn`, each one commit on
+  `cdeps1.0.101`. All CESM changes live here. Change a component's datamode on
+  its branch, then restack the branches above it. Don't run `gh stack sync`: it
+  rebases onto the fork's `main`, 133 commits past `cdeps1.0.101`.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
@@ -116,21 +122,25 @@ their code is in `~/documents/croc/dev/`.
 Say so before slow calls (`create_case`, `process_forcings`, `case_build`),
 and flag any that run past ~4 minutes.
 
-## Status (2026-10-19)
+## Status (2026-10-22)
 
 - MESACLIP DATM/DOCN/DICE modes are done. `docs/source/adding_mesaclip_to_cdeps.md`
-  has the PR, the five scenario modes, `DATM_MESACLIP_CASE` and the datamode code.
-- Draft PR CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`, two commits on
-  `cdeps1.0.101`: DATM+DOCN, then DICE). The org's `main` now tracks ESCOMP main,
-  so merging needs a rebase onto newer CDEPS and a retest. The user moves org refs.
-- The CESM_crocodash install's `components/cdeps` holds the same edits manually,
-  uncommitted, on detached `cdeps1.0.101`. Run `code/claude/add_mesaclip_to_cesm.py` to
-  regenerate from the submodule if needed.
-- Verified test cases, 10 days each on 48 tasks: `~/croc_cases/mesaclip_a_hist`
-  (A case, `ne120_t12`, SICE) and `~/croc_cases/mesaclip_ww3_alaska` (regional WW3
-  on a 162×66 Bering Sea grid, SICE). Both use DATM+DOCN%MESACLIP-HIST.
-  DICE test cases (`mesaclip_dice_a_hist`, `mesaclip_dice_ww3_alaska`) pending.
-  Each has `replay.sh`; `user_nl_*` edits are in the case dirs.
+  has the PRs, the five scenario modes, `DATM_MESACLIP_CASE`, runs to 2100 and the
+  datamode code.
+- PRs: the stack manishvenu/CDEPS#1–#3 (stack #4). The older combined draft
+  CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`) is untouched; the org's `main`
+  now tracks ESCOMP main, so merging there needs a rebase and a retest. The user
+  moves org refs.
+- The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (remote
+  `mesawave`); the earlier manual copies are in its `stash@{0}`.
+- Verified test cases: `~/croc_cases/mesaclip_a_hist` (A case, `ne120_t12`, SICE),
+  `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66 Bering Sea grid,
+  SICE), `mesaclip_dice_a_hist` and `mesaclip_dice_ww3_alaska` (16 tasks; WW3 gets
+  9 of its 10 imports, all but `Si_floediam`). Each has `replay.sh`; `user_nl_*`
+  edits are in the case dirs.
+- Reference for what each model receives: `~/croc_cases/gwr_jra_cplhist`
+  (GWR_JRA clone of `so1deg_wav_wavfix`, cpayne's `crocodile2026` CESM), 1 day
+  with `HIST_OPTION=ndays`; its `cpl.hi` is the input to `coupler_fields.py`.
 - Claude runs on Casper. Build, submit and `xmlquery` need Derecho:
   `ssh -o BatchMode=yes derecho '<command>'`. Keep jobs under 60 cores so they
   go through the develop queue fast.
@@ -165,8 +175,7 @@ and flag any that run past ~4 minutes.
   `DOCN%MESACLIP-<scenario>`, and `DICE%MESACLIP-<scenario>` with one case variable,
   `DATM_MESACLIP_CASE`, read by `mesaclip` datamodes copied from CPLHIST/SSMI, which
   also do unit conversions. DICE reads daily `aice_d` (%) from CICE history and divides
-  by 100; exports only `Si_ifrac`. `Si_thick` and `Si_floediam` are not provided
-  (DICE%SSMI also doesn't provide them).
+  by 100. `Si_floediam` is not provided (DICE%SSMI also doesn't provide it).
 - **Stand-ins for fields MESACLIP lacks** (2026-10-16): 2 m `TREFHT`/`QREFHT` and
   `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
   computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;
@@ -181,6 +190,17 @@ and flag any that run past ~4 minutes.
 - **`So_s` from MESACLIP `SSS`** (2026-10-21): daily POP `SSS`, × 1000 because the files hold kg/kg despite a g/kg label,
   in the DOCN streams; CICE and DICE (freezing point, `tfreeze_option = mushy`) import
   it. Without the stream, DOCN falls back to 34.7 psu as DOCN%SST does.
+
+- **`Si_thick` = `hi_d` / `aice_d`** (2026-10-21): DICE computes it as CICE does
+  (`vice/aice` where aice > puny, else 0). Before, WW3 got 0 everywhere.
+- **`So_bldepth` = 0** (2026-10-21): WW3 wants a boundary-layer depth, not POP's
+  mixed-layer depth `HMXL`; MESACLIP only has the daily maximum (`XBLT`). DOCN
+  sends 0 (was 1e30) and WW3 floors it at 5 m. It only affects WW3's Langmuir and
+  Stokes diagnostics.
+- **Years to 2100 without changing CDEPS code** (2026-10-21): CDEPS's `%y`
+  templates can't name MESACLIP's date-range files, and members' last files differ,
+  so the stream XML lists files explicitly up to the shared years (RCP 6.0 to
+  2095, other RCPs to 2099). Runs past that use `mesaclip_case_streams.py`.
 
 ## Working rules
 

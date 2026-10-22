@@ -39,12 +39,17 @@ DICE%CPLHIST, replayed from a prior coupled run. Links in these columns go to
 | `So_u`, `So_v` | Surface current | 0 ([107–108](sstdata:L107-L108)) | DOCN%CPLHIST | [202–203](ww3:L202-L203) |
 | `So_bldepth` | Boundary-layer depth: **not supplied** | not supplied | not supplied | [208–210](ww3:L208-L210) |
 | `Si_ifrac` | Ice fraction | DICE%SSMI | DICE%CPLHIST or CICE | [200](ww3:L200) |
-| `Si_thick` | Ice thickness: **not supplied** | not supplied | CICE only | [201](ww3:L201) |
+| `Si_thick` | Ice thickness | not supplied | CICE only | [201](ww3:L201) |
 | `Si_floediam` | Floe diameter: **not supplied** | not supplied | not supplied | [211–213](ww3:L211-L213) |
 
-`So_bldepth`: DOCN sends a fill value, so WW3's Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only
-with `LMPN=T`) are fill. CMEPS's `fd_cesm.yaml` aliases it `mixed_layer_depth`, and MOM6 sends its
-[mixed-layer depth](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_ocean_model_nuopc.F90#L999).
+`So_bldepth`: WW3 takes 0.2 × max(depth, 5 m) as the layer it averages Stokes drift over for its
+Langmuir outputs (`Sw_lamult`, `Sw_hstokes`, only with `LMPN=T`) ([620–624](ww3:L620-L624)). MESACLIP
+has no daily boundary-layer depth, so DOCN sends 0 and WW3 uses 1 m. MOM6 sends its boundary-layer
+scheme's depth (KPP or ePBL), named `Hml`
+([999](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_ocean_model_nuopc.F90#L999),
+[295](https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/src/parameterizations/vertical/MOM_diabatic_driver.F90#L295)),
+not a density-based mixed-layer depth like POP's `HMXL`, although CMEPS's `fd_cesm.yaml` aliases it
+`mixed_layer_depth`.
 
 ## MOM6
 
