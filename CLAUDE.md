@@ -38,6 +38,8 @@ output through CESM's data models (CDEPS). The full plan is
   `verify_a_case.py RUNDIR` checks the A case's coupler history against GDEX.
   `coupler_fields.py CPL_HI [CPL_HI_TEST]` lists what the mediator sends each model
   (and what a test case lacks against a reference).
+  `check_ww3_forcing.py CPL_HI WW3_HI` compares WW3's history (`CUR AST WLV ICE IC1 IC5`
+  in its field list) with what the mediator sent, to show which imports WW3 kept.
 - `cdeps/`: submodule on `manishvenu/CDEPS` `mesaclip-dice`, the top of a GitHub
   stack of PRs in the fork, on `cdeps1.0.101`: #5 `stream-daterange` → `main`
   (`%daterange`), #1 `mesaclip-datm` → `stream-daterange`, #2 `mesaclip-docn` →
@@ -147,7 +149,10 @@ and flag any that run past ~4 minutes.
 - Verified test cases: `~/croc_cases/mesaclip_a_hist` (A case, `ne120_t12`, SICE),
   `~/croc_cases/mesaclip_ww3_alaska` (regional WW3 on a 162×66 Bering Sea grid,
   SICE), `mesaclip_dice_a_hist` and `mesaclip_dice_ww3_alaska` (16 tasks; WW3 gets
-  9 of its 10 imports, all but `Si_floediam`). Each has `replay.sh`; `user_nl_*`
+  9 of its 10 imports, all but `Si_floediam`). On 2026-10-22, rebuilt on the stack (1 day,
+  job 6340575), WW3's history matched the coupler for winds, currents, ice fraction and
+  `Sa_tbot − So_t` (≤ 1e-5); ice thickness stayed at WW3's 0.5 m default, floe diameter
+  1000 m, water level 0. `user_nl_ww3` keeps the longer field list. Each has `replay.sh`; `user_nl_*`
   edits are in the case dirs.
 - Reference for what each model receives: `~/croc_cases/gwr_jra_cplhist`
   (GWR_JRA clone of `so1deg_wav_wavfix`, cpayne's `crocodile2026` CESM), 1 day
