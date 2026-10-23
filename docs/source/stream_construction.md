@@ -31,7 +31,7 @@ links go to the datamode source.
 | `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [312](datm:L312) |
 | `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [311](datm:L311) |
 | `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's T (ps/p)^κ ([CAM](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)) with p = `PS` | `TREFHT` | [282](datm:L282) |
-| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | `U10` speed along `UBOT`/`VBOT` (as NorESM's CAM sends WW3); 0 where `UBOT`/`VBOT` is 0 | `U10`, `UBOT`, `VBOT` | [290–300](datm:L290-L300) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | `U10` speed along `UBOT`/`VBOT`; 0 where `UBOT`/`VBOT` is 0 | `U10`, `UBOT`, `VBOT` | [290–300](datm:L290-L300) |
 | `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [308](datm:L308) |
 | `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [309](datm:L309) |
 | `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd `TREFHT` (1 + zvir `QREFHT`)) | [283](datm:L283) |

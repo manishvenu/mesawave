@@ -193,7 +193,8 @@ and flag any that run past ~4 minutes.
 - **WW3's winds: CAM's `U10` speed along `UBOT`/`VBOT`** (2026-10-22; was `UBOT`/`VBOT`
   since 10-16). The lowest CAM level is ~64 m over ocean (`ZBOT`). `U10` (6-hourly `h2`) is
   CESM1's equivalent-neutral 10 m speed relative to the current, merged over ocean, ice and
-  land, so it is low at coasts and ice; NorESM's CAM sends WW3 the same thing. Over 10 days it
+  land, so it is low at coasts and ice. NorESM's CAM builds WW3's wind the same way, but its
+  ocean speed is COARE's actual (not neutral) 10 m wind. Over 10 days it
   cut mean wind by 10% and Hs by 25% on wu2r05 (19% in Alaska). `BETAMAX`, if tuned, is tuned
   once on historical and held fixed. Rejected: `ZWND` ≈ 64 (neutral only), letting `BETAMAX`
   absorb the bias. `Sa_u`/`Sa_v` stay `UBOT`/`VBOT`; pass `ZBOT` as `Sa_z` for MOM6.
