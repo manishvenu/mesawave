@@ -153,7 +153,17 @@ and flag any that run past ~4 minutes.
   job 6340575), WW3's history matched the coupler for winds, currents, ice fraction and
   `Sa_tbot − So_t` (≤ 1e-5); ice thickness stayed at WW3's 0.5 m default, floe diameter
   1000 m, water level 0. `user_nl_ww3` keeps the longer field list. Each has `replay.sh`; `user_nl_*`
-  edits are in the case dirs.
+  edits are in the case dirs. WW3 writes `ww3.hi` only when `HIST_OPTION` is set: the cap takes
+  the driver's `history_option`, not `wav_in`'s, and the same setting writes the mediator's `cpl.hi`.
+- Global unstructured WW3: `~/croc_cases/mesaclip_ww3_wu2r05` (Derecho, 1 node/128 tasks on
+  `main`, 10 days from 2000-01-01, member 010) tests ESMCI/ccs_config_cesm#310 + ESCOMP/WW3_interface#23
+  in the sandbox `/glade/work/manishrv/installs/CESM_wu2r05` (CESM 16dd396; `ww3` branch
+  `wu2r05-pr23` = e64dc4d + the PR's commits, two conflicts resolved by hand; `cdeps` on
+  `mesaclip-dice`). Grid `a%ne120np4_l%null_oi%wu2r05_r%null_g%null_w%wu2r05_z%null_m%wu2r05`, so
+  DOCN/DICE sit on the WW3 mesh. Job 7911442 (2026-10-22): 186 s init, 58.7 s/day (WAV 41 s), 98 GB;
+  `check_ww3_forcing.py` matches winds, currents, ice fraction. Job 7911888 reran it with `U10`
+  winds (55.8 s/day). `UBOT`/`VBOT` and `U10` `ww3.hi` from both cases are in
+  `~/scratch/mesawave_u10_compare/{ubot,u10,ubot_wu2r05,u10_wu2r05}/`.
 - Reference for what each model receives: `~/croc_cases/gwr_jra_cplhist`
   (GWR_JRA clone of `so1deg_wav_wavfix`, cpayne's `crocodile2026` CESM), 1 day
   with `HIST_OPTION=ndays`; its `cpl.hi` is the input to `coupler_fields.py`.
@@ -180,10 +190,13 @@ and flag any that run past ~4 minutes.
 
 ## Decisions
 
-- **Winds: CAM bottom winds (`UBOT`/`VBOT`) for now** (2026-10-16). WW3
-  treats `Sa_u10m` as a 10 m wind, but the lowest CAM level is ~60 m (check
-  `ZBOT`), so expect winds and waves biased high until rescaled to 10 m (e.g.
-  to CAM's `U10` speed, if saved 6-hourly). Pass `ZBOT` as `Sa_z` for MOM6.
+- **WW3's winds: CAM's `U10` speed along `UBOT`/`VBOT`** (2026-10-22; was `UBOT`/`VBOT`
+  since 10-16). The lowest CAM level is ~64 m over ocean (`ZBOT`). `U10` (6-hourly `h2`) is
+  CESM1's equivalent-neutral 10 m speed relative to the current, merged over ocean, ice and
+  land, so it is low at coasts and ice; NorESM's CAM sends WW3 the same thing. Over 10 days it
+  cut mean wind by 10% and Hs by 25% on wu2r05 (19% in Alaska). `BETAMAX`, if tuned, is tuned
+  once on historical and held fixed. Rejected: `ZWND` ≈ 64 (neutral only), letting `BETAMAX`
+  absorb the bias. `Sa_u`/`Sa_v` stay `UBOT`/`VBOT`; pass `ZBOT` as `Sa_z` for MOM6.
 - **No runs span historical and future MESACLIP** (2026-10-16). Each run
   uses one MESACLIP scenario and member; combining them is out of scope.
 - **MESACLIP enters CESM as CDEPS modes** (2026-10-16/19): `DATM%MESACLIP-<scenario>`,
@@ -194,7 +207,7 @@ and flag any that run past ~4 minutes.
 - **Stand-ins for fields MESACLIP lacks** (2026-10-16): 2 m `TREFHT`/`QREFHT` and
   `PS` (`h2`) for lowest-level T, q and p; potential temperature and density
   computed; direct shortwave = `FSDS` minus diffuse, split with JRA's fractions;
-  topography from DATM's observed stream; WW3's 10 m winds = `UBOT`/`VBOT`.
+  topography from DATM's observed stream; WW3's 10 m winds as above.
 - **6-hourly MESACLIP fields** (2026-10-16): `h2` is instantaneous (`UBOT`, `VBOT`,
   `ZBOT`, `PSL`, `PS`, `TREFHT`, `QREFHT`); `h4` holds 6 h means stamped at the
   window's end (`FSDS`, `FLDS`, `SOLSD`, `SOLLD`, `PRECT`, `PRECC`, `PRECSC`,
@@ -211,7 +224,9 @@ and flag any that run past ~4 minutes.
 - **`So_bldepth` = 0** (2026-10-21): WW3 wants a boundary-layer depth, not POP's
   mixed-layer depth `HMXL`; MESACLIP only has the daily maximum (`XBLT`). DOCN
   sends 0 (was 1e30). WW3 reads it into `HSL` but uses it only with `&LMPN`
-  `LMPENABLED` and `HSLMODE = 1`, both off by default, so it changes nothing.
+  `LMPENABLED` and `HSLMODE = 1`. Both are off by default, but CESM's `wgx3v7`, `ww3a` and
+  `wu2r05` grid inputs turn them on; then it changes only the Langmuir/Stokes fields WW3
+  sends an ocean, not the waves. Check the NOAA mesh's input.
 - **What standalone WW3 uses** (2026-10-22, from the CESM WW3 source; proof links on
   the demand page): only winds, currents and ice fraction change the waves. `Sa_tbot −
   So_t` feeds only `STAB3` (build has `STAB0`); the cap turns `Si_thick`/`Si_floediam`
