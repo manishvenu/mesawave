@@ -76,7 +76,8 @@ output through CESM's data models (CDEPS). The full plan is
 - `%daterange` (stack PR #5) in a `<file>` stands for the `<start>-<end>` of CESM
   time-series names; buildnml expands it to the files covering the stream years,
   checks gaps and overlaps, and marks the stream `check_dates`, so the model checks
-  each file's times against its name (only for those streams).
+  each file's times against its name (only for those streams). It is expanded after
+  `user_nl_*_streams` changes, with their `year_first`/`year_last` and `datafiles`.
 
 ## Reference CESM source (GLADE)
 
@@ -143,9 +144,15 @@ and flag any that run past ~4 minutes.
   on `T62_t232_wg37` with testmod `dice/mesaclip` (starts on the scenario's first year):
   `SMS_D_Ld3_P12` (HIST) and `ERS_Ld4_P12` (RCP45). Both passed on 2026-10-27 (31 and
   14 min, 56 GB). WW3 on `wt232` took 98% of the run time; one task ran out of memory.
-- The CESM_crocodash install's `components/cdeps` is on an older restack of
-  `mesaclip-dice` (1f2c94a; the pushed branch differs only in comments and tests) plus the
-  untracked `dice/mesaclip` testmod; the earlier manual copies are in its `stash@{0}`.
+- The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (ddf810a, as pushed);
+  the earlier manual copies are in its `stash@{0}`. Its `ccs_config/modelgrid_aliases_nuopc.xml`
+  has an uncommitted `mesaclip_ne120np4` alias (atm/lnd `ne120np4`, from a tester).
+- CrocoDash + MESACLIP: `~/croc_cases/mesaclip_crocodash_alaska` (DATM/DICE MESACLIP-HIST,
+  regional MOM6, Casper, `replay.sh`). Needs an `ne120np4` alias without `not_compset="_MOM"`:
+  visualCaseGen keeps a grid's `not_compset` only if every alias using it has it
+  (`cime_interface.py` `_process_domain_constraints`), and all CESM `ne120` aliases are `_MOM`-excluded.
+  CrocoDash's `StreamYears` rewrites every DATM stream's years/`datafiles`, which works only
+  with the 2026-10-28 `%daterange` fix. CrocoDash picked 62 tasks; 162×66 MOM6 needs ≤ ~16.
 - The A case needs ~136 GB, more than Derecho's develop queue gives (CIME asks 10 GB
   per task up to 12 tasks, then that share of a node's 235 GB, so ≤ 120 GB; 63 tasks
   max): run it on Casper or a full `main` node.
@@ -240,7 +247,11 @@ and flag any that run past ~4 minutes.
   the demand page): only winds, currents and ice fraction change the waves. `Sa_tbot −
   So_t` feeds only `STAB3` (build has `STAB0`); the cap turns `Si_thick`/`Si_floediam`
   off without CICE, which also turns off ice-concentration scaling, so `IC4` method 1
-  (no `&SIC4`) damps at 0.5 m⁻¹ wherever ice > 0. `So_h` isn't advertised.
+  (no `&SIC4`) damps at 0.5 m⁻¹ wherever ice > 0. `So_h` isn't advertised. Tested
+  2026-10-28 on `mesaclip_dice_ww3_alaska` (3 days): shifting every other stream 10 days
+  (`user_nl_{datm,docn,dice}_streams` offsets; not the static `topo.observed`) left all WW3
+  wave output bit-for-bit identical; only `AS` changed. Shifting only the six WW3 streams
+  (`UBOT VBOT U10 U1_1 V1_1 aice_d`) changed Hs by up to 5 m. Files in `~/scratch/mesawave_offset_test/`.
 - **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
   per variable, expanded at buildnml to the member's files for the stream years
   (all RCPs to 2100), with gap/overlap checks and a file-time-vs-name check in

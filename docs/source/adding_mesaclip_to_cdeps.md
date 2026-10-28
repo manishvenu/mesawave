@@ -55,6 +55,14 @@ are within a day of its name. Set the years to the run's years:
 Keep runs inside those years: past them `extend` holds the last record without an error
 ([stream parameters](stream_construction.md#stream-parameters)).
 
+A stream's years or files changed in `user_nl_datm_streams` (or `_docn_`, `_dice_`) are expanded the
+same way, after the change:
+
+```
+MESACLIP_HIST.UBOT:year_first = 1998
+MESACLIP_HIST.UBOT:year_last = 2001
+```
+
 ## XML variable: `DATM_MESACLIP_CASE`
 
 The GDEX case name, which picks the member for DATM, DOCN and DICE at once (`env_run.xml`):
@@ -72,6 +80,6 @@ the [supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|
-| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/436c4f563d9152781bec1b3c61bf2901f830a67a/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
-| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/bffc46249f99f14df948d67b56525f5b3bd35382/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
-| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/d9f69fe3bbf64f58decfcdf4624bb14fda7db92d/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/39d8f8e2b069c947f9c803c791875240ad18c7fc/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
+| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/93bd0f13b00f06078c36ced3dc4f97f5d6c7cd85/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
+| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/ddf810a11dd2c0e8d3b35544c062fcdb570d0236/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
