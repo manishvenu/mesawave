@@ -82,7 +82,6 @@ FIELDS = {
         "Sa_u": ("h2", "UBOT"),
         "Sa_v": ("h2", "VBOT"),
         "Sa_z": ("h2", "ZBOT"),
-        "Sa_wspd10m": ("h2", "U10"),
         "Sa_pslv": ("h2", "PSL"),
         "Sa_tbot": ("h2", "TREFHT"),
         "Sa_shum": ("h2", "QREFHT"),

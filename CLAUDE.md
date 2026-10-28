@@ -146,13 +146,14 @@ and flag any that run past ~4 minutes.
   14 min, 56 GB). WW3 on `wt232` took 98% of the run time; one task ran out of memory.
 - The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (ddf810a, as pushed);
   the earlier manual copies are in its `stash@{0}`. Its `ccs_config/modelgrid_aliases_nuopc.xml`
-  has an uncommitted `mesaclip_ne120np4` alias (atm/lnd `ne120np4`, from a tester).
+  has an uncommitted `mesaclip_ne120np4` alias (atm `ne120np4` only; a tester's, minus lnd).
 - CrocoDash + MESACLIP: `~/croc_cases/mesaclip_crocodash_alaska` (DATM/DICE MESACLIP-HIST,
   regional MOM6, Casper, `replay.sh`). Needs an `ne120np4` alias without `not_compset="_MOM"`:
   visualCaseGen keeps a grid's `not_compset` only if every alias using it has it
   (`cime_interface.py` `_process_domain_constraints`), and all CESM `ne120` aliases are `_MOM`-excluded.
   CrocoDash's `StreamYears` rewrites every DATM stream's years/`datafiles`, which works only
   with the 2026-10-28 `%daterange` fix. CrocoDash picked 62 tasks; 162×66 MOM6 needs ≤ ~16.
+  Ran 3 days (job 6431558, 16 tasks, 23 sim yr/day) with CrocoDash's own overrides.
 - The A case needs ~136 GB, more than Derecho's develop queue gives (CIME asks 10 GB
   per task up to 12 tasks, then that share of a node's 235 GB, so ≤ 120 GB; 63 tasks
   max): run it on Casper or a full `main` node.
@@ -205,14 +206,14 @@ and flag any that run past ~4 minutes.
 
 ## Decisions
 
-- **WW3's winds: CAM's `U10` speed along `UBOT`/`VBOT`** (2026-10-22; was `UBOT`/`VBOT`
-  since 10-16). The lowest CAM level is ~64 m over ocean (`ZBOT`). `U10` (6-hourly `h2`) is
-  CESM1's equivalent-neutral 10 m speed relative to the current, merged over ocean, ice and
-  land, so it is low at coasts and ice. NorESM's CAM builds WW3's wind the same way, but its
-  ocean speed is COARE's actual (not neutral) 10 m wind. Over 10 days it
-  cut mean wind by 10% and Hs by 25% on wu2r05 (19% in Alaska). `BETAMAX`, if tuned, is tuned
-  once on historical and held fixed. Rejected: `ZWND` ≈ 64 (neutral only), letting `BETAMAX`
-  absorb the bias. `Sa_u`/`Sa_v` stay `UBOT`/`VBOT`; pass `ZBOT` as `Sa_z` for MOM6.
+- **WW3's winds: `UBOT`/`VBOT` × (10/`ZBOT`)^0.11** (2026-10-28, from Julio Bacmeister; was
+  `U10` speed along `UBOT`/`VBOT` from 10-22, `UBOT`/`VBOT` before). A power law from the lowest
+  CAM level (~64 m over ocean, `ZBOT`) to 10 m, about 0.82 at 60 m; no `U10` stream. For comparison,
+  MESACLIP's `U10`/|`UBOT`| has an open-ocean median of 0.92 (0.84 above 20 m/s, 0.79 stable),
+  and the `U10` winds cut Hs by 25% on wu2r05 (19% in Alaska) over 10 days. `BETAMAX`, if tuned,
+  is tuned once on historical and held fixed. `Sa_u`/`Sa_v` stay `UBOT`/`VBOT`; `ZBOT` is `Sa_z`.
+  Checked 2026-10-28 (Alaska, 1 day): DATM's `Sa_u10m` equals the formula to 4e-15; WW3's
+  wind is 0.821 × the `UBOT` run's and 0.93–0.96 × the `U10` run's.
 - **No runs span historical and future MESACLIP** (2026-10-16). Each run
   uses one MESACLIP scenario and member; combining them is out of scope.
 - **MESACLIP enters CESM as CDEPS modes** (2026-10-16/19): `DATM%MESACLIP-<scenario>`,

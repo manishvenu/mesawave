@@ -21,24 +21,24 @@ links go to the datamode source.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
-| `Sa_u`, `Sa_v` | Lowest-level wind, zonal and meridional | direct | `UBOT`, `VBOT` | [276–277](datm:L276-L277) |
-| `Sa_z` | Height of the lowest atmosphere level | direct | `ZBOT` | [271](datm:L271) |
-| `Sa_tbot` | Lowest-level air temperature | direct | `TREFHT` | [272](datm:L272) |
-| `Sa_shum` | Lowest-level specific humidity | direct | `QREFHT` | [273](datm:L273) |
-| `Sa_pbot` | Lowest-level pressure | direct | `PS` | [274](datm:L274) |
-| `Sa_pslv` | Sea-level pressure | direct | `PSL` | [275](datm:L275) |
-| `Faxa_lwdn` | Downward longwave | direct | `FLDS` {bdg-primary}`h4` | [310](datm:L310) |
-| `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [312](datm:L312) |
-| `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [311](datm:L311) |
-| `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's T (ps/p)^κ ([CAM](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)) with p = `PS` | `TREFHT` | [282](datm:L282) |
-| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | `U10` speed along `UBOT`/`VBOT`; 0 where `UBOT`/`VBOT` is 0 | `U10`, `UBOT`, `VBOT` | [290–300](datm:L290-L300) |
-| `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [308](datm:L308) |
-| `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [309](datm:L309) |
-| `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd `TREFHT` (1 + zvir `QREFHT`)) | [283](datm:L283) |
-| `Faxa_rainc` | Convective rain | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [306](datm:L306) |
-| `Faxa_rainl` | Large-scale rain | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [307](datm:L307) |
-| `Faxa_swvdr` | Downward shortwave, visible direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [314](datm:L314) |
-| `Faxa_swndr` | Downward shortwave, near-IR direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [294](datm:L294) |
+| `Sa_u`, `Sa_v` | Lowest-level wind, zonal and meridional | direct | `UBOT`, `VBOT` | [269–270](datm:L269-L270) |
+| `Sa_z` | Height of the lowest atmosphere level | direct | `ZBOT` | [264](datm:L264) |
+| `Sa_tbot` | Lowest-level air temperature | direct | `TREFHT` | [265](datm:L265) |
+| `Sa_shum` | Lowest-level specific humidity | direct | `QREFHT` | [266](datm:L266) |
+| `Sa_pbot` | Lowest-level pressure | direct | `PS` | [267](datm:L267) |
+| `Sa_pslv` | Sea-level pressure | direct | `PSL` | [268](datm:L268) |
+| `Faxa_lwdn` | Downward longwave | direct | `FLDS` {bdg-primary}`h4` | [293](datm:L293) |
+| `Faxa_swvdf` | Downward shortwave, visible diffuse | direct | `SOLSD` {bdg-primary}`h4` | [295](datm:L295) |
+| `Faxa_swndf` | Downward shortwave, near-IR diffuse | direct | `SOLLD` {bdg-primary}`h4` | [294](datm:L294) |
+| `Sa_ptem` | Lowest-level potential temperature | = `Sa_tbot`: CAM's T (ps/p)^κ ([CAM](https://github.com/ESCOMP/CAM/blob/cam6_4_187/src/control/camsrfexch.F90#L496)) with p = `PS` | `TREFHT` | [275](datm:L275) |
+| `Sa_u10m`, `Sa_v10m` | 10 m wind, zonal and meridional | `UBOT`, `VBOT` × (10/`ZBOT`)^0.11, about 0.82 at 60 m (Julio Bacmeister, personal communication) | `UBOT`, `VBOT`, `ZBOT` | [281–284](datm:L281-L284) |
+| `Faxa_snowc` | Convective snow | unit conversion, m/s → kg/m²/s | `PRECSC` {bdg-primary}`h4` | [291](datm:L291) |
+| `Faxa_snowl` | Large-scale snow | unit conversion, m/s → kg/m²/s | `PRECSL` {bdg-primary}`h4` | [292](datm:L292) |
+| `Sa_dens` | Lowest-level air density | {bdg-info}`computed` | `PS` / (Rd `TREFHT` (1 + zvir `QREFHT`)) | [276](datm:L276) |
+| `Faxa_rainc` | Convective rain | {bdg-info}`computed` | (`PRECC` − `PRECSC`) × 1000 {bdg-primary}`h4` | [289](datm:L289) |
+| `Faxa_rainl` | Large-scale rain | {bdg-info}`computed` | (`PRECT` − `PRECC` − `PRECSL`) × 1000 {bdg-primary}`h4` | [290](datm:L290) |
+| `Faxa_swvdr` | Downward shortwave, visible direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.475 {bdg-primary}`h4` | [297](datm:L297) |
+| `Faxa_swndr` | Downward shortwave, near-IR direct | {bdg-info}`computed` | (`FSDS` − `SOLSD` − `SOLLD`) × 0.525 {bdg-primary}`h4` | [298](datm:L298) |
 | `Sa_topo` | Surface height (topography) | DATM's observed topography stream | — | [263](datm:L263) |
 
 Direct shortwave is split in JRA's 0.28 : 0.31 ratio. `Faxa_swdn`, `Faxa_prect`, `Faxa_precc`,
@@ -84,6 +84,7 @@ In the files ([variable glossary](mesaclip_experiments.md#variable-glossary)) bu
 
 | MESACLIP variable | Meaning | File | Could provide | Instead of |
 |---|---|---|---|---|
+| `U10` | 10 m wind speed | `cam.h2` | `Sa_u10m`, `Sa_v10m` speed | power-law scaling of `UBOT`/`VBOT` |
 | `SSH_2` | Sea-surface height | `pop.h.nday1` | `So_dhdx`, `So_dhdy` from its gradient² | not supplied |
 | `Tsfc_d` | Snow/ice surface temperature | `cice.h1` | `Si_t` | DICE's made-up seasonal value |
 | `fswthru_d` | Shortwave through the ice to the ocean | `cice.h1` | `Fioi_swpen` | 0 |
