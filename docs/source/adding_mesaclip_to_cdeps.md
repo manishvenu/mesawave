@@ -72,6 +72,6 @@ the [supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|
-| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/13ebd6d48fbe6d168973332ac5df1b54411dc546/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
-| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/c852c1a757f1766b4551133d01cbeff44136cf60/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
-| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/0b003869804c2c74715f586a8cc305e2060751aa/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/436c4f563d9152781bec1b3c61bf2901f830a67a/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
+| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/bffc46249f99f14df948d67b56525f5b3bd35382/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
+| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/d9f69fe3bbf64f58decfcdf4624bb14fda7db92d/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
