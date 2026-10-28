@@ -128,7 +128,7 @@ their code is in `~/documents/croc/dev/`.
 Say so before slow calls (`create_case`, `process_forcings`, `case_build`),
 and flag any that run past ~4 minutes.
 
-## Status (2026-10-22)
+## Status (2026-10-27)
 
 - MESACLIP DATM/DOCN/DICE modes are done. `docs/source/adding_mesaclip_to_cdeps.md`
   has the PRs, the five scenario modes, `%daterange`, `DATM_MESACLIP_CASE` and the
@@ -137,10 +137,18 @@ and flag any that run past ~4 minutes.
   CROCODILE-CESM/CDEPS#2 (fork branch `mesaclip`) is untouched; the org's `main`
   now tracks ESCOMP main, so merging there needs a rebase and a retest. The user
   moves org refs.
-- The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (remote
-  `mesawave`); the earlier manual copies are in its `stash@{0}`.
-- The A case needs ~136 GB, more than Derecho's develop queue gives (~1.8 GB per
-  core, 63 cores max): run it on Casper or a full `main` node.
+- Tests in the stack: #5 has `cime_config/test_stream_cdeps.py` (one plain-assert test
+  of `%daterange`; `CIMEROOT=... python3 cime_config/test_stream_cdeps.py`). #3 adds two
+  `aux_cdeps` tests to `testlist_dice.xml`, DATM/DOCN/DICE in MESACLIP modes forcing WW3
+  on `T62_t232_wg37` with testmod `dice/mesaclip` (starts on the scenario's first year):
+  `SMS_D_Ld3_P12` (HIST) and `ERS_Ld4_P12` (RCP45). Both passed on 2026-10-27 (31 and
+  14 min, 56 GB). WW3 on `wt232` took 98% of the run time; one task ran out of memory.
+- The CESM_crocodash install's `components/cdeps` is on an older restack of
+  `mesaclip-dice` (1f2c94a; the pushed branch differs only in comments and tests) plus the
+  untracked `dice/mesaclip` testmod; the earlier manual copies are in its `stash@{0}`.
+- The A case needs ~136 GB, more than Derecho's develop queue gives (CIME asks 10 GB
+  per task up to 12 tasks, then that share of a node's 235 GB, so ≤ 120 GB; 63 tasks
+  max): run it on Casper or a full `main` node.
   `~/croc_cases/mesaclip_dice_a_hist_derecho` (main, 128 tasks, 2 days, stream
   years 2000–2000, ocean history `So_t:So_s:So_u:So_v`) verified the stack: run
   starts on Jan 1 of the stream year (`extend`), currents match `ANGLE`-rotated
