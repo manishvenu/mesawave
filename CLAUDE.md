@@ -252,11 +252,14 @@ and flag any that run past ~4 minutes.
   (`w3gridmd.F90:2784`); `FICEN` blocking is `IC0` only and ice transparency needs
   `TRFLAG ≥ 3`. WW3 still reads the ice into `ICE` (history) and returns it as
   `Sw_ifrac_avg` (demand page has the links). `So_h` isn't advertised. Offset tests (3 days, Alaska, 10-day stream offsets; cases
-  `~/croc_cases/mesaclip_ww3_offset_{control,irrelevant,relevant,icefrac}`, power-law winds):
+  `~/croc_cases/mesaclip_ww3_offset_*`, all on the control's build, power-law winds):
   shifting everything but wind (`UBOT VBOT ZBOT`), currents and `aice_d` left waves and all
   600 restart spectral bins bit-for-bit identical (only `AS` changed); shifting those six
   changed the waves; shifting only `aice_d` changed `ICE` by up to 0.99 at ~1,100 of 6,996
-  sea points and left the waves bit-for-bit identical. Earlier 10-28 test (`U10` winds) in
+  sea points and left the waves bit-for-bit identical. Shifting `UBOT`, `VBOT`, `ZBOT`,
+  `U1_1` or `V1_1` alone changed the waves (Hs up to 4.5, 4.5, 0.57, 0.57, 0.29 m) and only
+  the matching `wavExp_` fields (`ZBOT` both winds; each current stream both currents, via
+  the `ANGLE` rotation). Earlier 10-28 test (`U10` winds) in
   `~/scratch/mesawave_offset_test/`.
 - **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
   per variable, expanded at buildnml to the member's files for the stream years
