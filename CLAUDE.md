@@ -244,15 +244,20 @@ and flag any that run past ~4 minutes.
   `LMPENABLED` and `HSLMODE = 1`. Both are off by default, but CESM's `wgx3v7`, `ww3a` and
   `wu2r05` grid inputs turn them on; then it changes only the Langmuir/Stokes fields WW3
   sends an ocean, not the waves. Check the NOAA mesh's input.
-- **What standalone WW3 uses** (2026-10-22, from the CESM WW3 source; proof links on
-  the demand page): only winds, currents and ice fraction change the waves. `Sa_tbot −
-  So_t` feeds only `STAB3` (build has `STAB0`); the cap turns `Si_thick`/`Si_floediam`
-  off without CICE, which also turns off ice-concentration scaling, so `IC4` method 1
-  (no `&SIC4`) damps at 0.5 m⁻¹ wherever ice > 0. `So_h` isn't advertised. Tested
-  2026-10-28 on `mesaclip_dice_ww3_alaska` (3 days): shifting every other stream 10 days
-  (`user_nl_{datm,docn,dice}_streams` offsets; not the static `topo.observed`) left all WW3
-  wave output bit-for-bit identical; only `AS` changed. Shifting only the six WW3 streams
-  (`UBOT VBOT U10 U1_1 V1_1 aice_d`) changed Hs by up to 5 m. Files in `~/scratch/mesawave_offset_test/`.
+- **What standalone WW3 uses** (2026-10-22, corrected 2026-10-29): only winds and currents
+  change the waves; ice fraction does not. `Sa_tbot − So_t` feeds only `STAB3` (build has
+  `STAB0`). Without CICE the cap sets `inflags2(:) = .false.` (`wav_comp_nuopc.F90:1714`),
+  which turns off all ice source terms (`w3srcemd.F90:2122`, and ice scaling at 1444);
+  the other `IC4` call needs `IC_NUMERICS` (`w3srcemd.F90:1363`), default false
+  (`w3gridmd.F90:2784`); `FICEN` blocking is `IC0` only and ice transparency needs
+  `TRFLAG ≥ 3`. WW3 still reads the ice into `ICE` (history) and returns it as
+  `Sw_ifrac_avg` (demand page has the links). `So_h` isn't advertised. Offset tests (3 days, Alaska, 10-day stream offsets; cases
+  `~/croc_cases/mesaclip_ww3_offset_{control,irrelevant,relevant,icefrac}`, power-law winds):
+  shifting everything but wind (`UBOT VBOT ZBOT`), currents and `aice_d` left waves and all
+  600 restart spectral bins bit-for-bit identical (only `AS` changed); shifting those six
+  changed the waves; shifting only `aice_d` changed `ICE` by up to 0.99 at ~1,100 of 6,996
+  sea points and left the waves bit-for-bit identical. Earlier 10-28 test (`U10` winds) in
+  `~/scratch/mesawave_offset_test/`.
 - **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
   per variable, expanded at buildnml to the member's files for the stream years
   (all RCPs to 2100), with gap/overlap checks and a file-time-vs-name check in

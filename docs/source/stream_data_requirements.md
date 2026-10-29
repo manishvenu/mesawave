@@ -19,18 +19,31 @@ into CESM's WW3 ([switches](ww3src:src/CMakeLists.txt#L45): `ST4`, `STAB0`, `IC4
 |---|---|---|---|---|
 | `Sa_u10m`, `Sa_v10m` | 10 m wind | [206–207](ww3:L206-L207) | `winds` ([545–579](ww3:L545-L579)) | yes |
 | `So_u`, `So_v` | Surface current | [202–203](ww3:L202-L203) | `currents` ([477–513](ww3:L477-L513)) | yes |
-| `Si_ifrac` | Ice fraction | [200](ww3:L200) | `ice_conc` ([607–614](ww3:L607-L614)) | yes: `IC4` damping where ice > 0 ([1379](ww3src:src/w3srcemd.F90#L1379)) |
+| `Si_ifrac` | Ice fraction | [200](ww3:L200) | `ice_conc` ([607–614](ww3:L607-L614)) | no: ice physics is off without CICE (below) |
 | `Sa_tbot`, `So_t` | Air temperature, SST | [204–205](ww3:L204-L205) | as `Sa_tbot − So_t` ([581–596](ww3:L581-L596), [703–704](ww3src:src/w3updtmd.F90#L703-L704)) | no: only `STAB3` uses it ([679–701](ww3src:src/w3src4md.F90#L679-L701)) |
 | `Si_thick` | Ice thickness | [201](ww3:L201) | no: off without CICE ([1714–1726](ww3src:src/wav_comp_nuopc.F90#L1714-L1726)) | no |
 | `Si_floediam` | Floe diameter | with CICE only ([211–213](ww3:L211-L213)) | no | no |
 | `So_bldepth` | Boundary-layer depth | [208–210](ww3:L208-L210) | always ([620–625](ww3:L620-L625)) | no: used only if `&LMPN` sets `LMPENABLED` and `HSLMODE = 1` ([1626–1633](ww3src:src/w3iogomd.F90#L1626-L1633)); both off by default ([2816–2818](ww3src:src/w3gridmd.F90#L2816-L2818)) |
 | `So_h` | Sea surface height | no: commented out ([199](ww3:L199)) | no | no |
 
-**Ice damping without CICE.** The same block that turns off thickness also turns off scaling by ice
-concentration ([1714](ww3src:src/wav_comp_nuopc.F90#L1714), [1444–1455](ww3src:src/w3srcemd.F90#L1444-L1455)).
-With no `&SIC4` in the grid file, `IC4` uses method 1 ([2931](ww3src:src/w3gridmd.F90#L2931)), whose
-coefficients come from ice fields that are off ([511–515](ww3src:src/w3sic4md.F90#L511-L515)), so
-they are 0 and the damping rate is 0.5 m⁻¹ wherever ice > 0 ([541–542](ww3src:src/w3sic4md.F90#L541-L542)).
+**Ice without CICE.** WW3 reads the ice fraction but nothing uses it. The cap sets `inflags2(:) = .false.` and sets
+`inflags2(4)` again only with CICE ([1714–1716](ww3src:src/wav_comp_nuopc.F90#L1714-L1716)), which
+turns off:
+
+- the ice source terms, including `IC4` damping ([2122](ww3src:src/w3srcemd.F90#L2122));
+- scaling input and dissipation by the ice-free fraction ([1444](ww3src:src/w3srcemd.F90#L1444)).
+
+The other ice paths are off too:
+
+- the other `IC4` call needs `IC_NUMERICS` ([1363](ww3src:src/w3srcemd.F90#L1363)), false by default
+  ([2784](ww3src:src/w3gridmd.F90#L2784));
+- removing points with ice above `FICEN` is compiled only with `IC0`
+  ([1980–1981](ww3src:src/w3updtmd.F90#L1980-L1981));
+- ice transparency needs `TRFLAG` ≥ 3 ([3063](ww3src:src/w3updtmd.F90#L3063)).
+
+WW3 still writes the ice it received to its history (`ICE`) and returns it as `Sw_ifrac_avg`. In a
+3-day test on the Alaska grid, shifting only `aice_d` by 10 days changed `ICE` by up to 0.99 and left
+the waves, including the full restart spectrum, bit-for-bit identical.
 
 ## MOM6
 
