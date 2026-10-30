@@ -37,9 +37,9 @@ myst_url_schemes = {
     'ww3src': 'https://github.com/CROCODILE-CESM/WW3/blob/4b79dba2859ce120adaac00e9ab98ffd12c8b0d5/model/{{path}}#{{fragment}}',
     'mom6': 'https://github.com/CROCODILE-CESM/MOM6/blob/09d8593619eddfda44cfd6d553e4f8651843654d/config_src/drivers/nuopc_cap/mom_cap.F90#{{path}}',
     'cice': 'https://github.com/ESCOMP/CICE/blob/cice6_6_3_20260904/cicecore/drivers/nuopc/cmeps/ice_import_export.F90#{{path}}',
-    'datm': 'https://github.com/manishvenu/CDEPS/blob/d41c6753ede978596ce209bdbbd3978ff87de00e/datm/datm_datamode_mesaclip_mod.F90#{{path}}',
-    'docn': 'https://github.com/manishvenu/CDEPS/blob/b6bf74132dfbdb77fe237ad46f2fbeb5d6b72417/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
-    'dice': 'https://github.com/manishvenu/CDEPS/blob/0eb07478c36fc762c34cbb08802b491475864eab/dice/dice_datamode_mesaclip_mod.F90#{{path}}',
+    'datm': 'https://github.com/manishvenu/CDEPS/blob/08664050b7598af456fe78c941616fa6fde8455e/datm/datm_datamode_mesaclip_mod.F90#{{path}}',
+    'docn': 'https://github.com/manishvenu/CDEPS/blob/d1cf32c31cb49ed0a12bed3b42f38b3a88eea4f5/docn/docn_datamode_mesaclip_mod.F90#{{path}}',
+    'dice': 'https://github.com/manishvenu/CDEPS/blob/769a216e4df4b31c57d3bb2d1700d395d4697b62/dice/dice_datamode_mesaclip_mod.F90#{{path}}',
 }
 
 templates_path = ['_templates']

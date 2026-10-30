@@ -74,10 +74,15 @@ output through CESM's data models (CDEPS). The full plan is
   invalid `taxmode`, `mapalgo`, `tintalgo`, `readmode`, so fill these before a run.
 - CDEPS does not convert units or rotate grid-relative vectors.
 - `%daterange` (stack PR #5) in a `<file>` stands for the `<start>-<end>` of CESM
-  time-series names; buildnml expands it to the files covering the stream years,
-  checks gaps and overlaps, and marks the stream `check_dates`, so the model checks
-  each file's times against its name (only for those streams). It is expanded after
-  `user_nl_*_streams` changes, with their `year_first`/`year_last` and `datafiles`.
+  time-series names; buildnml expands it to the files covering the stream years and
+  checks gaps and overlaps. It is expanded after `user_nl_*_streams` changes, with their
+  `year_first`/`year_last` and `datafiles`. Unless the stream cycles, buildnml stops if the
+  run starts outside the stream years (mapped through `year_align`) and warns if it starts
+  after `year_first`: the model reads the time axis of every file from `year_first` to the
+  start (years 1920–2005 from 2000: 81 of 86 files per stream, 336 s to start). The model
+  checks each file's times against its name only with `<COMP>_CHECK_DATES=TRUE` (DATM,
+  DOCN, DICE, …; default off; only in cases created since 2026-10-30); the check opens
+  no extra files.
 
 ## Reference CESM source (GLADE)
 
@@ -144,7 +149,7 @@ and flag any that run past ~4 minutes.
   on `T62_t232_wg37` with testmod `dice/mesaclip` (starts on the scenario's first year):
   `SMS_D_Ld3_P12` (HIST) and `ERS_Ld4_P12` (RCP45). Both passed on 2026-10-27 (31 and
   14 min, 56 GB). WW3 on `wt232` took 98% of the run time; one task ran out of memory.
-- The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (ddf810a, as pushed);
+- The CESM_crocodash install's `components/cdeps` is on `mesaclip-dice` (769a216, as pushed 2026-10-30);
   the earlier manual copies are in its `stash@{0}`. Its `ccs_config/modelgrid_aliases_nuopc.xml`
   has an uncommitted `mesaclip_ne120np4` alias (atm `ne120np4` only; a tester's, minus lnd).
 - CrocoDash + MESACLIP: `~/croc_cases/mesaclip_crocodash_alaska` (DATM/DICE MESACLIP-HIST,
@@ -263,8 +268,10 @@ and flag any that run past ~4 minutes.
   `~/scratch/mesawave_offset_test/`.
 - **`%daterange` in CDEPS for time-series files** (2026-10-22): one stream entry
   per variable, expanded at buildnml to the member's files for the stream years
-  (all RCPs to 2100), with gap/overlap checks and a file-time-vs-name check in
-  `dshr_stream_mod.F90`. Replaces explicit file lists and the per-case script.
+  (all RCPs to 2100), with gap/overlap checks, a run-start check (2026-10-30) and an
+  opt-in file-time-vs-name check in `dshr_stream_mod.F90` (`<COMP>_CHECK_DATES`, off by
+  default since 2026-10-30). Uses `DATM_YR_START`/`END` like `%y` streams do; set them to
+  the run's years. Replaces explicit file lists and the per-case script.
   Mesh/weight sharing across streams and multi-file streams were considered and
   not wanted.
 - **Currents rotated in the DOCN datamode, no preprocessing** (2026-10-22): `ANGLE`

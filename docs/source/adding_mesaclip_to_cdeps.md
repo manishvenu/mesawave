@@ -45,15 +45,22 @@ GDEX files hold one variable each, named by the dates they span (`UBOT.200001010
 ```
 
 The namelist build expands it to the member's files for `DATM_YR_START`–`DATM_YR_END` and stops on
-an overlap or a year with no file. When the model opens a file it checks its first and last times
-are within a day of its name. Set the years to the run's years:
+an overlap or a year with no file. Set the run's start and the years to the run's years (the
+compsets start in year 1 by default):
 
 ```bash
-./xmlchange DATM_YR_START=2080,DATM_YR_END=2100   # a run from 2080-01-01 to 2100-12-31
+./xmlchange RUN_STARTDATE=2080-01-01,DATM_YR_START=2080,DATM_YR_END=2100   # a run from 2080 to 2100
 ```
 
-Keep runs inside those years: past them `extend` holds the last record without an error
-([stream parameters](stream_construction.md#stream-parameters)).
+The build stops if the run starts outside those years, and warns if it starts after
+`DATM_YR_START`: at startup the model reads the time axis of every file from `DATM_YR_START` on,
+so with the default years (the whole scenario) a run from 2000 first reads the files from 1920 to
+2000. Keep runs inside the years: past `DATM_YR_END`, `extend` holds the last record without an
+error ([stream parameters](stream_construction.md#stream-parameters)).
+
+To have the model check each file's first and last times against the dates in its name (off by
+default), set `DATM_CHECK_DATES`, `DOCN_CHECK_DATES` or `DICE_CHECK_DATES` to `TRUE`. Only cases
+created with this version of the stack have these.
 
 A stream's years or files changed in `user_nl_datm_streams` (or `_docn_`, `_dice_`) are expanded the
 same way, after the change:
@@ -80,6 +87,6 @@ the [supply tables](stream_construction.md#from-mesaclip-to-the-coupler).
 
 | Datamode | Copied from | Changes from the copy |
 |---|---|---|
-| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/d41c6753ede978596ce209bdbbd3978ff87de00e/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
-| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/b6bf74132dfbdb77fe237ad46f2fbeb5d6b72417/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
-| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/0eb07478c36fc762c34cbb08802b491475864eab/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
+| [`datm_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/08664050b7598af456fe78c941616fa6fde8455e/datm/datm_datamode_mesaclip_mod.F90) | CPLHIST | computes `Sa_ptem`, `Sa_dens`, rain, snow, direct shortwave; adds `Sa_u10m`, `Sa_v10m` |
+| [`docn_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/d1cf32c31cb49ed0a12bed3b42f38b3a88eea4f5/docn/docn_datamode_mesaclip_mod.F90) | CPLHIST | current units (cm/s → m/s) and rotation to east/north; adds `So_s`; `So_bldepth` 0 instead of a fill value without a stream |
+| [`dice_datamode_mesaclip_mod.F90`](https://github.com/manishvenu/CDEPS/blob/769a216e4df4b31c57d3bb2d1700d395d4697b62/dice/dice_datamode_mesaclip_mod.F90) | SSMI | ice fraction units (% → fraction); adds `Si_thick` from `hi_d` |
