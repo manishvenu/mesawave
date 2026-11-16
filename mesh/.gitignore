@@ -8,3 +8,4 @@
 /tools/grid_inp_template
 # PBS job output
 *.o[0-9]*
+*.log
