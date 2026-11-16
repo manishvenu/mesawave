@@ -193,6 +193,28 @@ and flag any that run past ~4 minutes.
 - Reference for what each model receives: `~/croc_cases/gwr_jra_cplhist`
   (GWR_JRA clone of `so1deg_wav_wavfix`, cpayne's `crocodile2026` CESM), 1 day
   with `HIST_OPTION=ndays`; its `cpl.hi` is the input to `coupler_fields.py`.
+- **wu025r005 in CESM (2026-11-16):** registered, uncommitted, in the `CESM_wu2r05` sandbox
+  (`components/ww3/cime_config`, `ccs_config`); grid files follow the link
+  `/glade/work/manishrv/ww3_mesh/grid_inp/wu025r005`, set by `mesh/tools/stage_grid.sh` (see `mesh/README.md`,
+  "In CESM"). Smoke case `~/croc_cases/mesaclip_ww3_wu025r005` (MESACLIP HIST, DOCN/DICE on the wave mesh): with
+  Alper's layout (WW3 sharing nodes 1–2 with DATM/DOCN/DICE/MED) job 8205735 ran out of memory (rank 129 SIGKILLed,
+  2.8 TB on 16 nodes); rerun with `ROOTPE_WAV=256` (18 nodes) is job 8207499.
+- **ERA5 comparison with Ali's mesh (2026-11-16):** Alper's `ERA5_UW` DATM mode (10 m winds only, from Ali's
+  0.25° ERA5+OWI file, `redist` onto the `era5owi` atm grid) is ported, uncommitted, into the sandbox's
+  `components/cdeps`; `era5owi` and `wu025r004` (Ali's mesh, files read in place from Alper's space) are in its
+  `ccs_config` and WW3 `cime_config`. The forcing and Ali's mesh are not cleared for redistribution: keep them out of
+  public repos and PRs. Alper's archived 24-day `wu025r004` runs (`W_ERA5UW.wu025r004.001` at 300 s, `.002` at
+  600 s; 3-hourly `ww3.hi`, 2023-12-01 to 12-25) used an earlier wind file that is now deleted;
+  `~/croc_cases/era5uw_ww3_wu025r004_check` (2 days, job 8208653) checks that our setup reproduces 001.
+  `~/croc_cases/era5uw_ww3_wu025r005` (24 days, his 001 settings) is built and waits on the smoke run. The sandbox's
+  WW3 model source equals his (`9248f20f`) except for `ww3_bounc` build lines.
+- **Point output (2026-11-16):** manishvenu/WW3#1 (`BIN2NC` in the CESM switch list, so points go to
+  `out_pnt.ww3.nc`) and manishvenu/WW3_interface#1 (`date%point%*` entries; `buildnml` defaults the start to the run
+  start and copies an absolute `type%point%file` to `RUNDIR`). PRs inside the forks, on ESCOMP `dev/unified`
+  (`9248f20f`) and `main` (`ceb47d8`); worktrees `/glade/work/manishrv/installs/pr_ww3_*`. The sandbox has the same
+  edits, uncommitted. Tested in `~/croc_cases/pointout_ww3_wu2r05` (job 8208928): Hs from the spectra matches the
+  gridded `HS` (median ratio 1.01, correlation 0.98). Ali's 638-point list (NDBC buoys and more):
+  `/glade/work/altuntas/ww3.input/ABDOLALI_grid/Global_setup/points.list`.
 - Claude runs on Casper. Build, submit and `xmlquery` need Derecho:
   `ssh -o BatchMode=yes derecho '<command>'`. Keep jobs under 60 cores so they
   go through the develop queue fast.

@@ -154,6 +154,11 @@ whenever it differs; with `WW3_GRID_INP_DIR` alone, `buildnml` would keep the fi
 first build's node count (1,291,302, `icos_s1`); the data models don't use them, and the mediator only uses them for
 history dimensions (it warns when they don't match).
 
+Give WW3 its own nodes when DOCN/DICE run on the wave mesh: with WW3 on all 16 nodes and the data models and
+mediator on the first two (Alper's `wu025r004` layout, which had no DOCN/DICE), the first smoke run (job 8205735)
+ran out of memory on node 2. WW3 uses ~1.4 GB per task at 2,048 tasks, mostly arrays every task holds for the whole
+mesh. The case now sets `ROOTPE_WAV=256` (18 nodes).
+
 ## Gotchas
 
 - MATLAB R2024b on Derecho needs `ncarenv/24.12` or newer, but your login loads
