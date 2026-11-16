@@ -17,7 +17,7 @@ you want to keep to work).
 | `mesawave_mesh/` | The pipeline: `regions.py` (size raster), `make_mesh.m` + `run_mesh.sh` (mesh), `check_mesh.py` + `diag/` (checks), `make_grid_inp.sh` (WW3 inputs) |
 | `OceanMesh2D/` (link) | OceanMesh2D clone (Projection branch, 754d69a) with Alper's `@meshgen/meshgen.m` edit; `git diff` there shows it. `make_mesh.m` finds it at `../OceanMesh2D` |
 | `data/GEBCO_2024_coarse_x4.nc` (link) | Bathymetry |
-| `tools/` | From Alper's `cesm3_0_beta09.ww3` sandbox: `ww3_msh_to_esmf.py`, `plot_ww3_unstr.py`, `ww3_scaling_plot.py`, `latlon_to_esmf.py`; `derecho_ww3_env.sh` (the wu025r004 case's module env, which `ww3_grid` was built in). Ours: `msh_to_ptb.py` (any `.msh`, e.g. Ali's, to a `_ptb.mat` the `diag/` scripts read), `defect_compare.py` and `quality_compare.py` (5/7 nodes and triangle quality, several meshes side by side), `icos_rotation.py` (picks the icosahedron's orientation) |
+| `tools/` | From Alper's `cesm3_0_beta09.ww3` sandbox: `ww3_msh_to_esmf.py`, `plot_ww3_unstr.py`, `ww3_scaling_plot.py`, `latlon_to_esmf.py`; `derecho_ww3_env.sh` (the wu025r004 case's module env, which `ww3_grid` was built in). Ours: `msh_to_ptb.py` (any `.msh`, e.g. Ali's, to a `_ptb.mat` the `diag/` scripts read), `defect_compare.py` and `quality_compare.py` (5/7 nodes and triangle quality, several meshes side by side), `icos_rotation.py` (picks the icosahedron's orientation), `stage_grid.sh` (a build as CESM's `wu025r005`, see "In CESM") |
 | `tools/grid_inp_template/` (link) | `ww3_grid` binary + namelists |
 | `wu025r005_v2/` (link) | Alper's latest mesh (2026-11-10, 1,285,928 nodes), copied off his scratch: `build/wu025r005_v2/` and `grid_inp.wu025r005/` (`mod_def.ww3`, `wu025r005_ESMFmesh.nc`) |
 | `smoke_test.pbs` | Whole pipeline on a coarse mesh; rerun to check the setup still works. Passed 2026-11-13 (job 8177725, ~11 min): 79,546 nodes, `ww3_grid` exit 0, ESMF mesh written |
@@ -125,6 +125,30 @@ $Q -l select=1:ncpus=2:mem=40GB -l walltime=00:30:00 -- $PY ../tools/plot_ww3_un
   --mesh $G/mesh.msh --outdir $SCRATCH/mesawave_mesh/plots --title try1 \
   --zoom "Gulf:-98,-80,18,31" --zoom "Alaska:-170,-130,52,72"
 ```
+
+## In CESM
+
+`wu025r005` is registered (uncommitted) in the sandbox `/glade/work/manishrv/installs/CESM_wu2r05`, next to
+`wu2r05`: `components/ww3/cime_config/config_component.xml` and `namelist_definition_ww3.xml` (300 s
+timesteps, as Alper's `wu025r004`), and `ccs_config/component_grids_nuopc.xml`. Every path points at
+`/glade/work/manishrv/ww3_mesh/grid_inp/wu025r005`, a link to one staged build in that folder, so swapping the
+mesh needs no re-registration and no new case. The smoke-run case is `~/croc_cases/mesaclip_ww3_wu025r005`
+(MESACLIP HIST member 010 from 2000-01-01, DOCN/DICE on the wave mesh; `replay.sh` there).
+
+To try another build in the case (a compute-node job, ~10 min; the 2nd argument makes `mod_def.ww3` with the
+case's own `ww3_grid`, so it matches the case's WW3 build):
+
+```bash
+cd ~/documents/mesawave/mesh
+qsub -N ww3_stage -A NCGD0039 -q develop -l select=1:ncpus=2:mem=60GB -l walltime=00:45:00 -j oe -o $PWD/ \
+  -- $PWD/tools/stage_grid.sh BUILD ~/croc_cases/mesaclip_ww3_wu025r005
+```
+
+then resubmit the case. The case sets `WW3_MODDEF` to the staged `mod_def.ww3`, which `buildnml` copies
+whenever it differs; with `WW3_GRID_INP_DIR` alone, `buildnml` would keep the first mesh's files in
+`$RUNDIR/ww3_moddef_create` and run `ww3_grid` on a login node. `WAV_NX`, `OCN_NX` and `ICE_NX` stay at the
+first build's node count (1,291,302, `icos_s1`); the data models don't use them, and the mediator only uses them for
+history dimensions (it warns when they don't match).
 
 ## Gotchas
 
