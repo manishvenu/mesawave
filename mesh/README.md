@@ -62,8 +62,12 @@ edges and coarser (~27 km) face centres. The fix to try next is an equal-area st
 for rows), so test it at SCALE 1.
 
 2026-11-16: `run_mesh.sh` and `make_mesh.m` take an optional 5th argument, ITMAX (DistMesh iterations,
-default 100), and `icos_test.pbs` reads `ITMAX`. `icos_s1_it700` (job 8205552) rebuilds `icos_s1` with 700
-iterations, to see whether more shaking evens out the stretch.
+default 100), and `icos_test.pbs` reads `ITMAX`. `icos_s1_it700` (job 8205552, 4.5 h) rebuilt `icos_s1` with 700
+iterations. The stretch did not move (p5–p95 23.3–26.7 km, against 23.3–26.8). Open-ocean 5/7 nodes fell from
+1,464 to 1,053, but the deep ones rose from 2 to 62 (still far below v2's 2,693), and there are 3,706 fewer nodes.
+Relaxation smooths like diffusion, so a pattern N spacings wide needs about N² iterations; an icosahedron face is
+~280 spacings across. More iterations will not fix the stretch, so `icos_s1` (100 iterations) stays the current
+build and the equal-area starting map is next.
 
 Still read from Alper's space: Ali's wu025r004 mesh, only for comparisons
 (`/glade/work/altuntas/ww3.input/ABDOLALI_grid/Global_setup/Global_WIS_option3.msh`).
