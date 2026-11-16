@@ -12,7 +12,8 @@ output through CESM's data models (CDEPS). The full plan is
 `docs/source/discussions/`.
 
 - **WW3 mesh:** from a NOAA collaborator. 1.67M nodes, 25 km open ocean,
-  10 km coasts, 5 km US coasts, 600 s implicit timestep.
+  10 km coasts, 5 km US coasts, 600 s implicit timestep. Its in-house
+  replacement, wu025r005 (1.29M nodes), is in `mesh/`.
 - **MESACLIP:** CESM1.3 high-res (0.25° atmosphere, 0.1° ocean and sea ice).
   https://project.cgd.ucar.edu/projects/MESACLIP/. 10-member historical
   ensemble plus future transient runs; PI control, historical and some future
@@ -47,6 +48,10 @@ output through CESM's data models (CDEPS). The full plan is
   here. Change a component on its branch, then restack the branches above it
   (force-pushes need the user's OK). Don't run `gh stack sync`: it rebases onto
   the fork's `main`, 133 commits past `cdeps1.0.101`.
+- `mesh/`: the in-house global WW3 mesh (wu025r005, OceanMesh2D), handed over by Alper
+  Altuntas 2026-11-10. Read `mesh/CLAUDE.md` (the user is learning meshes and wants
+  explanations) and `mesh/README.md` (layout, commands, results) first. Its large data is
+  symlinked from `/glade/work/manishrv/ww3_mesh/` and git-ignored.
 - `docs/source/`: Sphinx source, Markdown via MyST. `index.md` links the
   proposal and auto-lists `discussions/*` newest first.
 - `docs/source/discussions/YYYY-MM-DD.md`: dated planning notes, one per discussion.
@@ -248,7 +253,8 @@ and flag any that run past ~4 minutes.
   sends 0 (was 1e30). WW3 reads it into `HSL` but uses it only with `&LMPN`
   `LMPENABLED` and `HSLMODE = 1`. Both are off by default, but CESM's `wgx3v7`, `ww3a` and
   `wu2r05` grid inputs turn them on; then it changes only the Langmuir/Stokes fields WW3
-  sends an ocean, not the waves. Check the NOAA mesh's input.
+  sends an ocean, not the waves. The NOAA mesh's inputs (Ali's `ww3_grid.nml` and `namelists.nml`,
+  which wu025r005 reuses) don't set them (checked 2026-11-16).
 - **What standalone WW3 uses** (2026-10-22, corrected 2026-10-29): only winds and currents
   change the waves; ice fraction does not. `Sa_tbot − So_t` feeds only `STAB3` (build has
   `STAB0`). Without CICE the cap sets `inflags2(:) = .false.` (`wav_comp_nuopc.F90:1714`),

@@ -1,0 +1,10 @@
+# Large data lives in /glade/work/manishrv/ww3_mesh; these are symlinks to it (see README "Data")
+/OceanMesh2D
+/data
+/wu025r005_v2
+/mesawave_mesh/data
+/mesawave_mesh/regions
+/mesawave_mesh/plots
+/tools/grid_inp_template
+# PBS job output
+*.o[0-9]*

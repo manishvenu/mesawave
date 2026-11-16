@@ -1,0 +1,35 @@
+#!/bin/bash -l
+#PBS -N ww3mesh_smoke
+#PBS -A NCGD0039
+#PBS -q develop
+#PBS -l select=1:ncpus=16:mem=200GB
+#PBS -l walltime=02:00:00
+#PBS -j oe
+# Whole pipeline on a coarse (SCALE 4, ~80k-node) mesh: mesh -> checks -> WW3 grid inputs -> plot.
+# Submit on Derecho from this folder:  cd /glade/work/manishrv/ww3_mesh && qsub smoke_test.pbs
+# Outputs: $SCRATCH/mesawave_mesh/{build,grid_inp,plots}/smoke_x4
+set -eo pipefail
+cd "$PBS_O_WORKDIR"; D=$PWD; M=$D/mesawave_mesh
+PY="/glade/u/apps/opt/conda/envs/npl/bin/python -I"
+NAME=smoke_x4; SCALE=4
+S=$SCRATCH/mesawave_mesh; B=$S/build/$NAME; G=$S/grid_inp.$NAME; O=$S/plots/$NAME
+F=$M/regions/sizefx_na1000_ot500_hull.nc
+mkdir -p "$O"
+
+echo "== 1. mesh (MATLAB + OceanMesh2D)"
+"$M/run_mesh.sh" $NAME $SCALE
+
+echo "== 2. checks"
+cd "$M"
+$PY check_mesh.py "$B/${NAME}_ptb.mat" "$F" $SCALE "$O/spacing.png"
+$PY diag/noise_tc.py "$B/${NAME}_ptb.mat" "$F"
+$PY diag/defects.py "$B/${NAME}_ptb.mat" "$F" "$O/defects.png"
+
+echo "== 3. WW3 grid inputs (mod_def.ww3 + ESMF mesh)"
+mkdir -p "$G" && cp "$D"/tools/grid_inp_template/* "$G"/ && ln -sfn "$B/$NAME.ww3" "$G/mesh.msh"
+"$M/make_grid_inp.sh" "$G" $NAME
+
+echo "== 4. mesh plot"
+$PY "$D/tools/plot_ww3_unstr.py" --mesh "$G/mesh.msh" --outdir "$O" --title $NAME
+
+echo "== done"; ls -la "$B" "$G" "$O"

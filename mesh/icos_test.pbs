@@ -1,0 +1,29 @@
+#!/bin/bash -l
+#PBS -N ww3mesh_icos
+#PBS -A NCGD0039
+#PBS -q develop
+#PBS -l select=1:ncpus=16:mem=200GB
+#PBS -l walltime=02:00:00
+#PBS -j oe
+# Icosahedral initial points vs latitude rows. Defaults: SCALE 4 against smoke_x4 (from smoke_test.pbs).
+# Full size against Alper's v2:
+#   qsub -l walltime=03:00:00 -v NAME=icos_s1,SCALE=1,BASEPTB=$PWD/wu025r005_v2/build/wu025r005_v2/wu025r005_v2_ptb.mat icos_test.pbs
+# ITMAX (default 100) caps the DistMesh iterations; at SCALE 1 each takes ~23 s.
+set -eo pipefail
+cd "$PBS_O_WORKDIR"; D=$PWD; M=$D/mesawave_mesh
+PY="/glade/u/apps/opt/conda/envs/npl/bin/python -I"
+B=$SCRATCH/mesawave_mesh/build
+NAME=${NAME:-smoke_icos}; SCALE=${SCALE:-4}; BASEPTB=${BASEPTB:-$B/smoke_x4/smoke_x4_ptb.mat}; ITMAX=${ITMAX:-100}
+BASE=$(basename "$BASEPTB" _ptb.mat); O=$SCRATCH/mesawave_mesh/plots/$NAME
+F=$M/regions/sizefx_na1000_ot500_hull.nc
+mkdir -p "$O"
+"$M/run_mesh.sh" $NAME $SCALE sizefx_na1000_ot500_hull.nc icos $ITMAX
+cd "$M"
+for P in "$BASEPTB" "$B/$NAME/${NAME}_ptb.mat"; do
+  N=$(basename "$P" _ptb.mat); echo "===== $N"
+  $PY check_mesh.py "$P" "$F" $SCALE "$O/spacing_$N.png"
+  $PY diag/noise_tc.py "$P" "$F"
+  $PY diag/defects.py "$P" "$F" "$O/$N.png"
+done
+$PY diag/defects_cmp.py "$O/$BASE.npz" "$O/$NAME.npz" "$O/defects_rows_vs_icos.png"
+$PY "$D/tools/defect_compare.py" "$F" "$BASEPTB" "$B/$NAME/${NAME}_ptb.mat"
