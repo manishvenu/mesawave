@@ -247,16 +247,21 @@ and flag any that run past ~4 minutes.
      `csp.initialize`. CrocoDash calls it from `Case.__init__` via
      `initialize_visualCaseGen(cesmroot)`.
 
-4. **Ice physics in standalone WW3: `IC4` (CESM) or `IC0` (NOAA, Ali's `CICE0`/`CICEN`)?** Today neither acts: CESM
-   builds `IC4`, and without CICE the cap clears `inflags2` (`wav_comp_nuopc.F90:1714`), which gates ice scaling
-   and the default `IC4` call. The `ICNUMERICS = T` path calls `W3SIC4` whenever ice > 0, without that flag
-   (`w3srcemd.F90:1379`); CESM's `wgx3v7` uses it with `IC4METHOD = 10`, which takes ice thickness and floe diameter
-   (`w3sic4md.F90`, `CASE (10)`; thickness clamped to 0.1–3.5 m, radius to 2.5–100 m) but reads them only when
-   `inflags2(-7)`/`(-3)` are set. The user leans to `IC4`, can supply MESACLIP ice, and is fine with a small cap
-   change; floe diameter has to be derived (the proposal: from concentration and thickness). Manual pointers:
-   `docs/source/ww3_manuals.md`.
-
 ## Decisions
+
+- **Ice physics: `IC4` method 10, as CESM3** (2026-11-17; the proposal: "sea-ice attenuation is as in CESM3 with
+  parameterized floe diameter"). Grid namelists add `ICNUMERICS = T` (`&MISC`) and `&SIC4 IC4METHOD = 10 /`, as
+  CESM's `wgx3v7` does (`mesh/tools/grid_inp_template/namelists.nml`; Ali's original kept as `.ali_orig`). Method 10
+  takes thickness and floe diameter (`w3sic4md.F90`, `CASE (10)`; thickness clamped to 0.1–3.5 m, radius 2.5–100 m).
+  Without CICE, `wav_coupling_to_cice = .true.` in `user_nl_cpl` turns WW3's ice inputs on (the cap's `inflags2`,
+  `Si_floediam` advertise) and makes CMEPS route `Si_floediam`; no cap change needed (side effect: WW3 also exports
+  `Sw_elevation_spectrum`, which nothing takes). DICE sends `Si_floediam` = 50 m where there is ice (CICE's value
+  with FSD off), manishvenu/CDEPS#7 (draft, branch `mesaclip-floediam` on `mesaclip-dice`), until the proposal's
+  logarithmic fit (no coefficients yet) is chosen. Alaska test (`~/croc_cases/alaska_ice_{control,ic4}`, 3 days):
+  WW3 gets 50 m and DICE's thickness (its `ICEH` history floors at `ICEHMIN` = 0.2 m; its `ICEF` history stays at
+  1000 m because `W3UIC5` is unused with `IC4`); Hs in ice 1.0–1.5 m → 0.1–0.5 m, ice-free points ~1%. Manual
+  pointers: `docs/source/ww3_manuals.md`. The sandbox `cdeps` `mesawave-local` has the commit; the smoke case sets
+  the flag.
 
 - **WW3's winds: `UBOT`/`VBOT` × (10/`ZBOT`)^0.11** (2026-10-28, from Julio Bacmeister; was
   `U10` speed along `UBOT`/`VBOT` from 10-22, `UBOT`/`VBOT` before). A power law from the lowest
@@ -297,7 +302,8 @@ and flag any that run past ~4 minutes.
   `wu2r05` grid inputs turn them on; then it changes only the Langmuir/Stokes fields WW3
   sends an ocean, not the waves. The NOAA mesh's inputs (Ali's `ww3_grid.nml` and `namelists.nml`,
   which wu025r005 reuses) don't set them (checked 2026-11-16).
-- **What standalone WW3 uses** (2026-10-22, corrected 2026-10-29): only winds and currents
+- **What standalone WW3 uses** (2026-10-22, corrected 2026-10-29; this is CESM's default without CICE, before
+  MESAWAVE turned ice on, see "Ice physics" above): only winds and currents
   change the waves; ice fraction does not. `Sa_tbot − So_t` feeds only `STAB3` (build has
   `STAB0`). Without CICE the cap sets `inflags2(:) = .false.` (`wav_comp_nuopc.F90:1714`),
   which turns off all ice source terms (`w3srcemd.F90:2122`, and ice scaling at 1444);

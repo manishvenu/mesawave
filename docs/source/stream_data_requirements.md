@@ -45,6 +45,15 @@ WW3 still writes the ice it received to its history (`ICE`) and returns it as `S
 3-day test on the Alaska grid, shifting only `aice_d` by 10 days changed `ICE` by up to 0.99 and left
 the waves, including the full restart spectrum, bit-for-bit identical.
 
+**MESAWAVE turns ice on (2026-11-17).** As in CESM3, WW3 uses `IC4` method 10, attenuation by scattering
+from ice floes, which takes ice thickness and floe diameter (`IC4METHOD = 10` and `ICNUMERICS = T` in the
+grid namelists, as CESM's `wgx3v7` grid sets). Without CICE, `wav_coupling_to_cice = .true.` in
+`user_nl_cpl` switches the ice inputs on: the cap then sets the ice flags above, advertises
+`Si_floediam`, and CMEPS routes `Si_floediam` from ice to wave. DICE sends `Si_floediam` = 50 m where
+there is ice (manishvenu/CDEPS#7), what CICE sends with its floe size distribution off, until the
+proposal's fit to concentration and thickness is chosen. In the same 3-day Alaska test, mean wave height
+inside the ice fell from 1.0–1.5 m to 0.1–0.5 m, and ice-free points changed by about 1% on average.
+
 ## MOM6
 
 | Import | Meaning | Line |

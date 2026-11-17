@@ -52,8 +52,10 @@ triangle as it is (`FIX_PERIODCITY` in `w3triamd.F90`). Our pole triangle spans 
 about 4 m at most there. A run of `wu025r005` with the same winds is the like-for-like test. A likely fix
 is a small hole in the mesh at the pole, for example north of 88.5°N.
 
-Ice does not hide this today: without CICE, CESM's WW3 cap turns all ice effects off, so waves grow
-under the Arctic ice. Choosing the ice physics is a separate open question (see [WW3 manuals](ww3_manuals.md)).
+Ice did not hide this in the smoke run: without CICE, CESM's WW3 cap turns all ice effects off by
+default, so waves grew under the Arctic ice. MESAWAVE now turns ice on (`IC4` method 10, see
+[Demand](stream_data_requirements.md)), which damps waves under winter ice, but the pole can be open water
+in late-century summers, so the pole still needs a fix.
 
 ## Comparison with the NOAA mesh
 
