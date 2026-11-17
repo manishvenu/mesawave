@@ -39,6 +39,20 @@ What the data models send, how each field is made, and the stream settings.
 The PR, the five scenario modes, and the datamode code.
 :::
 
+:::{grid-item-card} {octicon}`globe` The wave mesh
+:link: wave_mesh
+:link-type: doc
+
+How wu025r005 is built, the 5/7 defects, and the icosahedral-start experiment.
+:::
+
+:::{grid-item-card} {octicon}`rocket` The wave mesh in CESM
+:link: wave_mesh_in_cesm
+:link-type: doc
+
+Registration, swapping meshes, the smoke run, and the open North Pole problem.
+:::
+
 :::{grid-item-card} {octicon}`file` WW3 manuals
 :link: ww3_manuals
 :link-type: doc
@@ -73,6 +87,8 @@ mesaclip_experiments
 stream_data_requirements
 stream_construction
 adding_mesaclip_to_cdeps
+wave_mesh
+wave_mesh_in_cesm
 ww3_manuals
 ```
 

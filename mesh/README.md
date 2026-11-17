@@ -154,6 +154,11 @@ whenever it differs; with `WW3_GRID_INP_DIR` alone, `buildnml` would keep the fi
 first build's node count (1,291,302, `icos_s1`); the data models don't use them, and the mediator only uses them for
 history dimensions (it warns when they don't match).
 
+Ice physics (2026-11-17): `tools/grid_inp_template/namelists.nml` now adds `ICNUMERICS = T` to `&MISC` and
+`&SIC4 IC4METHOD = 10 /`, as CESM's `wgx3v7` grid does (`IC4` method 10: attenuation by floe scattering, using ice
+thickness and floe diameter). Ali's original is next to it as `namelists.nml.ali_orig`. Builds staged before this
+(`icos_s1`) still have the original; restage to pick it up. See open question 4 in the root `CLAUDE.md`.
+
 Give WW3 its own nodes when DOCN/DICE run on the wave mesh: with WW3 on all 16 nodes and the data models and
 mediator on the first two (Alper's `wu025r004` layout, which had no DOCN/DICE), the first smoke run (job 8205735)
 ran out of memory on node 2. WW3 uses ~1.4 GB per task at 2,048 tasks, mostly arrays every task holds for the whole
