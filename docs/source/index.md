@@ -59,6 +59,13 @@ Registration, swapping meshes, the smoke run, and the open North Pole problem.
 
 Links to the 6.07 and 7.14 (draft) manuals, and where the ice physics is.
 :::
+
+:::{grid-item-card} {octicon}`stopwatch` Core-hours
+:link: compute
+:link-type: doc
+
+Core-hours used on each project code.
+:::
 ::::
 
 ## Where to start
@@ -90,6 +97,7 @@ adding_mesaclip_to_cdeps
 wave_mesh
 wave_mesh_in_cesm
 ww3_manuals
+compute
 ```
 
 ```{toctree}

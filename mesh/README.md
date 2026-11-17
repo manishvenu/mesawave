@@ -79,14 +79,15 @@ Still read from Alper's space: Ali's wu025r004 mesh, only for comparisons
 
 ## Running
 
-Run everything on Derecho compute nodes (develop queue), charged to NCGD0039. Python is
+Run everything on Derecho compute nodes (develop queue), charged to NCGD0011 (NCGD0039 only with the
+user's OK, for expensive runs; see `docs/source/compute.md`). Python is
 NPL with `-I`. `qcmd` holds your terminal until the job ends; for long runs, put the
 command in a PBS script like `smoke_test.pbs` and `qsub` it.
 
 ```bash
 cd ~/documents/mesawave/mesh/mesawave_mesh
 PY="/glade/u/apps/opt/conda/envs/npl/bin/python -I"
-Q="qcmd -A NCGD0039 -q develop"
+Q="qcmd -A NCGD0011 -q develop"
 ```
 
 **1. Size raster** (edit `TC_CASES`, `TC_HULL`, `TC_CHOSEN`, `US_BAND_KM` at the top of `regions.py`):
@@ -149,7 +150,7 @@ case's own `ww3_grid`, so it matches the case's WW3 build):
 
 ```bash
 cd ~/documents/mesawave/mesh
-qsub -N ww3_stage -A NCGD0039 -q develop -l select=1:ncpus=2:mem=60GB -l walltime=00:45:00 -j oe -o $PWD/ \
+qsub -N ww3_stage -A NCGD0011 -q develop -l select=1:ncpus=2:mem=60GB -l walltime=00:45:00 -j oe -o $PWD/ \
   -- $PWD/tools/stage_grid.sh BUILD ~/croc_cases/mesaclip_ww3_wu025r005
 ```
 

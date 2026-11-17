@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #PBS -N ww3mesh_smoke
-#PBS -A NCGD0039
+#PBS -A NCGD0011
 #PBS -q develop
 #PBS -l select=1:ncpus=16:mem=200GB
 #PBS -l walltime=02:00:00

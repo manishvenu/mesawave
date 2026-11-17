@@ -24,8 +24,9 @@ along the US coast, growing at 0.15 km per km between them.
 | Nodes | 1,671,039 | 1,285,928 (build `v2`, the one in use) |
 | Spacing | 25 km open ocean, 10 km coasts, 5 km US coasts | as above, plus 12 km tropical-cyclone regions |
 
-The proposal budgeted 1.2 million nodes; `v2` is about 7% over that and about 23% cheaper than
-`wu025r004`. Its spacing is within 1% of the target (median) in every zone.
+The proposal's budget, 110,000 core-hours per simulated year for 873 simulated years, was measured on
+`wu025r004` at 600 s; `v2` has 23% fewer nodes. Its spacing is within 1% of the target (median) in
+every zone.
 
 ## How it is built
 

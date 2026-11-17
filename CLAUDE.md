@@ -41,6 +41,8 @@ output through CESM's data models (CDEPS). The full plan is
   (and what a test case lacks against a reference).
   `check_ww3_forcing.py CPL_HI WW3_HI` compares WW3's history (`CUR AST WLV ICE IC1 IC5`
   in its field list) with what the mediator sent, to show which imports WW3 kept.
+  `core_hours.py DERECHO_CSV CASPER_CSV` sums MESAWAVE's core-hours per project code from `qhist`
+  exports, for `docs/source/compute.md`.
 - `cdeps/`: submodule on `manishvenu/CDEPS` `mesaclip-dice`, the top of a GitHub
   stack of PRs in the fork, on `cdeps1.0.101`: #5 `stream-daterange` → `main`
   (`%daterange`), #1 `mesaclip-datm` → `stream-daterange`, #2 `mesaclip-docn` →
@@ -359,3 +361,8 @@ and flag any that run past ~4 minutes.
 - Run `module load gh` before using the `gh` CLI.
 - Don't recursively scan GDEX/GLADE data collections. Look up specific paths.
 - Never move, copy or delete anything in CESM inputdata.
+- **Project codes (2026-11-17):** NCGD0039 is for expensive runs, and only with the user's explicit OK
+  for each run. Everything else goes on NCGD0011. The global cases (`mesaclip_ww3_wu025r005`,
+  `era5uw_ww3_wu025r004_check`, `era5uw_ww3_wu025r005`, `pointout_ww3_wu2r05`) have `PROJECT=NCGD0039`, so
+  ask before submitting them. After each run, update the table in `docs/source/compute.md`
+  (`code/claude/core_hours.py`).
