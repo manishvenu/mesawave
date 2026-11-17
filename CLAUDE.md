@@ -205,9 +205,20 @@ and flag any that run past ~4 minutes.
   `ccs_config` and WW3 `cime_config`. The forcing and Ali's mesh are not cleared for redistribution: keep them out of
   public repos and PRs. Alper's archived 24-day `wu025r004` runs (`W_ERA5UW.wu025r004.001` at 300 s, `.002` at
   600 s; 3-hourly `ww3.hi`, 2023-12-01 to 12-25) used an earlier wind file that is now deleted;
-  `~/croc_cases/era5uw_ww3_wu025r004_check` (2 days, job 8208653) checks that our setup reproduces 001.
-  `~/croc_cases/era5uw_ww3_wu025r005` (24 days, his 001 settings) is built and waits on the smoke run. The sandbox's
-  WW3 model source equals his (`9248f20f`) except for `ww3_bounc` build lines.
+  `~/croc_cases/era5uw_ww3_wu025r004_check` (2 days, job 8215479, 2026-11-17) reproduces 001 (`HS` within 4 mm,
+  RMS 1e-6 m), so his archive is the reference; it ran at 810 s/day against his 405 (same WW3 model source,
+  `9248f20f`, except for `ww3_bounc` build lines; cause not found yet). `~/croc_cases/era5uw_ww3_wu025r005` (24 days,
+  his 001 settings, hourly point output at Ali's 638 points) is job 8215539.
+- **I/O: set `PIO_TYPENAME=pnetcdf` (2026-11-17).** A case created with no matching `config_pes` entry starts at one
+  task, and CIME then sets every component's `PIO_TYPENAME` to `netcdf` (`cime/CIME/case/case.py:1665`); setting
+  `NTASKS` later does not undo it. Serial writes made the first smoke run spend 48 min on a 9.3 GB WW3 restart and
+  the first `wu025r004` check run 11× slower than Alper's. All three global cases now use `pnetcdf`.
+- **North Pole blow-up on wu025r005 (2026-11-17).** The 2-day MESACLIP smoke run (job 8207499) passes
+  `check_ww3_forcing.py`, but `HS` grows to 88 m at the node nearest the pole (89.90°N 107.5°E) and spreads to ~78°N.
+  WW3 computes triangle geometry in raw lon-lat; `FIX_PERIODCITY` (`w3triamd.F90:3155`) names the pole-containing
+  triangle but leaves it unwrapped (258° wide here, 196° in Ali's mesh). Ali's mesh stays ≤ 4 m there over 24 days of
+  ERA5 (winds 3–6 m/s there, MESACLIP's ~12 m/s); job 8215539 is the same-forcing test. Candidate fix: a polar hole
+  (e.g. north of 88.5°N).
 - **Point output (2026-11-16):** manishvenu/WW3#1 (`BIN2NC` in the CESM switch list, so points go to
   `out_pnt.ww3.nc`) and manishvenu/WW3_interface#1 (`date%point%*` entries; `buildnml` defaults the start to the run
   start and copies an absolute `type%point%file` to `RUNDIR`). PRs inside the forks, on ESCOMP `dev/unified`
@@ -235,6 +246,15 @@ and flag any that run past ~4 minutes.
      `get_relational_constraints(cvars)`, a `{constraint: message}` dict, to
      `csp.initialize`. CrocoDash calls it from `Case.__init__` via
      `initialize_visualCaseGen(cesmroot)`.
+
+4. **Ice physics in standalone WW3: `IC4` (CESM) or `IC0` (NOAA, Ali's `CICE0`/`CICEN`)?** Today neither acts: CESM
+   builds `IC4`, and without CICE the cap clears `inflags2` (`wav_comp_nuopc.F90:1714`), which gates ice scaling
+   and the default `IC4` call. The `ICNUMERICS = T` path calls `W3SIC4` whenever ice > 0, without that flag
+   (`w3srcemd.F90:1379`); CESM's `wgx3v7` uses it with `IC4METHOD = 10`, which takes ice thickness and floe diameter
+   (`w3sic4md.F90`, `CASE (10)`; thickness clamped to 0.1–3.5 m, radius to 2.5–100 m) but reads them only when
+   `inflags2(-7)`/`(-3)` are set. The user leans to `IC4`, can supply MESACLIP ice, and is fine with a small cap
+   change; floe diameter has to be derived (the proposal: from concentration and thickness). Manual pointers:
+   `docs/source/ww3_manuals.md`.
 
 ## Decisions
 

@@ -38,6 +38,13 @@ What the data models send, how each field is made, and the stream settings.
 
 The PR, the five scenario modes, and the datamode code.
 :::
+
+:::{grid-item-card} {octicon}`file` WW3 manuals
+:link: ww3_manuals
+:link-type: doc
+
+Links to the 6.07 and 7.14 (draft) manuals, and where the ice physics is.
+:::
 ::::
 
 ## Where to start
@@ -66,6 +73,7 @@ mesaclip_experiments
 stream_data_requirements
 stream_construction
 adding_mesaclip_to_cdeps
+ww3_manuals
 ```
 
 ```{toctree}
