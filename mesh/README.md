@@ -56,7 +56,7 @@ refined zone) from 2,693 to 2. Defects at the edges of the 25 km zone remain, be
 The cost: open-ocean triangles are slightly less equilateral (median quality 0.994, against 0.9996), because
 DistMesh's 100 iterations don't fully relax the icosahedron's starting stretch. `tools/quality_compare.py`
 measures this. In the resolution map the stretch shows as finer (~23 km) lines along the icosahedron
-edges and coarser (~27 km) face centres. The fix to try next is an equal-area starting map.
+edges and coarser (~27 km) face centres. An equal-area starting map might narrow this (not tried).
 `defect_compare.py` shows the stretch as the open-ocean edge-length spread: p5–p95 23.3–26.8 km for
 `icos_s1`, against 24.1–26.0 km for v2. SCALE 4 builds don't show it (93.4–108.3 km, against 93.1–109.6 km
 for rows), so test it at SCALE 1.
@@ -66,8 +66,13 @@ default 100), and `icos_test.pbs` reads `ITMAX`. `icos_s1_it700` (job 8205552, 4
 iterations. The stretch did not move (p5–p95 23.3–26.7 km, against 23.3–26.8). Open-ocean 5/7 nodes fell from
 1,464 to 1,053, but the deep ones rose from 2 to 62 (still far below v2's 2,693), and there are 3,706 fewer nodes.
 Relaxation smooths like diffusion, so a pattern N spacings wide needs about N² iterations; an icosahedron face is
-~280 spacings across. More iterations will not fix the stretch, so `icos_s1` (100 iterations) stays the current
-build and the equal-area starting map is next.
+~280 spacings across. More iterations will not fix the stretch.
+
+2026-11-17: decision: `v2` (latitude rows) is the mesh in use. The icosahedral start stays as the opt-in `icos`
+layout, but it is not worth its extra code (a second lattice function and `tools/icos_rotation.py`) for a mixed
+result: dots traded for streaks, with neither tested for its effect on the waves. The equal-area map is not being
+pursued. `v2` is staged in CESM (`grid_inp/wu025r005_v2`, see "In CESM"); its pole triangle spans 196° of longitude,
+as in Ali's mesh, against 258° in `icos_s1`.
 
 Still read from Alper's space: Ali's wu025r004 mesh, only for comparisons
 (`/glade/work/altuntas/ww3.input/ABDOLALI_grid/Global_setup/Global_WIS_option3.msh`).
@@ -148,16 +153,18 @@ qsub -N ww3_stage -A NCGD0039 -q develop -l select=1:ncpus=2:mem=60GB -l walltim
   -- $PWD/tools/stage_grid.sh BUILD ~/croc_cases/mesaclip_ww3_wu025r005
 ```
 
-then resubmit the case. The case sets `WW3_MODDEF` to the staged `mod_def.ww3`, which `buildnml` copies
+`v2` lives in work, not in the build folder, so link it there first
+(`ln -sfn /glade/work/manishrv/ww3_mesh/wu025r005_v2/build/wu025r005_v2 $SCRATCH/mesawave_mesh/build/`); it was
+staged this way on 2026-11-17 and is what `wu025r005` points at. Then resubmit the case. The case sets `WW3_MODDEF` to the staged `mod_def.ww3`, which `buildnml` copies
 whenever it differs; with `WW3_GRID_INP_DIR` alone, `buildnml` would keep the first mesh's files in
 `$RUNDIR/ww3_moddef_create` and run `ww3_grid` on a login node. `WAV_NX`, `OCN_NX` and `ICE_NX` stay at the
-first build's node count (1,291,302, `icos_s1`); the data models don't use them, and the mediator only uses them for
+first build's node count (1,291,302, `icos_s1`; `v2` has 1,285,928); the data models don't use them, and the mediator only uses them for
 history dimensions (it warns when they don't match).
 
 Ice physics (2026-11-17): `tools/grid_inp_template/namelists.nml` now adds `ICNUMERICS = T` to `&MISC` and
 `&SIC4 IC4METHOD = 10 /`, as CESM's `wgx3v7` grid does (`IC4` method 10: attenuation by floe scattering, using ice
 thickness and floe diameter). Ali's original is next to it as `namelists.nml.ali_orig`. Builds staged before this
-(`icos_s1`) still have the original; restage to pick it up. See open question 4 in the root `CLAUDE.md`.
+(`icos_s1`) still have the original. `wu025r005_v2`, staged 2026-11-17, has it. See open question 4 in the root `CLAUDE.md`.
 
 Give WW3 its own nodes when DOCN/DICE run on the wave mesh: with WW3 on all 16 nodes and the data models and
 mediator on the first two (Alper's `wu025r004` layout, which had no DOCN/DICE), the first smoke run (job 8205735)

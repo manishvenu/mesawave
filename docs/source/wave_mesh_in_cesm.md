@@ -41,15 +41,15 @@ Two setup lessons came out of it:
 
 ## Open: wave heights blow up at the North Pole
 
-In the smoke run, significant wave height reaches 88 m at the node nearest the pole (89.90°N) after
+In the smoke run, on build `icos_s1`, significant wave height reaches 88 m at the node nearest the pole (89.90°N) after
 2 days and spreads south to about 78°N, under ordinary winds of about 12 m/s. It is not the currents
 (about 0.1 m/s there) and not a mesh defect (every node north of 88.5°N has 6 neighbours).
 
 WW3 computes triangle geometry in plain longitude–latitude. It fixes triangles that cross the 180°
 meridian, and its code comments name the case of a triangle that contains the pole, but leaves that
-triangle as it is (`FIX_PERIODCITY` in `w3triamd.F90`). Our pole triangle spans 258° of longitude;
-`wu025r004`'s spans 196°. In a 24-day run with ERA5 winds (3–6 m/s near the pole), `wu025r004` stays at
-about 4 m at most there. A run of `wu025r005` with the same winds is the like-for-like test. A likely fix
+triangle as it is (`FIX_PERIODCITY` in `w3triamd.F90`). `icos_s1`'s pole triangle spans 258° of longitude;
+`wu025r004`'s spans 196°, and so does `v2`'s, the build CESM uses since 2026-11-17. In a 24-day run with ERA5 winds (3–6 m/s near the pole), `wu025r004` stays at
+about 4 m at most there. A run of `wu025r005` (`v2`) with the same winds is the like-for-like test. A likely fix
 is a small hole in the mesh at the pole, for example north of 88.5°N.
 
 Ice did not hide this in the smoke run: without CICE, CESM's WW3 cap turns all ice effects off by

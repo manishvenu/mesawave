@@ -213,7 +213,7 @@ and flag any that run past ~4 minutes.
   task, and CIME then sets every component's `PIO_TYPENAME` to `netcdf` (`cime/CIME/case/case.py:1665`); setting
   `NTASKS` later does not undo it. Serial writes made the first smoke run spend 48 min on a 9.3 GB WW3 restart and
   the first `wu025r004` check run 11× slower than Alper's. All three global cases now use `pnetcdf`.
-- **North Pole blow-up on wu025r005 (2026-11-17).** The 2-day MESACLIP smoke run (job 8207499) passes
+- **North Pole blow-up on wu025r005 (2026-11-17).** The 2-day MESACLIP smoke run (job 8207499, build `icos_s1`) passes
   `check_ww3_forcing.py`, but `HS` grows to 88 m at the node nearest the pole (89.90°N 107.5°E) and spreads to ~78°N.
   WW3 computes triangle geometry in raw lon-lat; `FIX_PERIODCITY` (`w3triamd.F90:3155`) names the pole-containing
   triangle but leaves it unwrapped (258° wide here, 196° in Ali's mesh). Ali's mesh stays ≤ 4 m there over 24 days of
@@ -249,6 +249,10 @@ and flag any that run past ~4 minutes.
 
 ## Decisions
 
+- **Mesh start: latitude rows, build `v2`** (2026-11-17, the user: the icosahedral start is too complex to want).
+  CESM's `wu025r005` link points at `grid_inp/wu025r005_v2` (1,285,928 nodes, staged with the IC4 namelist). The
+  icosahedral start stays an opt-in layout in `mesh/mesawave_mesh/make_mesh.m` (`icos`); results in `mesh/README.md`
+  and `docs/source/wave_mesh.md`. `v2`'s pole triangle spans 196° (as Ali's), `icos_s1`'s 258°.
 - **Ice physics: `IC4` method 10, as CESM3** (2026-11-17; the proposal: "sea-ice attenuation is as in CESM3 with
   parameterized floe diameter"). Grid namelists add `ICNUMERICS = T` (`&MISC`) and `&SIC4 IC4METHOD = 10 /`, as
   CESM's `wgx3v7` does (`mesh/tools/grid_inp_template/namelists.nml`; Ali's original kept as `.ali_orig`). Method 10

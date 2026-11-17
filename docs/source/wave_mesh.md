@@ -21,7 +21,7 @@ along the US coast, growing at 0.15 km per km between them.
 
 | | `wu025r004` (NOAA) | `wu025r005` |
 |---|---|---|
-| Nodes | 1,671,039 | 1,291,302 (build `icos_s1`); 1,285,928 (`v2`, the handover build) |
+| Nodes | 1,671,039 | 1,285,928 (build `v2`, the one in use) |
 | Spacing | 25 km open ocean, 10 km coasts, 5 km US coasts | as above, plus 12 km tropical-cyclone regions |
 
 The proposal budgeted 1.2 million nodes; `v2` is about 7% over that and about 23% cheaper than
@@ -33,7 +33,8 @@ The proposal budgeted 1.2 million nodes; `v2` is about 7% over that and about 23
    shoreline. It also writes the Antarctic ice-front coastline the mesh uses as its southern boundary.
 2. **Size levels** (`size_levels`, [make_mesh.m:64](https://github.com/manishvenu/mesawave/blob/main/mesh/mesawave_mesh/make_mesh.m#L64)):
    the sizes that cover more than 1% of the raster, filled in geometrically so no step is more than 10%.
-3. **Starting points** (lines 44–49): one regular triangle lattice per size level. Each point is kept
+3. **Starting points** (`initial_points`, [make_mesh.m:76](https://github.com/manishvenu/mesawave/blob/main/mesh/mesawave_mesh/make_mesh.m#L76)):
+   one regular triangle lattice per size level, in latitude rows. Each point is kept
    where its level is the nearest to the target size, and points on land are dropped. (Thinning one
    fine lattice at random instead left 26% of the nodes with a wrong number of neighbours, line 78.)
 4. **Relaxation** (OceanMesh2D's DistMesh, line 42): edges act as springs that pull towards the target
@@ -56,7 +57,12 @@ thousands more.
 needs a 5/7 pair. `v2` staggers the rows so the pairs are scattered, but about 5,000 open-ocean nodes
 (~1%) are still 5/7 pairs, and the triangles around them are about 1 km off the 25 km target.
 
-## Icosahedral starting points
+## Option: icosahedral starting points
+
+`v2`'s latitude rows stay the method in use. The icosahedral start is kept as an option
+(`run_mesh.sh PREFIX SCALE SIZEFILE icos`): it removes the deep-ocean dots but adds a second lattice
+function and a rotation script (`tools/icos_rotation.py`), and leaves streaks instead, so it is not worth
+the extra code for now. Neither the dots nor the streaks have been tested for their effect on the waves.
 
 Instead of rows, `initial_points_icos` ([make_mesh.m:106](https://github.com/manishvenu/mesawave/blob/main/mesh/mesawave_mesh/make_mesh.m#L106))
 starts each level from a subdivided icosahedron (a "soccer ball"): 20 triangular faces, each filled
@@ -80,9 +86,9 @@ stretch, so it has to be checked at full size.
 
 **Why more iterations don't help.** Relaxation smooths like diffusion: a pattern N spacings wide needs
 roughly N² iterations, and an icosahedron face is about 280 spacings across. Seven times more
-iterations left the spread unchanged. `icos_s1` (100 iterations) is the current build.
+iterations left the spread unchanged.
 
-**Next: an equal-area start.** On one face (n = 30), the small triangles' areas run from 0.93 times
+**An idea not tried: an equal-area start.** On one face (n = 30), the small triangles' areas run from 0.93 times
 the mean at the face edges to 1.10 at the centre, a ratio of 1.19. An equal-area map from the flat face
 to the sphere (Snyder's icosahedral projection, which the PROJ library provides) would make the areas
 equal, but it distorts shapes, so the test is whether it narrows the edge-length spread, not just the

@@ -43,7 +43,7 @@ The PR, the five scenario modes, and the datamode code.
 :link: wave_mesh
 :link-type: doc
 
-How wu025r005 is built, the 5/7 defects, and the icosahedral-start experiment.
+How wu025r005 is built, the 5/7 defects, and the icosahedral start kept as an option.
 :::
 
 :::{grid-item-card} {octicon}`rocket` The wave mesh in CESM
