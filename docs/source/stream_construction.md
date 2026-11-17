@@ -58,12 +58,14 @@ Direct shortwave is split in JRA's 0.28 : 0.31 ratio. `Faxa_swdn`, `Faxa_prect`,
 
 ### DICE
 
-Only `Si_ifrac` and `Si_thick` come from MESACLIP; the rest is made as DICE%SSMI does.
+Only `Si_ifrac` and `Si_thick` come from MESACLIP. `Si_floediam` is a constant for WW3 (see
+[Ice for WW3](#ice-for-ww3-dice-against-cice)); the rest is made as DICE%SSMI does.
 
 | Coupler field | Meaning | How it's made | From MESACLIP | Line |
 |---|---|---|---|---|
 | `Si_ifrac` | Ice fraction | unit conversion, % → fraction, clipped to 0–1¹ | `aice_d` | [418](dice:L418), [448](dice:L448), [511–519](dice:L511-L519) |
-| `Si_thick` | Ice thickness (WW3 reads it only with CICE) | `hi_d` ÷ final ice fraction where there is ice, else 0, as CICE does | `hi_d`, `aice_d` | [567–574](dice:L567-L574) |
+| `Si_thick` | Ice thickness (WW3 uses it with `wav_coupling_to_cice`) | `hi_d` ÷ final ice fraction where there is ice, else 0, as CICE does | `hi_d`, `aice_d` | [567–574](dice:L567-L574) |
+| `Si_floediam` | Floe diameter, for WW3 | 50 m where there is ice, else 0 ([CDEPS#7](https://github.com/manishvenu/CDEPS/pull/7), draft) | — | [582–585](https://github.com/manishvenu/CDEPS/blob/bad6783f5a91f834e49f20e2bd105086097af533/dice/dice_datamode_mesaclip_mod.F90#L582-L585) |
 | `Si_imask` | Ice mask | ice mask of the model mesh | — | [251](dice:L251) |
 | `Si_t` | Ice surface temperature | made up: 260 ± 10 K seasonal cycle, pulled toward freezing | — | [451–455](dice:L451-L455), [529](dice:L529) |
 | `Si_avsdr`, `Si_anidr`, `Si_avsdf`, `Si_anidf` | Ice albedo, 4 bands | fixed albedos | — | [458–461](dice:L458-L461) |
@@ -77,6 +79,93 @@ Only `Si_ifrac` and `Si_thick` come from MESACLIP; the rest is made as DICE%SSMI
 | `Si_ifrac_n`, `Fioi_swpen_ifrac_n` | Per-category ice fraction, shortwave | one category (per-category coupling only) | — | [585–586](dice:L585-L586) |
 
 ¹ With `flux_qacc` (default on), at least 0.01 where there is ice.
+
+## Ice for WW3: DICE against CICE
+
+What WW3 gets from CICE in CESM3, what DICE gives it in MESAWAVE, and tests of both on the Alaska grid.
+Both use `IC4` method 10 and `wav_coupling_to_cice = .true.`
+([Demand](stream_data_requirements.md#ww3)).
+
+### What each sends
+
+| | CICE (CESM3, coupled to WW3) | DICE (MESACLIP) |
+|---|---|---|
+| Switch | `wav_coupling_to_cice` is on whenever WW3 and CICE both run ([buildnml 128–132](https://github.com/ESCOMP/CMEPS/blob/022b856d2289c99b8214efc5328df82d198eb0fb/cime_config/buildnml#L128-L132)); CICE then sends the two extra fields ([144](cice:L144), [236–239](cice:L236-L239)) | set in `user_nl_cpl` |
+| `Si_ifrac` | `aice`, new every coupling step ([949](cice:L949)) | daily mean `aice_d`, held for the day (`tintalgo` `nearest`) |
+| `Si_thick` | `vice/aice` where there is ice, else 0 ([954–960](cice:L954-L960)) | `hi_d/aice_d`, the same formula, daily |
+| `Si_floediam` | Floe size distribution on, because the default is on with any wave model ([`tr_fsd`](https://github.com/ESCOMP/CESM_CICE/blob/cesm3_cice6_6_3_22/cime_config/namelist_definition_cice.xml#L1289-L1299)), with 12 size classes ([`nfsd`](https://github.com/ESCOMP/CESM_CICE/blob/cesm3_cice6_6_3_22/cime_config/namelist_definition_cice.xml#L744-L753)): twice the area-weighted mean floe radius ([962–973](cice:L962-L973)), so 5.4–1,701 m ([class limits](https://github.com/ESCOMP/icepack/blob/410ca0731b211ce73920848640b3e060615adb33/columnphysics/icepack_fsd.F90#L151-L156)). 50 m only with the distribution off ([976](cice:L976)) | 50 m where there is ice. MESACLIP's CICE4 has no floe sizes |
+| Where there is no ice | thickness and diameter 0 ([1137–1144](cice:L1137-L1144), [1852](cice:L1852)) | the same |
+| Onto WW3's mesh | bilinear with nearest fill ([3142](https://github.com/ESCOMP/CMEPS/blob/022b856d2289c99b8214efc5328df82d198eb0fb/mediator/esmFldsExchange_cesm_mod.F90#L3142), [3155](https://github.com/ESCOMP/CMEPS/blob/022b856d2289c99b8214efc5328df82d198eb0fb/mediator/esmFldsExchange_cesm_mod.F90#L3155), [3169](https://github.com/ESCOMP/CMEPS/blob/022b856d2289c99b8214efc5328df82d198eb0fb/mediator/esmFldsExchange_cesm_mod.F90#L3169)) | DICE runs on the wave mesh |
+| Back to the ice | WW3's `Sw_elevation_spectrum`, which CICE uses to break floes | nothing takes it |
+
+WW3 reads thickness into `ICEP1` and diameter into `ICEP5` ([662](ww3:L662), [674](ww3:L674)). Method 10
+([710–746](ww3src:src/w3sic4md.F90#L710-L746)) takes both ([511](ww3src:src/w3sic4md.F90#L511),
+[515](ww3src:src/w3sic4md.F90#L515)), limits thickness to 0.1–3.5 m and floe radius (half the diameter) to
+2.5–100 m, and its damping is multiplied by the ice fraction ([1455](ww3src:src/w3srcemd.F90#L1455)).
+
+### Tests on the Alaska grid
+
+The grid is 162 × 66 cells over the Bering Sea, 56–67°N, 6,996 of them sea. All cases are in `~/croc_cases/`
+and were built from `CESM_crocodash`.
+
+| Case | Setup | Floe diameter sent |
+|---|---|---|
+| `alaska_cice_ww3` | DATM JRA + CICE + MOM6 + WW3, 2020-01-01 to 01-09 (the length of the ocean boundary data). CrocoDash's `big_alaska_sea_ice_waves`, rebuilt. CICE starts from GLORYS ice with 94% of the ice area in the smallest floe class | CICE's, floe sizes on |
+| `alaska_cice_ww3_nofsd` | the same with `tr_fsd = .false.` | 50 m |
+| `alaska_ice_ic4` | DATM, DOCN and DICE in MESACLIP-HIST mode, member 010, 2000-01-01 to 01-04 | 50 m |
+| `alaska_ice_ic4_d5`, `_d200` | the same, with the constant changed | 5 m, 200 m |
+
+**WW3 gets what is sent.** In every case and at every 6-hourly output, WW3's `ICE` equals the mediator's
+`Si_ifrac` to 3e-8. In the CICE run, what the mediator sends WW3 differs from CICE's latest export by less
+than 0.012 in ice fraction at 99% of WW3's sea cells (Jan 5); the larger differences are on WW3 land cells. CICE's
+`Si_floediam`, averaged over Jan 8, equals twice its own `fsdrad` history (median 7.3 against 7.4 m,
+correlation 1.0).
+
+**DICE matches MESACLIP.** DICE's ice fraction on day N matches the GDEX `aice_d` mean for day N (correlation
+0.996, mean difference 0.004, against the nearest tx0.1 cell). MESACLIP's 2000 has ice only north of 62°N
+here: 466 cells above 15% on Jan 1, against 3,794 in the 2020 CICE run. The two runs differ in year and in
+model, so they compare the interface, not the ice.
+
+**What the fields look like** (cells with more than 15% ice):
+
+| | CICE, floe sizes on | DICE, MESACLIP |
+|---|---|---|
+| Thickness p10/50/90 | 0.14/0.38/0.99 m on Jan 1, 0.24/0.41/0.96 m on Jan 9 | 0.07/0.12/0.62–0.79 m |
+| Thickness below method 10's 0.1 m floor | 0.4% | 40% |
+| Floe diameter median | 5.7 m on Jan 1 → 7.4 m on Jan 9 | 50 m |
+| Floe diameter p95 | 30 m → 209 m on Jan 6 → 154 m on Jan 9 | 50 m |
+| Floe diameter above method 10's 200 m limit | up to 5% | none |
+
+CICE's floes grow slowly: the smallest class falls from 94% to 87% of the ice area in 8 days. On Jan 8 the
+median diameter is 5.4 m where ice covers 15–50% of a cell and is under 0.4 m thick, and 7.7–8.3 m where
+it covers over 95% and is over 0.2 m thick. These are 8 days from a start with almost all ice in the
+smallest class, not CESM3's floe sizes after a spin-up.
+
+**How much the floe diameter matters** (mean wave height change over cells with more than 15% ice, over
+the run; the largest change at any one cell; the largest change in ice-free water):
+
+| Change | Mean over ice | Marginal ice zone (15–80%) | Largest, one cell | Ice-free, largest |
+|---|---|---|---|---|
+| CICE: 50 m → its own floe sizes (median 6–7 m) | +0.003 to +0.026 m | +0.014 to +0.062 m | 0.91 m | 0.07 m |
+| DICE: 50 m → 5 m | +0.03 to +0.08 m | +0.05 to +0.08 m | 0.83 m | 0.23 m |
+| DICE: 50 m → 200 m | +0.03 to −0.05 m | +0.05 to −0.03 m | 0.69 m | 0.30 m |
+
+The damping does not change in one direction with floe size: both 5 m and 200 m damp less than 50 m at
+the start of the DICE run.
+
+### What DICE can provide
+
+- **Ice fraction and thickness:** the same quantities CICE sends, from MESACLIP's daily means, held for
+  each day where CICE updates every coupling step.
+- **Floe diameter:** MESACLIP has no floe sizes. Its daily ice output is `aice_d`, `hi_d`, `hs_d`, `Tsfc_d`,
+  `uvel_d`, `vvel_d`, `ice_present_d`, `fswabs_d`, `fswdn_d` and `fswthru_d`. Monthly output adds
+  thickness categories (`aicen001`–`005`, `vicen001`–`005`), `FYarea`, `frazil`, `meltl` and others. DICE can
+  send a constant (now 50 m, CICE's value with floe sizes off) or the proposal's fit to fraction and
+  thickness. In these tests the choice moves mean wave height in the ice by a few centimetres and single
+  cells by up to 0.9 m.
+- **Data for the fit:** CESM3 output with floe sizes, for example
+  `b.e30_beta04.BLTHIST.ne30_t232_wgx3.121` in `/glade/campaign/cesm/development/cross-wg/cesm3_development`.
+  Only the `cesm` Unix group can read it.
 
 ## MESACLIP variables not used yet
 

@@ -257,7 +257,12 @@ and flag any that run past ~4 minutes.
   `Si_floediam` advertise) and makes CMEPS route `Si_floediam`; no cap change needed (side effect: WW3 also exports
   `Sw_elevation_spectrum`, which nothing takes). DICE sends `Si_floediam` = 50 m where there is ice (CICE's value
   with FSD off), manishvenu/CDEPS#7 (draft, branch `mesaclip-floediam` on `mesaclip-dice`), until the proposal's
-  logarithmic fit (no coefficients yet) is chosen. Alaska test (`~/croc_cases/alaska_ice_{control,ic4}`, 3 days):
+  logarithmic fit (no coefficients yet) is chosen. CESM3 itself has FSD on whenever WW3 runs (`tr_fsd`, 12 classes),
+  so CICE sends 2 × area-weighted mean floe radius (5.4–1,701 m). Tests of CICE vs DICE on the Alaska grid
+  (2026-11-17; `~/croc_cases/alaska_cice_ww3{,_nofsd}`, `alaska_ice_ic4{,_d5,_d200}`) are in the docs, Supply page,
+  "Ice for WW3": floe diameter moves mean Hs in ice by a few cm, single cells up to 0.9 m; 40% of MESACLIP's
+  Bering ice is under method 10's 0.1 m thickness floor. CESM3 dev output with FSD
+  (`/glade/campaign/cesm/development/cross-wg/cesm3_development/b.e30_beta04.*_wgx3.121`) is `cesm`-group only. Alaska test (`~/croc_cases/alaska_ice_{control,ic4}`, 3 days):
   WW3 gets 50 m and DICE's thickness (its `ICEH` history floors at `ICEHMIN` = 0.2 m; its `ICEF` history stays at
   1000 m because `W3UIC5` is unused with `IC4`); Hs in ice 1.0–1.5 m → 0.1–0.5 m, ice-free points ~1%. Manual
   pointers: `docs/source/ww3_manuals.md`. The sandbox `cdeps` `mesawave-local` has the commit; the smoke case sets

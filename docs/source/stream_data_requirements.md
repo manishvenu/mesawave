@@ -51,7 +51,9 @@ grid namelists, as CESM's `wgx3v7` grid sets). Without CICE, `wav_coupling_to_ci
 `user_nl_cpl` switches the ice inputs on: the cap then sets the ice flags above, advertises
 `Si_floediam`, and CMEPS routes `Si_floediam` from ice to wave. DICE sends `Si_floediam` = 50 m where
 there is ice (manishvenu/CDEPS#7), what CICE sends with its floe size distribution off, until the
-proposal's fit to concentration and thickness is chosen. In the same 3-day Alaska test, mean wave height
+proposal's fit to concentration and thickness is chosen. CESM3 turns the distribution on whenever WW3
+runs, so CICE itself sends a diameter that varies; the comparison and tests are in
+[Ice for WW3](stream_construction.md#ice-for-ww3-dice-against-cice). In the same 3-day Alaska test, mean wave height
 inside the ice fell from 1.0–1.5 m to 0.1–0.5 m, and ice-free points changed by about 1% on average.
 
 ## MOM6
