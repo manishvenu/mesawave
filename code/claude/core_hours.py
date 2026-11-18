@@ -14,6 +14,7 @@ import re
 import sys
 
 GROUPS = [  # (label, regex on the job name)
+    ("wu025r005 scaling runs", r"wu025r005_scaling"),
     ("wu025r005 smoke runs", r"mesaclip_ww3_wu025r005"),
     ("ERA5 runs on wu025r004/wu025r005", r"era5uw_ww3_"),
     ("Mesh builds and staging", r"ww3mesh_|ww3_stage"),

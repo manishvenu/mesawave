@@ -208,8 +208,8 @@ and flag any that run past ~4 minutes.
   public repos and PRs. Alper's archived 24-day `wu025r004` runs (`W_ERA5UW.wu025r004.001` at 300 s, `.002` at
   600 s; 3-hourly `ww3.hi`, 2023-12-01 to 12-25) used an earlier wind file that is now deleted;
   `~/croc_cases/era5uw_ww3_wu025r004_check` (2 days, job 8215479, 2026-11-17) reproduces 001 (`HS` within 4 mm,
-  RMS 1e-6 m), so his archive is the reference; it ran at 810 s/day against his 405 (same WW3 model source,
-  `9248f20f`, except for `ww3_bounc` build lines; cause not found yet). `~/croc_cases/era5uw_ww3_wu025r005` (24 days,
+  RMS 1e-6 m), so his archive is the reference; it ran at 810 s/day on 2,048 WW3 tasks, his 001 at 405 on 5,376
+  (not a slowdown: different task counts). His 002 at 2,048 tasks (600 s) is the proposal's 481.5 s/day. `~/croc_cases/era5uw_ww3_wu025r005` (24 days,
   his 001 settings, hourly point output at Ali's 638 points) is job 8215539.
 - **I/O: set `PIO_TYPENAME=pnetcdf` (2026-11-17).** A case created with no matching `config_pes` entry starts at one
   task, and CIME then sets every component's `PIO_TYPENAME` to `netcdf` (`cime/CIME/case/case.py:1665`); setting
@@ -221,6 +221,19 @@ and flag any that run past ~4 minutes.
   triangle but leaves it unwrapped (258° wide here, 196° in Ali's mesh). Ali's mesh stays ≤ 4 m there over 24 days of
   ERA5 (winds 3–6 m/s there, MESACLIP's ~12 m/s); job 8215539 is the same-forcing test. Candidate fix: a polar hole
   (e.g. north of 88.5°N).
+- **Scaling runs (2026-11-17, NCGD0039, approved):** `~/croc_cases/wu025r005_scaling_w{16,24,32}` (jobs 8219321,
+  8219324, 8219327), `--keepexe` clones of `mesaclip_ww3_wu025r005` (rebuilt 2026-11-17 for DICE `Si_floediam`) made by
+  its `make_scaling_clones.sh`: v2, MESACLIP HIST, 600 s (`dtmax dtcfl dtcfli dtmin` in `user_nl_ww3`), WW3 on 16/24/32
+  nodes after 2 for the data models, 2 days, no restart, daily `HS ICE` for the pole check. Results (all ran):
+  305/228/187 s/day, 0.78/1.04/1.27 SYPD, 71k/77k/83k core-h/sim yr counting the 2 data-model nodes (WW3 alone
+  62k/70k/75k); vs 16 nodes, 89% and 82% efficient; WW3 98% of run time, init ~135 s. HS ≤ 0.02 m north of 85°N, but
+  the pole is 98–99% ice so IC4 damping may hide the pole triangle. HS is not bit-for-bit across task counts (≤ 1.7 cm
+  after 2 days). Alper's own scaling runs
+  are on `wu025r004` only (`/glade/derecho/scratch/altuntas/w.e30.W_ERA5UW.wu025r004.nb_*`, 600 s, 3 or 24 days,
+  history off; analysis in `.../altuntas/nimbus_eval`): `nb_base` (same WW3 as ours) 90k core-h/sim yr at 2,048 tasks,
+  136k at 5,376; his unmerged WW3 changes `nimbus`, `reorder`, `il` are bit-for-bit and cut it to 79k, 81k, 75k;
+  `wgt2` (cost-weighted partition, answers differ ~1e-6) to 68k. CIME rejects an inline
+  `!` comment after a value in `user_nl_cpl` ("expected literal value").
 - **Point output (2026-11-16):** manishvenu/WW3#1 (`BIN2NC` in the CESM switch list, so points go to
   `out_pnt.ww3.nc`) and manishvenu/WW3_interface#1 (`date%point%*` entries; `buildnml` defaults the start to the run
   start and copies an absolute `type%point%file` to `RUNDIR`). PRs inside the forks, on ESCOMP `dev/unified`
